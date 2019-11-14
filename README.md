@@ -27,10 +27,3 @@ root[0] .x bigboss.C
 ## Generated image
 
 ![](InvariantMassProbe.png)
-
-## Mudança na versão
-
-* INTEGRACAO
-    * Melhoria nos comentários
-    * ADD: Um fit separado para cada sinal `f1`,`f2`,`f3`
-    * ADD: Área dos ajuste no terminal
