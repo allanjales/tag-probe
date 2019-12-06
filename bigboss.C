@@ -154,6 +154,7 @@ void invariantMassProbe()
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", 	hMassAll->GetBinWidth(0)));
 	hPtSigBack->GetYaxis()->SetTitle(Form("Events / (%1.1f GeV/c)", 	hPtSigBack->GetBinWidth(0)));
 	hEtaSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", 			hEtaSigBack->GetBinWidth(0)));
+	hPhiSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", 			hPhiSigBack->GetBinWidth(0)));
 
 
 	//Loop between the components
