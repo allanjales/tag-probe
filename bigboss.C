@@ -135,10 +135,10 @@ void invariantMassProbe()
 	Tree->SetBranchAddress("InvariantMass",		&InvariantMass);
 
 	//Create histograms for Singla + Background
-	TH1D *hMassAll = new TH1D("InvariantMassProbe","All Invariant Mass (Probe);Mass (GeV/c^{2});Events",240,2.8,3.4);
-	TH1D *hPtSigBack = new TH1D("TransversalMomentumProbeAll","Transversal Momentum (Probe);Transversal Momentum (GeV/c);Events",100,0.,100.);
+	TH1D *hMassAll    = new TH1D("InvariantMassProbe","All Invariant Mass (Probe);Mass (GeV/c^{2});Events",240,2.8,3.4);
+	TH1D *hPtSigBack  = new TH1D("TransversalMomentumProbeAll","Transversal Momentum (Probe);Transversal Momentum (GeV/c);Events",100,0.,100.);
 	TH1D *hEtaSigBack = new TH1D("PseudorapidityProbeAll","Pseudorapidity (Probe);#eta;Events",200,-2.5,2.5);
-	TH1D *hPhiSigBack = new TH1D("PhiProbeAll","Phi (Probe);#phi;Events",100,-3.15,3.15);
+	TH1D *hPhiSigBack = new TH1D("PhiProbeAll","Phi (Probe);#phi;Events",79,-3.15,3.15);
 
 	//Clone histogram for Background
 	TH1D* hPtBack  = (TH1D*) hPtSigBack->Clone("hPtBack");
@@ -614,15 +614,22 @@ void invariantMassProbe()
 	//Debug
 	cout << endl;
 	cout << "Candidates by sideband" << endl;
-	cout << "#Tree Entries     = " << Tree->GetEntries() << endl;
-	cout << "#Total            = "	<< count_sigregion 					<< endl;
-	cout << "#Sideband         = "	<< count_sideband 					<< endl;
-	cout << "#Total - Sideband = " 	<< count_sigregion - count_sideband << endl;
+	cout << "#Tree Entries     = "   << Tree->GetEntries() << endl;
+	cout << "#Total            = "	 << count_sigregion 					<< endl;
+	cout << "#Sideband         = "	 << count_sideband 						<< endl;
+	cout << "#Total - Sideband = " 	 << count_sigregion - count_sideband	<< endl;
+
+	//Integrate function to get number of particles in it
+	cout << endl;
+	cout << "Checking number Inconsistency" << endl;
+	cout << "#Pt  = " << hPtSigBack->GetEntries()  - hPtSig->GetEntries()  - hPtBack->GetEntries() << endl;
+	cout << "#Phi = " << hPhiSigBack->GetEntries() - hPhiSig->GetEntries() - hPhiBack->GetEntries() << endl;
+	cout << "#Eta = " << hEtaSigBack->GetEntries() - hEtaSig->GetEntries() - hEtaBack->GetEntries() << endl;
 
 
 	//Show chi-squared test (on prompt)
 	cout << endl;
-	cout << "Overview"<< endl;
+	cout << "Overview" << endl;
 	cout << "Chi2/ndf = " << f->GetChisquare()/f->GetNDF() << endl;
 	printf( "#Signal  = %.0f +- %.0f\n",S,dS);
 	cout << endl;
