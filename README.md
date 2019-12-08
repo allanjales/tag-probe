@@ -6,7 +6,7 @@
 
 Link to our [Google Drive](https://drive.google.com/drive/folders/1KZ0OyHnHObX_z6l_ZQ3LN4n7lWHzJ9Fy).
 
-## Arquivos necessários
+## Necessary files
 
 The analysed datas are from this file:
 * [DoubleMu_data_ntuples.tar](https://drive.google.com/file/d/1z4oNmr3Vcv2JOtH-iBxXOFuWCd4llTNe/view?usp=sharing)
