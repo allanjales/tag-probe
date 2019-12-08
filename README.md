@@ -21,7 +21,7 @@ $ hadd data_histoall.root *.root
 
 It is necessary to have [ROOT](https://root.cern.ch/root/html534/guides/users-guide/InstallandBuild.html), CERN's software, installed on your machine.
 
-Go on your folder where the file is downloaded and run:
+Go on your folder where the file code is downloaded and run:
 
 ```sh
 $ root -l -n
