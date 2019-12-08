@@ -35,6 +35,6 @@ The number of candidates were estimated by sideband subtraction.
 
 ![](PtProbe.png)
 
-![](PhiProbe.png)
-
 ![](EtaProbe.png)
+
+![](PhiProbe.png)
