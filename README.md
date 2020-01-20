@@ -38,3 +38,6 @@ The number of candidates were estimated by sideband subtraction.
 ![](EtaProbe.png)
 
 ![](PhiProbe.png)
+
+## Output
+In addition a .root file is generated named `generated_hist.root` with all histograms above inside.
