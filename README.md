@@ -6,7 +6,7 @@
 
 Link to our [Google Drive](https://drive.google.com/drive/folders/1KZ0OyHnHObX_z6l_ZQ3LN4n7lWHzJ9Fy).
 
-## Necessary files
+## Necessary files and preparation
 
 The analysed datas are from this file:
 * [DoubleMu_data_ntuples.tar](https://drive.google.com/file/d/1z4oNmr3Vcv2JOtH-iBxXOFuWCd4llTNe/view?usp=sharing)
@@ -24,12 +24,30 @@ It is necessary to have [ROOT](https://root.cern.ch/root/html534/guides/users-gu
 Go on your folder where the file code is downloaded and run:
 
 ```sh
+$ cd step1
 $ root -l -n
 root[0] .x bigboss.C
 ```
 
-## Generated images
-The number of candidates were estimated by sideband subtraction.
+After this, you need to run step 2. To do it, simply end ROOT program and go to folder step 2 by:
+
+```sh
+root[1] .q
+$ cd ../step2
+```
+
+Now run the step2 by typing:
+
+```sh
+$ root -l -n
+root[0] .x smallboss.C
+```
+
+## Generated files and images
+
+They are saved in root folder, where you put `step1` and `step2` folders
+
+Note: The number of candidates were estimated by sideband subtraction.
 
 ![](InvariantMassProbe.png)
 
@@ -39,5 +57,11 @@ The number of candidates were estimated by sideband subtraction.
 
 ![](PhiProbe.png)
 
+![](PtProbe_Efficiency.png)
+
+![](EtaProbe_Efficiency.png)
+
+![](PhiProbe_Efficiency.png)
+
 ## Output
-In addition a .root file is generated named `generated_hist.root` with all histograms above inside.
+In addition a .root file is generated named `generated_hist.root` with all canvas above and histograms inside.
