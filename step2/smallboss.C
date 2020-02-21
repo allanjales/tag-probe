@@ -54,7 +54,7 @@ void efficiency()
 	hPtEff->SetMarkerSize(0.5);
 	hPtEff->SetMarkerColor(kRed);
 	hPtEff->SetMaximum(1);
-	//hPtEff->SetMinimum(0);
+	hPtEff->SetMinimum(0);
 	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
 	c1->SetTopMargin(0.07);
 	c1->SetLeftMargin(0.12);
@@ -72,7 +72,7 @@ void efficiency()
 	hEtaEff->SetMarkerSize(0.5);
 	hEtaEff->SetMarkerColor(kRed);
 	hEtaEff->SetMaximum(1);
-	//hEtaEff->SetMinimum(0);
+	hEtaEff->SetMinimum(0);
 	TCanvas *c2 = new TCanvas("ProbeEta_Efficiency","Probe Eta Efficiency", 800, 600);
 	c2->SetTopMargin(0.07);
 	c2->SetLeftMargin(0.12);
