@@ -41,15 +41,20 @@ void efficiency()
 	TH1D *hPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
 	TH1D *hPhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
 
+
+
 	//Efficiency calculation for Pt
 	TH1D* hPtEff  = (TH1D*) hPtSig->Clone("ProbePt_Efficiency");
 	hPtEff->SetTitle("Transversal Momentum Efficiency for Probe");
+	hPtEff->GetYaxis()->SetTitle("Efficiency");
 	hPtEff->Divide(hPtSig, hPtSigBack, 1.0, 1.0, "B");
 	hPtEff->SetLineWidth(2);
 	hPtEff->SetLineColor(kRed);
 	hPtEff->SetMarkerStyle(21);
 	hPtEff->SetMarkerSize(0.5);
 	hPtEff->SetMarkerColor(kRed);
+	hPtEff->SetMaximum(1);
+	//hPtEff->SetMinimum(0);
 	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
 	c1->SetTopMargin(0.07);
 	c1->SetLeftMargin(0.12);
@@ -59,12 +64,15 @@ void efficiency()
 	//Efficiency calculation for Eta
 	TH1D* hEtaEff  = (TH1D*) hEtaSig->Clone("ProbeEta_Efficiency");
 	hEtaEff->SetTitle("Pseudorapidity Efficiency for Probe");
+	hEtaEff->GetYaxis()->SetTitle("Efficiency");
 	hEtaEff->Divide(hEtaSig, hEtaSigBack, 1.0, 1.0, "B");
 	hEtaEff->SetLineWidth(2);
 	hEtaEff->SetLineColor(kRed);
 	hEtaEff->SetMarkerStyle(21);
 	hEtaEff->SetMarkerSize(0.5);
 	hEtaEff->SetMarkerColor(kRed);
+	hEtaEff->SetMaximum(1);
+	//hEtaEff->SetMinimum(0);
 	TCanvas *c2 = new TCanvas("ProbeEta_Efficiency","Probe Eta Efficiency", 800, 600);
 	c2->SetTopMargin(0.07);
 	c2->SetLeftMargin(0.12);
@@ -74,17 +82,22 @@ void efficiency()
 	//Efficiency calculation for Phi
 	TH1D* hPhiEff  = (TH1D*) hPhiSig->Clone("ProbePhi_Efficiency");
 	hPhiEff->SetTitle("Phi Efficiency for Probe");
+	hPhiEff->GetYaxis()->SetTitle("Efficiency");
 	hPhiEff->Divide(hPhiSig, hPhiSigBack, 1.0, 1.0, "B");
 	hPhiEff->SetLineWidth(2);
 	hPhiEff->SetLineColor(kRed);
 	hPhiEff->SetMarkerStyle(21);
 	hPhiEff->SetMarkerSize(0.5);
 	hPhiEff->SetMarkerColor(kRed);
+	hPhiEff->SetMaximum(1);
+	hPhiEff->SetMinimum(0);
 	TCanvas *c3 = new TCanvas("ProbePhi_Efficiency","Probe Phi Efficiency", 800, 600);
 	c3->SetTopMargin(0.07);
 	c3->SetLeftMargin(0.12);
 	c3->SetTicky(2);
 	hPhiEff->Draw();
+
+
 
 	//Not show frame
 	gStyle->SetOptStat(0);
