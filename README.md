@@ -24,23 +24,16 @@ It is necessary to have [ROOT](https://root.cern.ch/root/html534/guides/users-gu
 Go on your folder where the file code is downloaded and run:
 
 ```sh
-$ cd step1
+$ cd master
 $ root -l -n
-root[0] .x bigboss.C
+root[0] .L boss.C
+root[1] step1()
 ```
 
-After this, you need to run step 2. To do it, simply end ROOT program and go to folder step 2 by:
+After this, you need to run step 2. Run the efficiency plots by typing:
 
 ```sh
-root[1] .q
-$ cd ../step2
-```
-
-Now run the step2 by typing:
-
-```sh
-$ root -l -n
-root[0] .x smallboss.C
+root[2] efficiency()
 ```
 
 ## Generated files and images
