@@ -154,11 +154,10 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	//f->SetParameter(11,	2.0);
 
 	//Fit Color
-	f->SetLineColor(kBlue);class
+	f->SetLineColor(kBlue);
 
 	//Fit the function
 	TFitResultPtr fitr = hMassAll->Fit(f,"RNS","",hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax());
-
 	//Get parameters from fit function and put it in par variable
    	Double_t par[12];
 	f->GetParameters(par);
@@ -226,6 +225,7 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	//Writes in file
 	if (shouldWrite == true)
 	{
+		//Aqui dá crash quando roda pela segunda vez no meu ROOT
 		c1->Write();
 	}
 
@@ -347,6 +347,9 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 	tx2_2->SetTextSize(0.04);
 	tx2_2->SetTextFont(42);
 	tx2_2->SetNDC(kTRUE);
+
+	//Not show frame with mean, std dev
+	gStyle->SetOptStat(0);
 	
 	if (strcmp(canvasName, "ProbeSignal_Pt") == 0) 
 	{
@@ -445,6 +448,7 @@ void step1()
 	{
 		//Gets the entry from TTree
 		TreePC->GetEntry(i);
+		TreeAT->GetEntry(i);
 
 		//Fill invariant mass histogram
 		hMassAll->Fill(InvariantMass);
@@ -452,10 +456,13 @@ void step1()
 		//if is inside signal region
 		if (fabs(InvariantMass - M_JPSI) < W_JPSI*3.0)
 		{
-			hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
-			hEtaSigBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
-			hPhiSigBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
-			count_sigregion++;
+			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
+			{
+				hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
+				hEtaSigBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
+				hPhiSigBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
+				count_sigregion++;
+			}
 		}
 
 		//If is inside sideband region
@@ -502,10 +509,10 @@ void step1()
 	//Debug
 	cout << endl;
 	cout << "Candidates by sideband subtraction" << endl;
-	cout << "#Tree Entries    = " << TreePC->GetEntries() 				<< endl;
+	cout << "#Tree Entries    = " 	<< TreePC->GetEntries() 			<< endl;
 	cout << "#Signal   region = "	<< count_sigregion 					<< endl;
 	cout << "#Sideband region = "	<< count_sideband 					<< endl;
-	cout << "#Signal          = " << count_sigregion - count_sideband	<< endl;
+	cout << "#Signal          = " 	<< count_sigregion - count_sideband	<< endl;
 	cout << endl;
 
 	//Create canvas for others
@@ -627,6 +634,29 @@ void efficiency()
 	hPhiEff->Write("",TObject::kOverwrite);
 }
 
+//Creates a efficiency plot with datas
+TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const char *title, bool shouldWrite = false)
+{
+	//Creates TEfficiency object
+	TEfficiency* pEff = 0;
+
+	//Check if are valid and consistent histograms
+	if(TEfficiency::CheckConsistency(*hPass, *hTotal))
+	{
+		//Fills histogram
+		pEff = new TEfficiency(*hPass, *hTotal);
+	}
+
+	pEff->SetTitle("Transversal Momentum Efficiency for Probe;P_{t};Efficiency");
+	pEff->SetLineWidth(2);
+	pEff->SetLineColor(kRed);
+	pEff->SetMarkerStyle(21);
+	pEff->SetMarkerSize(0.5);
+	pEff->SetMarkerColor(kRed);
+
+	return pEff;
+}
+
 //Estimates efficiency
 void efficiency2()
 {
@@ -641,42 +671,18 @@ void efficiency2()
 	TH1D *hPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
 	TH1D *hPhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
 
+	TEfficiency* pPtEff = efficiencyPlot(hPtSig, hPtSigBack, "", "Transversal Momentum Efficiency for Probe;P_{t} (GeV/c);Efficiency", false);
 
-	TEfficiency* pEff = new TEfficiency("eff","my efficiency;x;y;#epsilon",10,0,10,20,-5,5);
-	
+	//Draw on canvas
 	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
 	c1->SetTopMargin(0.07);
 	c1->SetLeftMargin(0.12);
 	c1->SetTicky(2);
-	pEff->Draw();
-
-
-	//Efficiency calculation for Pt
-	/*
-	TH1D* hPtEff  = (TH1D*) hPtSig->Clone("ProbePt_Efficiency");
-	hPtEff->SetTitle("Transversal Momentum Efficiency for Probe");
-	hPtEff->GetYaxis()->SetTitle("Efficiency");
-	hPtEff->Divide(hPtSig, hPtSigBack, 1.0, 1.0, "B");
-	hPtEff->SetLineWidth(2);
-	hPtEff->SetLineColor(kRed);
-	hPtEff->SetMarkerStyle(21);
-	hPtEff->SetMarkerSize(0.5);
-	hPtEff->SetMarkerColor(kRed);
-	hPtEff->SetMaximum(1);
-	hPtEff->SetMinimum(0);
-	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
-	c1->SetTopMargin(0.07);
-	c1->SetLeftMargin(0.12);
-	c1->SetTicky(2);
-	hPtEff->Draw();
-	*/
-
-	//Not show frame
-	gStyle->SetOptStat(0);
+	pPtEff->Draw();
 }
 
 //Call functions
 void boss() {
-	step1();
-	//efficiency2();
+	//step1();
+	efficiency2();
 }
