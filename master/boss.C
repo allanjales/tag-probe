@@ -226,7 +226,7 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	if (shouldWrite == true)
 	{
 		//Aqui dá crash quando roda pela segunda vez no meu ROOT
-		c1->Write();
+		c1->Write("",TObject::kOverwrite);
 	}
 
 	//If should save
@@ -423,7 +423,7 @@ void step1()
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
 
 	//Create histograms for Signal + Background & Background only for Pt
-	TH1D *hPtSigBack  = new TH1D("ProbeMuon_PtSigBack",	"Transversal Momentum (Probe);P_t (GeV/c);Events",100,0.,100.);
+	TH1D *hPtSigBack  = new TH1D("ProbeMuon_PtSigBack",	"Transversal Momentum (Probe);P_{t} (GeV/c);Events",100,0.,100.);
 	hPtSigBack->GetYaxis()->SetTitle(Form("Events / (%1.1f GeV/c)", hPtSigBack->GetBinWidth(0)));
 	TH1D* hPtBack  = (TH1D*) hPtSigBack->Clone("hPtBack");
 	hPtBack->SetTitle("Transversal Momentum (Probe)");
@@ -543,7 +543,7 @@ void step1()
 }
 
 //Estimates efficiency
-void efficiency()
+void efficiencyObsolete()
 {
 	//Opens the file
 	TFile *generatedFile = TFile::Open("../generated_hist.root","UPDATE");
@@ -634,11 +634,14 @@ void efficiency()
 	hPhiEff->Write("",TObject::kOverwrite);
 }
 
-//Creates a efficiency plot with datas
+//Creates a efficiency plot with histograms
 TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const char *title, bool shouldWrite = false)
 {
 	//Creates TEfficiency object
 	TEfficiency* pEff = 0;
+
+	//Set Y axis title for efficiency plot
+	hTotal->GetYaxis()->SetTitle("Efficiency");
 
 	//Check if are valid and consistent histograms
 	if(TEfficiency::CheckConsistency(*hPass, *hTotal))
@@ -647,18 +650,51 @@ TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const c
 		pEff = new TEfficiency(*hPass, *hTotal);
 	}
 
-	pEff->SetTitle("Transversal Momentum Efficiency for Probe;P_{t};Efficiency");
+	//Set plot config
+	pEff->SetTitle(title);
 	pEff->SetLineWidth(2);
 	pEff->SetLineColor(kRed);
 	pEff->SetMarkerStyle(21);
 	pEff->SetMarkerSize(0.5);
 	pEff->SetMarkerColor(kRed);
 
+	//Writes in file
+	if (shouldWrite == true)
+	{
+		pEff->Write("",TObject::kOverwrite);
+	}
+
+	//return
 	return pEff;
 }
 
+//Creates canvas for efficiency plots
+TCanvas *createEfficiencyCanvas(TEfficiency* pEff, const char *canvasName, const char *title, bool shouldWrite = false, const char *saveAs = "")
+{
+	//Draw on canvas
+	TCanvas *c1 = new TCanvas(canvasName, title, 800, 600);
+	c1->SetTicky(2);
+	pEff->Draw();
+
+	//Writes in file
+	if (shouldWrite == true)
+	{
+		c1->Write("",TObject::kOverwrite);
+	}
+
+	//If should save
+	if (strcmp(saveAs, "") == 0)
+	{
+		//Saves as image
+		c1->SaveAs(saveAs);
+	} 
+
+	//return
+	return c1;
+}
+
 //Estimates efficiency
-void efficiency2()
+void efficiency()
 {
 	//Opens the file
 	TFile *generatedFile = TFile::Open("../generated_hist.root","UPDATE");
@@ -671,18 +707,28 @@ void efficiency2()
 	TH1D *hPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
 	TH1D *hPhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
 
-	TEfficiency* pPtEff = efficiencyPlot(hPtSig, hPtSigBack, "", "Transversal Momentum Efficiency for Probe;P_{t} (GeV/c);Efficiency", false);
+	//Deletes old dir and creates another
+	generatedFile->Delete("efficiency/");
+	generatedFile->mkdir("efficiency/plots/");
+	generatedFile->cd("efficiency/plots/");
 
-	//Draw on canvas
-	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
-	c1->SetTopMargin(0.07);
-	c1->SetLeftMargin(0.12);
-	c1->SetTicky(2);
-	pPtEff->Draw();
+	//Creates efficiency plots
+	TEfficiency* pPtEff = efficiencyPlot(hPtSig, hPtSigBack, "ProbeMuon_PtEfficiency", "Transversal Momentum Efficiency for Probe", true);
+	TEfficiency* pEtaEff = efficiencyPlot(hEtaSig, hEtaSigBack, "ProbeMuon_EtaEfficiency", "Pseudorapidity Efficiency for Probe", true);
+	TEfficiency* pPhiEff = efficiencyPlot(hPhiSig, hPhiSigBack, "ProbeMuon_PhiEfficiency", "Angle Efficiency for Probe", true);
+
+	//Saves new histograms and canvas in file
+	generatedFile->mkdir("efficiency/histograms/");
+	generatedFile->cd("efficiency/histograms/");
+
+	//Create canvas for others
+	createEfficiencyCanvas(pPtEff,  "ProbeMuon_PtEfficiency",  "Transversal Momentum Efficiency for Probe", 	true,	"../PtProbe_Efficiency.png");
+	createEfficiencyCanvas(pEtaEff,  "ProbeMuon_EtaEfficiency",  "Pseudorapidity Efficiency for Probe", 		true,	"../EtaProbe_Efficiency.png");
+	createEfficiencyCanvas(pPhiEff,  "ProbeMuon_PhiEfficiency",  "Angle Efficiency for Probe", 					true,	"../PhiProbe_Efficiency.png");
 }
 
 //Call functions
 void boss() {
 	//step1();
-	efficiency2();
+	efficiency();
 }
