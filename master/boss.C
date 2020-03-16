@@ -226,7 +226,7 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	if (shouldWrite == true)
 	{
 		//Aqui dá crash quando roda pela segunda vez no meu ROOT
-		c1->Write();
+		c1->Write("",TObject::kOverwrite);
 	}
 
 	//If should save
@@ -303,7 +303,7 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 	tx2_1->SetTextFont(42);
 	tx2_1->SetNDC(kTRUE);
 
-	if (strcmp(canvasName, "ProbeSignal_Pt") == 0) 
+	if (strcmp(canvasName, "ProbeSignal_Pt") == 0 || strcmp(canvasName, "TagSignal_Pt") == 0) 
 	{
 		tx2_1->SetTextAlign(12);	//Align left, center
 		tx2_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
@@ -351,7 +351,7 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 	//Not show frame with mean, std dev
 	gStyle->SetOptStat(0);
 	
-	if (strcmp(canvasName, "ProbeSignal_Pt") == 0) 
+	if (strcmp(canvasName, "ProbeSignal_Pt") == 0 || strcmp(canvasName, "TagSignal_Pt") == 0)
 	{
 		tx2_2->SetTextAlign(12);	//Align left, center
 		tx2_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
@@ -394,6 +394,9 @@ void step1()
 	Double_t 	ProbeMuon_Pt;
 	Double_t 	ProbeMuon_Eta;
 	Double_t 	ProbeMuon_Phi;
+	Double_t 	TagMuon_Pt;
+	Double_t 	TagMuon_Eta;
+	Double_t 	TagMuon_Phi;
 	Double_t 	InvariantMass;
 
 	//Create variables for AnalysisTree
@@ -413,6 +416,9 @@ void step1()
 	TreePC->SetBranchAddress("ProbeMuon_Pt",				&ProbeMuon_Pt);
 	TreePC->SetBranchAddress("ProbeMuon_Eta",				&ProbeMuon_Eta);
 	TreePC->SetBranchAddress("ProbeMuon_Phi",				&ProbeMuon_Phi);
+	TreePC->SetBranchAddress("TagMuon_Pt",					&TagMuon_Pt);
+	TreePC->SetBranchAddress("TagMuon_Eta",					&TagMuon_Eta);
+	TreePC->SetBranchAddress("TagMuon_Phi",					&TagMuon_Phi);
 	TreePC->SetBranchAddress("InvariantMass",				&InvariantMass);
 	TreeAT->SetBranchAddress("PassingProbeTrackingMuon",	&PassingProbeTrackingMuon);
 	TreeAT->SetBranchAddress("PassingProbeStandAloneMuon",	&PassingProbeStandAloneMuon);
@@ -422,26 +428,47 @@ void step1()
 	TH1D *hMassAll    = new TH1D("ProbeMuon_InvariantMass", "All Invariant Mass (Probe);Mass (GeV/c^{2});Events",240,2.8,3.4);
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
 
-	//Create histograms for Signal + Background & Background only for Pt
-	TH1D *hPtSigBack  = new TH1D("ProbeMuon_PtSigBack",	"Transversal Momentum (Probe);P_t (GeV/c);Events",100,0.,100.);
+	//Create histograms for Signal + Background & Background only for Probe Pt
+	TH1D *hPtSigBack  = new TH1D("ProbeMuon_PtSigBack",	"Transversal Momentum (Probe);P_{t} (GeV/c);Events",100,0.,100.);
 	hPtSigBack->GetYaxis()->SetTitle(Form("Events / (%1.1f GeV/c)", hPtSigBack->GetBinWidth(0)));
 	TH1D* hPtBack  = (TH1D*) hPtSigBack->Clone("hPtBack");
 	hPtBack->SetTitle("Transversal Momentum (Probe)");
 	hPtBack->SetName("ProbeMuon_PtBack");
 
-	//Create histograms for Signal + Background & Background only for Eta
+	//Create histograms for Signal + Background & Background only for Probe Eta
 	TH1D *hEtaSigBack = new TH1D("ProbeMuon_EtaSigBack", "Pseudorapidity (Probe);#eta;Events",200,-2.5,2.5);
 	hEtaSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", hEtaSigBack->GetBinWidth(0)));
 	TH1D* hEtaBack = (TH1D*) hEtaSigBack->Clone("hEtaBack");
 	hEtaBack->SetTitle("Pseudorapidity (Probe)");
 	hEtaBack->SetName("ProbeMuon_EtaBack");
 
-	//Create histograms for Signal + Background & Background only for Phi
+	//Create histograms for Signal + Background & Background only for Probe Phi
 	TH1D *hPhiSigBack = new TH1D("ProbeMuon_PhiSigBack", "Phi (Probe);#phi;Events",79,-3.15,3.15);
 	hPhiSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", hPhiSigBack->GetBinWidth(0)));
 	TH1D* hPhiBack = (TH1D*) hPhiSigBack->Clone("hPhiBack");
 	hPhiBack->SetTitle("Phi (Probe)");
 	hPhiBack->SetName("ProbeMuon_PhiBack");
+
+	//Create histograms for Signal + Background & Background only for Tag Pt
+	TH1D *hTagPtSigBack  = new TH1D("TagMuon_PtSigBack",	"Transversal Momentum (Tag);P_{t} (GeV/c);Events",100,0.,100.);
+	hTagPtSigBack->GetYaxis()->SetTitle(Form("Events / (%1.1f GeV/c)", hTagPtSigBack->GetBinWidth(0)));
+	TH1D* hTagPtBack  = (TH1D*) hTagPtSigBack->Clone("hTagPtBack");
+	hTagPtBack->SetTitle("Transversal Momentum (Tag)");
+	hTagPtBack->SetName("TagMuon_PtBack");
+
+	//Create histograms for Signal + Background & Background only for Tag Eta
+	TH1D *hTagEtaSigBack = new TH1D("TagMuon_EtaSigBack", "Pseudorapidity (Tag);#eta;Events",200,-2.5,2.5);
+	hEtaSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", hTagEtaSigBack->GetBinWidth(0)));
+	TH1D* hTagEtaBack = (TH1D*) hTagEtaSigBack->Clone("hTagEtaBack");
+	hTagEtaBack->SetTitle("Pseudorapidity (Tag)");
+	hTagEtaBack->SetName("TagMuon_EtaBack");
+
+	//Create histograms for Signal + Background & Background only for Tag Phi
+	TH1D *hTagPhiSigBack = new TH1D("TagMuon_PhiSigBack", "Phi (Tag);#phi;Events",79,-3.15,3.15);
+	hTagPhiSigBack->GetYaxis()->SetTitle(Form("Events / (%1.3f)", hTagPhiSigBack->GetBinWidth(0)));
+	TH1D* hTagPhiBack = (TH1D*) hTagPhiSigBack->Clone("hTagPhiBack");
+	hTagPhiBack->SetTitle("Phi (Tag)");
+	hTagPhiBack->SetName("TagMuon_PhiBack");
 
 	//Loop between the components
 	for (int i = 0; i < TreePC->GetEntries(); i++)
@@ -458,9 +485,17 @@ void step1()
 		{
 			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 			{
+				//Add to Probe histogram
 				hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
 				hEtaSigBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
 				hPhiSigBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
+
+				//Add to Tag histogram
+				hTagPtSigBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
+				hTagEtaSigBack->Fill(TagMuon_Eta);	//Add to Eta histogram
+				hTagPhiSigBack->Fill(TagMuon_Phi);	//Add to Phi histogram
+				
+				//Count events
 				count_sigregion++;
 			}
 		}
@@ -468,9 +503,17 @@ void step1()
 		//If is inside sideband region
 		if (fabs(InvariantMass - M_JPSI) > W_JPSI*3.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*6.5)
 		{
+			//Add to Probe histogram
 			hPtBack->Fill(ProbeMuon_Pt);	//Add to Pt  histogram
-			hEtaBack->Fill(ProbeMuon_Eta);	//Add to Eta hitogram
-			hPhiBack->Fill(ProbeMuon_Phi);	//Add to Phi hitogram
+			hEtaBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
+			hPhiBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
+
+			//Add to Tag histogram
+			hTagPtBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
+			hTagEtaBack->Fill(TagMuon_Eta);	//Add to Eta histogram
+			hTagPhiBack->Fill(TagMuon_Phi);	//Add to Phi histogram
+
+			//Count events
 			count_sideband++;
 		}
 	}
@@ -479,20 +522,35 @@ void step1()
 	double S = count_sigregion - count_sideband;
 	double dS = sqrt(count_sigregion+count_sideband);
 
-	//Create Signal histogram for Pt
+	//Create Signal histogram for Probe Pt
 	TH1D* hPtSig  = (TH1D*) hPtSigBack->Clone("hPtSig");
 	hPtSig->SetName("ProbeMuon_PtSig");
 	hPtSig->Add(hPtBack,-1);
 
-	//Create Signal histogram for Eta
+	//Create Signal histogram for Probe Eta
 	TH1D* hEtaSig = (TH1D*) hEtaSigBack->Clone("hEtaSig");
 	hEtaSig->SetName("ProbeMuon_EtaSig");
 	hEtaSig->Add(hEtaBack,-1);
 
-	//Create Signal histogram for Phi
+	//Create Signal histogram for Probe Phi
 	TH1D* hPhiSig = (TH1D*) hPhiSigBack->Clone("hPhiSig");
 	hPhiSig->SetName("ProbeMuon_PhiSig");
 	hPhiSig->Add(hPhiBack,-1);
+
+	//Create Signal histogram for Tag Pt
+	TH1D* hTagPtSig  = (TH1D*) hTagPtSigBack->Clone("hTagPtSig");
+	hTagPtSig->SetName("TagMuon_PtSig");
+	hTagPtSig->Add(hTagPtBack,-1);
+
+	//Create Signal histogram for Tag Eta
+	TH1D* hTagEtaSig = (TH1D*) hTagEtaSigBack->Clone("hTagEtaSig");
+	hTagEtaSig->SetName("TagMuon_EtaSig");
+	hTagEtaSig->Add(hTagEtaBack,-1);
+
+	//Create Signal histogram for Tag Phi
+	TH1D* hTagPhiSig = (TH1D*) hTagPhiSigBack->Clone("hTagPhiSig");
+	hTagPhiSig->SetName("TagMuon_PhiSig");
+	hTagPhiSig->Add(hTagPhiBack,-1);
 
 	//-------------------------------------
 	// Canvas
@@ -516,20 +574,27 @@ void step1()
 	cout << endl;
 
 	//Create canvas for others
-	createDividedCanvas(hPtSigBack,  hPtSig,  hPtBack,  "ProbeSignal_Pt",  "Transversal Momentum", 	"Transversal Momentum of Signal (Probe)", 	true,	"../PtProbe.png");
-	createDividedCanvas(hEtaSigBack, hEtaSig, hEtaBack, "ProbeSignal_Eta", "Pseudorapidity", 		"Pseudorapidity of Signal (Probe)", 		true,	"../EtaProbe.png");
-	createDividedCanvas(hPhiSigBack, hPhiSig, hPhiBack, "ProbeSignal_Phi", "Angle", 				"Angle of Signal (Probe)", 					true,	"../PhiProbe.png");
+	createDividedCanvas(hPtSigBack,  	hPtSig,  	hPtBack,  	 "ProbeSignal_Pt",  "Probe Transversal Momentum", "Transversal Momentum of Signal (Probe)", true, "../PtProbe.png");
+	createDividedCanvas(hEtaSigBack, 	hEtaSig, 	hEtaBack, 	 "ProbeSignal_Eta", "Probe Pseudorapidity", 		 "Pseudorapidity of Signal (Probe)", 	true, "../EtaProbe.png");
+	createDividedCanvas(hPhiSigBack, 	hPhiSig, 	hPhiBack, 	 "ProbeSignal_Phi", "Probe Angle", 				 "Angle of Signal (Probe)", 				true, "../PhiProbe.png");
+	createDividedCanvas(hTagPtSigBack,  hTagPtSig,  hTagPtBack,  "TagSignal_Pt",    "Tag Transversal Momentum",	 "Transversal Momentum of Signal (Tag)",    true, "../PtTag.png");
+	createDividedCanvas(hTagEtaSigBack, hTagEtaSig, hTagEtaBack, "TagSignal_Eta",   "Tag Pseudorapidity", 		 "Pseudorapidity of Signal (Tag)", 		    true, "../EtaTag.png");
+	createDividedCanvas(hTagPhiSigBack, hTagPhiSig, hTagPhiBack, "TagSignal_Phi",   "Tag Angle", 				 "Angle of Signal (Tag)", 				    true, "../PhiTag.png");
 
 	//Integrate function to get number of particles in it
 	cout << endl;
 	cout << "Checking histograms number inconsistency (should be 0)" << endl;
-	cout << "#Pt  = " << hPtSigBack->GetEntries()  - hPtSig->GetEntries()  - hPtBack->GetEntries() 	<< endl;
-	cout << "#Eta = " << hEtaSigBack->GetEntries() - hEtaSig->GetEntries() - hEtaBack->GetEntries() << endl;
-	cout << "#Phi = " << hPhiSigBack->GetEntries() - hPhiSig->GetEntries() - hPhiBack->GetEntries() << endl;
+	cout << "#Probe Pt  = " << hPtSigBack->GetEntries()  	- hPtSig->GetEntries()     - hPtBack->GetEntries()		<< endl;
+	cout << "#Probe Eta = " << hEtaSigBack->GetEntries() 	- hEtaSig->GetEntries()    - hEtaBack->GetEntries()		<< endl;
+	cout << "#Probe Phi = " << hPhiSigBack->GetEntries() 	- hPhiSig->GetEntries()    - hPhiBack->GetEntries()		<< endl;
+	cout << "#Tag   Pt  = " << hTagPtSigBack->GetEntries()  - hTagPtSig->GetEntries()  - hTagPtBack->GetEntries()  	<< endl;
+	cout << "#Tag   Eta = " << hTagEtaSigBack->GetEntries() - hTagEtaSig->GetEntries() - hTagEtaBack->GetEntries() 	<< endl;
+	cout << "#Tag   Phi = " << hTagPhiSigBack->GetEntries() - hTagPhiSig->GetEntries() - hTagPhiBack->GetEntries() 	<< endl;
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
 	generatedFile->cd("histograms/");
+	//Save Probe histograms
 	hPtSigBack->Write();
 	hPtBack->Write();
 	hPtSig->Write();
@@ -539,11 +604,22 @@ void step1()
 	hPhiSigBack->Write();
 	hPhiBack->Write();
 	hPhiSig->Write();
+	//Save Tag histograms
+	hTagPtSigBack->Write();
+	hTagPtBack->Write();
+	hTagPtSig->Write();
+	hTagEtaSigBack->Write();
+	hTagEtaBack->Write();
+	hTagEtaSig->Write();
+	hTagPhiSigBack->Write();
+	hTagPhiBack->Write();
+	hTagPhiSig->Write();
+	//Close files
 	generatedFile->Close();
 }
 
 //Estimates efficiency
-void efficiency()
+void efficiencyOldMethod()
 {
 	//Opens the file
 	TFile *generatedFile = TFile::Open("../generated_hist.root","UPDATE");
@@ -634,11 +710,14 @@ void efficiency()
 	hPhiEff->Write("",TObject::kOverwrite);
 }
 
-//Creates a efficiency plot with datas
+//Creates a efficiency plot with histograms
 TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const char *title, bool shouldWrite = false)
 {
 	//Creates TEfficiency object
 	TEfficiency* pEff = 0;
+
+	//Set Y axis title for efficiency plot
+	hTotal->GetYaxis()->SetTitle("Efficiency");
 
 	//Check if are valid and consistent histograms
 	if(TEfficiency::CheckConsistency(*hPass, *hTotal))
@@ -647,42 +726,99 @@ TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const c
 		pEff = new TEfficiency(*hPass, *hTotal);
 	}
 
-	pEff->SetTitle("Transversal Momentum Efficiency for Probe;P_{t};Efficiency");
+	//Set plot config
+	pEff->SetTitle(title);
 	pEff->SetLineWidth(2);
 	pEff->SetLineColor(kRed);
 	pEff->SetMarkerStyle(21);
 	pEff->SetMarkerSize(0.5);
 	pEff->SetMarkerColor(kRed);
 
+	//Writes in file
+	if (shouldWrite == true)
+	{
+		pEff->Write("",TObject::kOverwrite);
+	}
+
+	//return
 	return pEff;
 }
 
+//Creates canvas for efficiency plots
+TCanvas *createEfficiencyCanvas(TEfficiency* pEff, const char *canvasName, const char *title, bool shouldWrite = false, const char *saveAs = "")
+{
+	//Draw on canvas
+	TCanvas *c1 = new TCanvas(canvasName, title, 800, 600);
+	c1->SetTicky(2);
+	pEff->Draw();
+
+	//Writes in file
+	if (shouldWrite == true)
+	{
+		c1->Write("",TObject::kOverwrite);
+	}
+
+	//If should save
+	if (strcmp(saveAs, "") == 0)
+	{
+		//Saves as image
+		c1->SaveAs(saveAs);
+	} 
+
+	//return
+	return c1;
+}
+
 //Estimates efficiency
-void efficiency2()
+void efficiency()
 {
 	//Opens the file
 	TFile *generatedFile = TFile::Open("../generated_hist.root","UPDATE");
 
-	//Import histograms
-	TH1D *hPtSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSigBack");
-	TH1D *hPtSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSig");
-	TH1D *hEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSigBack");
-	TH1D *hEtaSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSig");
-	TH1D *hPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
-	TH1D *hPhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
+	//Import Probe histograms
+	TH1D *hProbePtSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSigBack");
+	TH1D *hProbePtSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSig");
+	TH1D *hProbeEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSigBack");
+	TH1D *hProbeEtaSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSig");
+	TH1D *hProbePhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
+	TH1D *hProbePhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
+	//Import Tag histograms
+	TH1D *hTagPtSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_PtSigBack");
+	TH1D *hTagPtSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_PtSig");
+	TH1D *hTagEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_EtaSigBack");
+	TH1D *hTagEtaSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_EtaSig");
+	TH1D *hTagPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_PhiSigBack");
+	TH1D *hTagPhiSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_PhiSig");
 
-	TEfficiency* pPtEff = efficiencyPlot(hPtSig, hPtSigBack, "", "Transversal Momentum Efficiency for Probe;P_{t} (GeV/c);Efficiency", false);
+	//Deletes old dir and creates another
+	generatedFile->Delete("efficiency/");
+	generatedFile->mkdir("efficiency/plots/");
+	generatedFile->cd("efficiency/plots/");
 
-	//Draw on canvas
-	TCanvas *c1 = new TCanvas("ProbePt_Efficiency","Probe Pt Efficiency", 800, 600);
-	c1->SetTopMargin(0.07);
-	c1->SetLeftMargin(0.12);
-	c1->SetTicky(2);
-	pPtEff->Draw();
+	//Creates efficiency plots
+	TEfficiency* pProbePtEff  = efficiencyPlot(hProbePtSig,  hProbePtSigBack,  	"ProbeMuon_PtEfficiency",  "Transversal Momentum Efficiency for Probe", true);
+	TEfficiency* pProbeEtaEff = efficiencyPlot(hProbeEtaSig, hProbeEtaSigBack, 	"ProbeMuon_EtaEfficiency", "Pseudorapidity Efficiency for Probe", 		true);
+	TEfficiency* pProbePhiEff = efficiencyPlot(hProbePhiSig, hProbePhiSigBack, 	"ProbeMuon_PhiEfficiency", "Angle Efficiency for Probe", 				true);
+	TEfficiency* pTagPtEff    = efficiencyPlot(hTagPtSig,  	 hTagPtSigBack,  	"TagMuon_PtEfficiency",    "Transversal Momentum Efficiency for Tag", 	true);
+	TEfficiency* pTagEtaEff   = efficiencyPlot(hTagEtaSig, 	 hTagEtaSigBack, 	"TagMuon_EtaEfficiency",   "Pseudorapidity Efficiency for Tag", 		true);
+	TEfficiency* pTagPhiEff   = efficiencyPlot(hTagPhiSig, 	 hTagPhiSigBack, 	"TagMuon_PhiEfficiency",   "Angle Efficiency for Tag",					true);
+
+	//Saves new histograms and canvas in file
+	generatedFile->mkdir("efficiency/histograms/");
+	generatedFile->cd("efficiency/histograms/");
+
+	//Create canvas for others
+	createEfficiencyCanvas(pProbePtEff,   "ProbeMuon_PtEfficiency",  "Transversal Momentum Efficiency for Probe", 	true,	"../PtProbe_Efficiency.png");
+	createEfficiencyCanvas(pProbeEtaEff,  "ProbeMuon_EtaEfficiency", "Pseudorapidity Efficiency for Probe", 		true,	"../EtaProbe_Efficiency.png");
+	createEfficiencyCanvas(pProbePhiEff,  "ProbeMuon_PhiEfficiency", "Angle Efficiency for Probe", 					true,	"../PhiProbe_Efficiency.png");
+	createEfficiencyCanvas(pTagPtEff,     "TagMuon_PtEfficiency", 	 "Transversal Momentum Efficiency for Tag", 	true,	"../PtTag_Efficiency.png");
+	createEfficiencyCanvas(pTagEtaEff,    "TagMuon_EtaEfficiency",	 "Pseudorapidity Efficiency for Tag", 			true,	"../EtaTag_Efficiency.png");
+	createEfficiencyCanvas(pTagPhiEff,    "TagMuon_PhiEfficiency",	 "Angle Efficiency for Tag", 					true,	"../PhiTag_Efficiency.png");
 }
 
 //Call functions
 void boss() {
-	//step1();
-	efficiency2();
+	step1();
+	//efficiencyOldMethod();
+	efficiency();
 }
