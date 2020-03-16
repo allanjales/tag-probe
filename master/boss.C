@@ -104,7 +104,7 @@ Double_t FFit_InvariantMassProbe(Double_t *x, Double_t *par) {
 TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrite = false, const char *saveAs = "")
 {
 	//Create canvas
-	TCanvas *c1 = new TCanvas("ProbeSignal_InvariantMass","Invariant Mass", 600, 600);
+	TCanvas *c1 = new TCanvas("AllInvariantMass","Invariant Mass", 600, 600);
 
 	//Set margin for canvas
 	c1->SetTopMargin(0.07);
@@ -562,7 +562,7 @@ void step1()
 	generatedFile->cd("canvas/");
 
 	//Create canvas and fitting
-	TCanvas *c1 = invariantMassProbe(hMassAll, S, dS, true, "../InvariantMassProbe.png");
+	TCanvas *c1 = invariantMassProbe(hMassAll, S, dS, true, "../InvariantMassAll.png");
 
 	//Debug
 	cout << endl;
