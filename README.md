@@ -42,7 +42,7 @@ They are saved in root folder, where you put `step1` and `step2` folders
 
 Note: The number of candidates were estimated by sideband subtraction.
 
-![](InvariantMassProbe.png)
+![](InvariantMassAll.png)
 
 ![](PtProbe.png)
 
