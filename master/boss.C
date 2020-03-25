@@ -425,7 +425,7 @@ void step1()
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
 
 	//Create histograms for Invariant Mass
-	TH1D *hMassAll    = new TH1D("ProbeMuon_InvariantMass", "All Invariant Mass (Probe);Mass (GeV/c^{2});Events",240,2.8,3.4);
+	TH1D *hMassAll    = new TH1D("ProbeMuon_InvariantMass", "Invariant Mass (All);Mass (GeV/c^{2});Events",240,2.8,3.4);
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
 
 	//Create histograms for Signal + Background & Background only for Probe Pt
@@ -483,7 +483,7 @@ void step1()
 		//if is inside signal region
 		if (fabs(InvariantMass - M_JPSI) < W_JPSI*3.0)
 		{
-			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
+			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon && abs(TagMuon_Pt) > 7.0 && abs(TagMuon_Eta) < 2.4)
 			{
 				//Add to Probe histogram
 				hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
@@ -749,7 +749,7 @@ TCanvas *createEfficiencyCanvas(TEfficiency* pEff, const char *canvasName, const
 {
 	//Draw on canvas
 	TCanvas *c1 = new TCanvas(canvasName, title, 800, 600);
-	c1->SetTicky(2);
+	c1->SetRightMargin(0.05);
 	pEff->Draw();
 
 	//Writes in file
