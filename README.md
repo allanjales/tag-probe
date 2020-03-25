@@ -38,8 +38,6 @@ root[2] efficiency()
 
 ## Generated files and images
 
-They are saved in root folder, where you put `step1` and `step2` folders
-
 Note: The number of candidates were estimated by sideband subtraction.
 
 ![](InvariantMassAll.png)
