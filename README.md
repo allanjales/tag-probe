@@ -46,15 +46,27 @@ Note: The number of candidates were estimated by sideband subtraction.
 
 ![](PtProbe.png)
 
+![](PtTag.png)
+
 ![](EtaProbe.png)
+
+![](EtaTag.png)
 
 ![](PhiProbe.png)
 
+![](PhiTag.png)
+
 ![](PtProbe_Efficiency.png)
+
+![](PtTag_Efficiency.png)
 
 ![](EtaProbe_Efficiency.png)
 
+![](EtaTag_Efficiency.png)
+
 ![](PhiProbe_Efficiency.png)
+
+![](PhiTag_Efficiency.png)
 
 ## Output
 In addition a .root file is generated named `generated_hist.root` with all canvas above and histograms inside.
