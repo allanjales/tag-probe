@@ -477,44 +477,48 @@ void step1()
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
 
-		//Fill invariant mass histogram
-		hMassAll->Fill(InvariantMass);
-
-		//if is inside signal region
-		if (fabs(InvariantMass - M_JPSI) < W_JPSI*3.0)
+		//Accepted particles
+		if (TagMuon_Pt > 7.0 && abs(TagMuon_Eta) < 2.4)
 		{
-			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon && abs(TagMuon_Pt) > 7.0 && abs(TagMuon_Eta) < 2.4)
+			//Fill invariant mass histogram
+			hMassAll->Fill(InvariantMass);
+
+			//if is inside signal region
+			if (fabs(InvariantMass - M_JPSI) < W_JPSI*3.0)
+			{
+				if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
+				{
+					//Add to Probe histogram
+					hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
+					hEtaSigBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
+					hPhiSigBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
+
+					//Add to Tag histogram
+					hTagPtSigBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
+					hTagEtaSigBack->Fill(TagMuon_Eta);	//Add to Eta histogram
+					hTagPhiSigBack->Fill(TagMuon_Phi);	//Add to Phi histogram
+					
+					//Count events
+					count_sigregion++;
+				}
+			}
+
+			//If is inside sideband region
+			if (fabs(InvariantMass - M_JPSI) > W_JPSI*3.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*6.5)
 			{
 				//Add to Probe histogram
-				hPtSigBack->Fill(ProbeMuon_Pt);		//Add to Pt  histogram
-				hEtaSigBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
-				hPhiSigBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
+				hPtBack->Fill(ProbeMuon_Pt);	//Add to Pt  histogram
+				hEtaBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
+				hPhiBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
 
 				//Add to Tag histogram
-				hTagPtSigBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
-				hTagEtaSigBack->Fill(TagMuon_Eta);	//Add to Eta histogram
-				hTagPhiSigBack->Fill(TagMuon_Phi);	//Add to Phi histogram
-				
+				hTagPtBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
+				hTagEtaBack->Fill(TagMuon_Eta);	//Add to Eta histogram
+				hTagPhiBack->Fill(TagMuon_Phi);	//Add to Phi histogram
+
 				//Count events
-				count_sigregion++;
+				count_sideband++;
 			}
-		}
-
-		//If is inside sideband region
-		if (fabs(InvariantMass - M_JPSI) > W_JPSI*3.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*6.5)
-		{
-			//Add to Probe histogram
-			hPtBack->Fill(ProbeMuon_Pt);	//Add to Pt  histogram
-			hEtaBack->Fill(ProbeMuon_Eta);	//Add to Eta histogram
-			hPhiBack->Fill(ProbeMuon_Phi);	//Add to Phi histogram
-
-			//Add to Tag histogram
-			hTagPtBack->Fill(TagMuon_Pt);	//Add to Pt  histogram
-			hTagEtaBack->Fill(TagMuon_Eta);	//Add to Eta histogram
-			hTagPhiBack->Fill(TagMuon_Phi);	//Add to Phi histogram
-
-			//Count events
-			count_sideband++;
 		}
 	}
 
@@ -729,10 +733,29 @@ TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const c
 	//Set plot config
 	pEff->SetTitle(title);
 	pEff->SetLineWidth(2);
-	pEff->SetLineColor(kRed);
+	pEff->SetLineColor(kBlack);
 	pEff->SetMarkerStyle(21);
 	pEff->SetMarkerSize(0.5);
-	pEff->SetMarkerColor(kRed);
+	pEff->SetMarkerColor(kBlack);
+
+	//Set range in y axis
+	pEff->Draw(); 
+	gPad->Update(); 
+	auto graph = pEff->GetPaintedGraph(); 
+	graph->SetMinimum(0.0);
+	graph->SetMaximum(1.2);
+	if (strcmp(name, "TagMuon_PhiEfficiency") == 0 || strcmp(name, "ProbeMuon_PhiEfficiency") == 0)
+	{
+		graph->SetMinimum(0.5);
+		graph->SetMaximum(1.0);
+	} 
+	gPad->Update();
+
+	//Set x range
+	if (strcmp(name, "ProbeMuon_PtEfficiency") == 0 || strcmp(name, "TagMuon_PtEfficiency") == 0)
+	{
+		pEff->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
+	}
 
 	//Writes in file
 	if (shouldWrite == true)
