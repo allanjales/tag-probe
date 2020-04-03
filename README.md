@@ -27,7 +27,7 @@ Go on your folder where the file code is downloaded and run:
 $ cd master
 $ root -l -n
 root[0] .L boss.C
-root[1] step1()
+root[1] boss()
 ```
 
 After this, you need to run step 2. Run the efficiency plots by typing:
