@@ -30,12 +30,6 @@ root[0] .L boss.C
 root[1] boss()
 ```
 
-After this, you need to run step 2. Run the efficiency plots by typing:
-
-```sh
-root[2] efficiency()
-```
-
 ## Generated files and images
 
 Note: The number of candidates were estimated by sideband subtraction.
