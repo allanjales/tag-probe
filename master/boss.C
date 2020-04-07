@@ -138,20 +138,21 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	f->SetNpx(1000);	//Resolution of fit function
 	
 	//Values Signal
-	//f->SetParameter(0,	2000.0);
-	f->SetParameter(1,	3.1);
-	f->SetParameter(2,	0.021);
-	f->SetParameter(3,	2.1);
-	f->SetParameter(4,	0.40);
-	f->SetParameter(5,	3.094);
-	f->SetParameter(6,	0.02);
-	//f->SetParameter(7,	0);
+	f->SetParameter(0,	340.2);
+	f->SetParameter(1,	3.09);
+	f->SetParameter(2,	0.037);
+
+	f->SetParameter(3,	1.824);
+	f->SetParameter(4,	1.034);
+	f->SetParameter(5,	3.093);
+	f->SetParameter(6,	0.022);
+	f->SetParameter(7,	8322.27);
 
 	//Values Background
-	f->SetParameter(8,	-1.7);
-	f->SetParameter(9,	2.0);
-	//f->SetParameter(10, -1.7);
-	//f->SetParameter(11,	2.0);
+	f->SetParameter(8,	-0.217);
+	f->SetParameter(9,	1.915);
+	f->SetParameter(10, 263.185);
+	f->SetParameter(11,	0.061);
 
 	//Fit Color
 	f->SetLineColor(kBlue);
@@ -161,7 +162,7 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	//Get parameters from fit function and put it in par variable
    	Double_t par[12];
 	f->GetParameters(par);
-
+	
 	//Signal Fitting
 	TF1 *fs = new TF1("fs",Signal_InvariantMassProbe,hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax(),8);
 	fs->SetNpx(1000);				//Resolution of background fit function
@@ -194,15 +195,15 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitr->Chi2()/fitr->Ndf()));
 
 	//Show number of particles
-	tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
-	tx->DrawLatex(0.64,0.43,"(candidates)");
+	//tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
+	//tx->DrawLatex(0.64,0.43,"(candidates)");
 
 	//Add legend
-	TLegend *l = new TLegend(0.65,0.75,0.92,0.90);
+	TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
 	l->SetTextSize(0.04);
 	l->AddEntry(hMassAll,	"J/#psi","lp");
 	l->AddEntry(f,			"Fitting","l");
-	l->AddEntry(fs,			"Signal","l");
+	//l->AddEntry(fs,			"Signal","l");
 	l->AddEntry(fb,			"Background","l");
 	l->Draw();
 
@@ -215,12 +216,20 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	cout << "Chi2/ndf = " << f->GetChisquare()/f->GetNDF() << endl;
 	printf( "#Signal  = %.0f +- %.0f\n", S, dS);
 
-	//Integrate function to get number of particles in it
+	double xMin  = hMassAll->GetXaxis()->GetXmin();
+	double xMax  = hMassAll->GetXaxis()->GetXmax();
+	double scale = 1/hMassAll->GetBinWidth(0);		//How many bins there is in each x axis unit 
+
+	cout << endl;
+	cout << "HistIntegral = " << hMassAll->Integral(0, hMassAll->GetNbinsX()) << endl;
+	cout << "#Total      = " << f ->Integral(xMin, xMax) * scale << " +- " << f ->IntegralError(xMin, xMax, fitr->GetParams(), fitr->GetCovarianceMatrix().GetMatrixArray()) * scale << endl;
+
+	//Show integrals
 	cout << endl;
 	cout << "Candidates by integration" << endl;
-	cout << "#Total      = " << f ->Integral(hMassAll->GetXaxis()->GetXmin(), hMassAll->GetXaxis()->GetXmax()) * hMassAll->GetNbinsX() << endl;
-	cout << "#Background = " << fb->Integral(hMassAll->GetXaxis()->GetXmin(), hMassAll->GetXaxis()->GetXmax()) * hMassAll->GetNbinsX() << endl;
-	cout << "#Signal     = " << fs->Integral(hMassAll->GetXaxis()->GetXmin(), hMassAll->GetXaxis()->GetXmax()) * hMassAll->GetNbinsX() << endl;
+	cout << "#Total      = " << f ->Integral(xMin, xMax) * scale << " +- " << f ->IntegralError(xMin, xMax) * scale << endl;
+	cout << "#Background = " << fb->Integral(xMin, xMax) * scale << " +- " << fb->IntegralError(xMin, xMax) * scale << endl;
+	cout << "#Signal     = " << fs->Integral(xMin, xMax) * scale << " +- " << fs->IntegralError(xMin, xMax) * scale << endl;
 
 	//Writes in file
 	if (shouldWrite == true)
@@ -234,7 +243,7 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	{
 		//Saves as image
 		c1->SaveAs(saveAs);
-	} 
+	}
 
 	//return
 	return c1;
@@ -577,6 +586,7 @@ void step1()
 	cout << "#Signal          = " 	<< count_sigregion - count_sideband	<< endl;
 	cout << endl;
 
+
 	//Create canvas for others
 	createDividedCanvas(hPtSigBack,  	hPtSig,  	hPtBack,  	 "ProbeSignal_Pt",  "Probe Transversal Momentum", "Transversal Momentum of Signal (Probe)", true, "../PtProbe.png");
 	createDividedCanvas(hEtaSigBack, 	hEtaSig, 	hEtaBack, 	 "ProbeSignal_Eta", "Probe Pseudorapidity", 		 "Pseudorapidity of Signal (Probe)", 	true, "../EtaProbe.png");
@@ -584,6 +594,7 @@ void step1()
 	createDividedCanvas(hTagPtSigBack,  hTagPtSig,  hTagPtBack,  "TagSignal_Pt",    "Tag Transversal Momentum",	 "Transversal Momentum of Signal (Tag)",    true, "../PtTag.png");
 	createDividedCanvas(hTagEtaSigBack, hTagEtaSig, hTagEtaBack, "TagSignal_Eta",   "Tag Pseudorapidity", 		 "Pseudorapidity of Signal (Tag)", 		    true, "../EtaTag.png");
 	createDividedCanvas(hTagPhiSigBack, hTagPhiSig, hTagPhiBack, "TagSignal_Phi",   "Tag Angle", 				 "Angle of Signal (Tag)", 				    true, "../PhiTag.png");
+
 
 	//Integrate function to get number of particles in it
 	cout << endl;
