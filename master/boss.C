@@ -18,6 +18,8 @@
 #include "TLegend.h"
 #include "TLatex.h"
 
+#include <TF1NormSum.h>
+
 #include <iostream>
 
 using namespace std;
@@ -25,83 +27,92 @@ using namespace std;
 
 
 //-------------------------------------
-// General functions
+// Fit functions for Invariant Mass
 //-------------------------------------
 
-//Gaussian function
-Double_t Gaus(Double_t *x, Double_t *par)
+class FitFunctions
 {
-	//par[0] = height
-	//par[1] = position
-	//par[2] = sigma
-	Double_t gaus = par[0]*TMath::Gaus(x[0],par[1],par[2],1);
-	return gaus;
-}
-
-//Polynomial function
-Double_t Pol1(Double_t *x, Double_t *par)
-{
-	//par[0] = b
-	//par[1] = a
-	Double_t pol = par[0] + par[1]*x[0];
-	return pol;
-}
-
-//Exponential function
-Double_t Exp(Double_t *x, Double_t *par)
-{
-	//par[0] = height
-	//par[1] = width
-	Double_t exp = par[0] * TMath::Exp(par[1]*x[0]);
-	return exp;
-}
-
-//crystall ball function
-Double_t CrystalBall(Double_t *x,Double_t *par)
-{
-	//par[0] = alpha
-	//par[1] = n
-	//par[2] = mean
-	//par[3] = sigma
-	//par[4] = Yield
-	Double_t t = (x[0]-par[2])/par[3];
-	if (par[0] < 0) t = -t;
-	Double_t absAlpha = fabs((Double_t)par[0]);
-	if (t >= -absAlpha)
+public:
+	class Primary
 	{
-		return par[4]*exp(-0.5*t*t);
-	}
-	else
+	public:
+		//Gaussian function
+		static Double_t Gaus(Double_t *x, Double_t *par)
+		{
+			//par[0] = height
+			//par[1] = position
+			//par[2] = sigma
+			Double_t gaus = par[0]*TMath::Gaus(x[0],par[1],par[2],1);
+			return gaus;
+		}
+
+		//Polynomial function
+		static Double_t Pol1(Double_t *x, Double_t *par)
+		{
+			//par[0] = b
+			//par[1] = a
+			Double_t pol = par[0] + par[1]*x[0];
+			return pol;
+		}
+
+		//Exponential function
+		static Double_t Exp(Double_t *x, Double_t *par)
+		{
+			//par[0] = height
+			//par[1] = width
+			Double_t exp = par[0] * TMath::Exp(par[1]*x[0]);
+			return exp;
+		}
+
+		//crystall ball function
+		static Double_t CrystalBall(Double_t *x,Double_t *par)
+		{
+			//par[0] = alpha
+			//par[1] = n
+			//par[2] = mean
+			//par[3] = sigma
+			//par[4] = Yield
+			Double_t t = (x[0]-par[2])/par[3];
+			if (par[0] < 0) t = -t;
+			Double_t absAlpha = fabs((Double_t)par[0]);
+			if (t >= -absAlpha)
+			{
+				return par[4]*exp(-0.5*t*t);
+			}
+			else
+			{
+				Double_t a =  TMath::Power(par[1]/absAlpha,par[1])*exp(-0.5*absAlpha*absAlpha);
+				Double_t b = par[1]/absAlpha - absAlpha;
+				return par[4]*(a/TMath::Power(b - t, par[1]));
+			}
+		}
+	};
+	class Merged
 	{
-		Double_t a =  TMath::Power(par[1]/absAlpha,par[1])*exp(-0.5*absAlpha*absAlpha);
-		Double_t b = par[1]/absAlpha - absAlpha;
-		return par[4]*(a/TMath::Power(b - t, par[1]));
-	}
-}
+	public:
+		//Fit function for signal for Invariant Mass Probe
+		static Double_t Signal_InvariantMassAll(Double_t *x, Double_t *par) {
+			return FitFunctions::Primary::Gaus(x,par) + FitFunctions::Primary::CrystalBall(x, &par[3]);
+		}
 
+		//Fit function for background for Invariant Mass Probe
+		static Double_t Background_InvariantMassAll(Double_t *x, Double_t *par) {
+			return FitFunctions::Primary::Exp(x,par) + FitFunctions::Primary::Exp(x, &par[2]);
+		}
 
+		//Fit function for signal & background for Invariant Mass Probe
+		static Double_t FFit_InvariantMassAll(Double_t *x, Double_t *par) {
+			return FitFunctions::Merged::Signal_InvariantMassAll(x,par) + FitFunctions::Merged::Background_InvariantMassAll(x, &par[8]);
+		}
+	};
+};
 
 //-------------------------------------
-// Fit functions
+// Invariant Mass Graph
 //-------------------------------------
-
-//Fit function for signal for Invariant Mass Probe
-Double_t Signal_InvariantMassProbe(Double_t *x, Double_t *par) {
-	return Gaus(x,par) + CrystalBall(x, &par[3]);
-}
-
-//Fit function for background for Invariant Mass Probe
-Double_t Background_InvariantMassProbe(Double_t *x, Double_t *par) {
-	return Exp(x,par) + Exp(x, &par[2]);
-}
-
-//Fit function for signal & background for Invariant Mass Probe
-Double_t FFit_InvariantMassProbe(Double_t *x, Double_t *par) {
-	return Signal_InvariantMassProbe(x,par) + Background_InvariantMassProbe(x, &par[8]);
-}
 
 //Create canvas and fitting for Invariant Mass
-TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrite = false, const char *saveAs = "")
+TCanvas *invariantMassAll(TH1D *hMassAll, double S, double dS, bool shouldWrite = false, const char *saveAs = "")
 {
 	//Create canvas
 	TCanvas *c1 = new TCanvas("AllInvariantMass","Invariant Mass", 600, 600);
@@ -121,8 +132,14 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	hMassAll->SetMarkerColor(kBlack);			//Set markers colors
 	hMassAll->SetLineColor(kBlack);				//Set lines colors (for errorbars)
 
+	//Get min and max from histogram
+	double xMin  = hMassAll->GetXaxis()->GetXmin();
+	double xMax  = hMassAll->GetXaxis()->GetXmax();
+	double scale = 1/hMassAll->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
+
+
 	//Fit Function
-	TF1 *f = new TF1("f",FFit_InvariantMassProbe,hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax(),12);
+	TF1 *f = new TF1("f", FitFunctions::Merged::FFit_InvariantMassAll, xMin, xMax, 12);
 	f->SetParName(0,	"Gaus(Sg) Height");
 	f->SetParName(1,	"Gaus(Sg) Position");
 	f->SetParName(2,	"Gaus(Sg) Sigma");
@@ -158,24 +175,86 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	f->SetLineColor(kBlue);
 
 	//Fit the function
-	TFitResultPtr fitr = hMassAll->Fit(f,"RNS","",hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax());
+	TFitResultPtr fitr = hMassAll->Fit(f, "RNS", "", xMin, xMax);
 	//Get parameters from fit function and put it in par variable
    	Double_t par[12];
 	f->GetParameters(par);
 	
 	//Signal Fitting
-	TF1 *fs = new TF1("fs",Signal_InvariantMassProbe,hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax(),8);
+	TF1 *fs = new TF1("fs", FitFunctions::Merged::Signal_InvariantMassAll, xMin, xMax, 8);
 	fs->SetNpx(1000);				//Resolution of background fit function
 	fs->SetParameters(par);			//Get only background part
 	fs->SetLineColor(kMagenta); 	//Fit Color
 	fs->SetLineStyle(kSolid);		//Fit Style
 
 	//Background Fitting
-	TF1 *fb = new TF1("fb",Background_InvariantMassProbe,hMassAll->GetXaxis()->GetXmin(),hMassAll->GetXaxis()->GetXmax(),4);
+	TF1 *fb = new TF1("fb", FitFunctions::Merged::Background_InvariantMassAll, xMin, xMax, 4);
 	fb->SetNpx(1000);				//Resolution of background fit function
 	fb->SetParameters(&par[8]);		//Get only background part
 	fb->SetLineColor(kBlue); 		//Fit Color
 	fb->SetLineStyle(kDashed);		//Fit Style
+
+/*
+	TF1 *fs = new TF1("fs",Signal_InvariantMassAll,xMin,xMax,8);
+	fs->SetParName(0,	"Gaus(Sg) Height");
+	fs->SetParName(1,	"Gaus(Sg) Position");
+	fs->SetParName(2,	"Gaus(Sg) Sigma");
+	fs->SetParName(3,	"CB(Sg) Alpha");
+	fs->SetParName(4,	"CB(Sg) N");
+	fs->SetParName(5,	"CB(Sg) Mean");
+	fs->SetParName(6,	"CB(Sg) Sigma");
+	fs->SetParName(7,	"CB(Sg) Yield");
+	
+	//Values Signal
+	fs->SetParameter(0,	86.2327);
+	fs->SetParameter(1,	3.09508);
+	fs->SetParameter(2,	0.0389252);
+
+	fs->SetParameter(3,	1.83218);
+	fs->SetParameter(4,	0.821031);
+	fs->SetParameter(5,	3.09279);
+	fs->SetParameter(6,	0.0227687);
+	fs->SetParameter(7,	1827.62);
+
+	TF1 *fb = new TF1("fb",Background_InvariantMassAll,xMin,xMax,4);
+	fb->SetParName(0,	"Exp1(Bg) Lambda");
+	fb->SetParName(1,	"Exp1(Bg) a");
+	fb->SetParName(2,	"Exp2(Bg) Lambda");
+	fb->SetParName(3,	"Exp2(Bg) a");
+
+	//Values Background
+	fb->SetParameter(0,	-0.0102751);
+	fb->SetParameter(1,	2.17821);
+	fb->SetParameter(2, 23.9689);
+	fb->SetParameter(3, 0.367475);
+
+	//Sum functions
+	TF1NormSum *fnorm = new TF1NormSum(fs,fb);
+	TF1   * f = new TF1("f", *fnorm, xMin, xMax, fnorm->GetNpar());
+	f->SetParameters(fnorm->GetParameters().data());
+	f->SetParName(1,"NBackground");
+	f->SetParName(0,"NSignal");
+	for (int i = 2; i < f->GetNpar(); ++i)
+		f->SetParName(i, fnorm->GetParName(i));
+	f->SetNpx(1000);	//Resolution of fit function
+
+	//Fit Color
+	f->SetLineColor(kBlue);
+
+	//Fit the function (Remove Q to standard show)
+	TFitResultPtr fitr = hMassAll->Fit(f,"RNS","",xMin,xMax);
+	//fitr->Print();
+	
+	//Signal Fitting
+	fs->SetNpx(1000);				//Resolution of background fit function
+	fs->SetLineColor(kMagenta); 	//Fit Color
+	fs->SetLineStyle(kSolid);		//Fit Style
+
+	//Background Fitting
+	fb->SetNpx(1000);				//Resolution of background fit function
+	fb->SetLineColor(kBlue); 		//Fit Color
+	fb->SetLineStyle(kDashed);		//Fit Style
+*/
 
 	//Draws histogram & fit function
 	hMassAll->Draw("ep");
@@ -207,7 +286,22 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	l->AddEntry(fb,			"Background","l");
 	l->Draw();
 
+/*
+	//Draw boxes
+	gStyle->SetCanvasPreferGL(kTRUE);
+	TBox *side1 = new TBox(2.9, 0., 3., hMassAll->GetMaximum());
+	side1->SetFillColorAlpha(kRed, 0.35);
+	side1->Draw();
+	TBox *signal = new TBox(3., 0., 3.2, hMassAll->GetMaximum());
+	signal->SetFillColorAlpha(kGreen, 0.35);
+	signal->Draw();
+	TBox *side2 = new TBox(3.2, 0.,3.3, hMassAll->GetMaximum());
+	side2->SetFillColorAlpha(kRed, 0.35);
+	side2->Draw();
+*/
+
 	//Not show frame with mean, std dev
+	gStyle->SetCanvasPreferGL(kTRUE);
 	gStyle->SetOptStat(0);
 	
 	//Show chi-squared test (on prompt)
@@ -216,13 +310,8 @@ TCanvas *invariantMassProbe(TH1D *hMassAll, double S, double dS, bool shouldWrit
 	cout << "Chi2/ndf = " << f->GetChisquare()/f->GetNDF() << endl;
 	printf( "#Signal  = %.0f +- %.0f\n", S, dS);
 
-	double xMin  = hMassAll->GetXaxis()->GetXmin();
-	double xMax  = hMassAll->GetXaxis()->GetXmax();
-	double scale = 1/hMassAll->GetBinWidth(0);		//How many bins there is in each x axis unit 
-
 	cout << endl;
 	cout << "HistIntegral = " << hMassAll->Integral(0, hMassAll->GetNbinsX()) << endl;
-	cout << "#Total      = " << f ->Integral(xMin, xMax) * scale << " +- " << f ->IntegralError(xMin, xMax, fitr->GetParams(), fitr->GetCovarianceMatrix().GetMatrixArray()) * scale << endl;
 
 	//Show integrals
 	cout << endl;
@@ -392,8 +481,8 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 // Main functions
 //-------------------------------------
 
-//Draws and save invariant mass histogram for pp
-void step1()
+//Select particles, draws and save histograms
+void generateHistograms()
 {
 	TFile *file0 = TFile::Open("../data_histoall.root");		//Opens the file
 	TTree *TreePC = (TTree*)file0->Get("demo/PlotControl");		//Opens TTree of file
@@ -493,7 +582,7 @@ void step1()
 			hMassAll->Fill(InvariantMass);
 
 			//if is inside signal region
-			if (fabs(InvariantMass - M_JPSI) < W_JPSI*3.0)
+			if (fabs(InvariantMass - M_JPSI) < W_JPSI*10.0)
 			{
 				if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 				{
@@ -513,7 +602,7 @@ void step1()
 			}
 
 			//If is inside sideband region
-			if (fabs(InvariantMass - M_JPSI) > W_JPSI*3.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*6.5)
+			if (fabs(InvariantMass - M_JPSI) > W_JPSI*10.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*20.5)
 			{
 				//Add to Probe histogram
 				hPtBack->Fill(ProbeMuon_Pt);	//Add to Pt  histogram
@@ -575,7 +664,7 @@ void step1()
 	generatedFile->cd("canvas/");
 
 	//Create canvas and fitting
-	TCanvas *c1 = invariantMassProbe(hMassAll, S, dS, true, "../InvariantMassAll.png");
+	TCanvas *c1 = invariantMassAll(hMassAll, S, dS, true, "../InvariantMassAll.png");
 
 	//Debug
 	cout << endl;
@@ -586,7 +675,7 @@ void step1()
 	cout << "#Signal          = " 	<< count_sigregion - count_sideband	<< endl;
 	cout << endl;
 
-
+/*
 	//Create canvas for others
 	createDividedCanvas(hPtSigBack,  	hPtSig,  	hPtBack,  	 "ProbeSignal_Pt",  "Probe Transversal Momentum", "Transversal Momentum of Signal (Probe)", true, "../PtProbe.png");
 	createDividedCanvas(hEtaSigBack, 	hEtaSig, 	hEtaBack, 	 "ProbeSignal_Eta", "Probe Pseudorapidity", 		 "Pseudorapidity of Signal (Probe)", 	true, "../EtaProbe.png");
@@ -594,7 +683,7 @@ void step1()
 	createDividedCanvas(hTagPtSigBack,  hTagPtSig,  hTagPtBack,  "TagSignal_Pt",    "Tag Transversal Momentum",	 "Transversal Momentum of Signal (Tag)",    true, "../PtTag.png");
 	createDividedCanvas(hTagEtaSigBack, hTagEtaSig, hTagEtaBack, "TagSignal_Eta",   "Tag Pseudorapidity", 		 "Pseudorapidity of Signal (Tag)", 		    true, "../EtaTag.png");
 	createDividedCanvas(hTagPhiSigBack, hTagPhiSig, hTagPhiBack, "TagSignal_Phi",   "Tag Angle", 				 "Angle of Signal (Tag)", 				    true, "../PhiTag.png");
-
+*/
 
 	//Integrate function to get number of particles in it
 	cout << endl;
@@ -633,6 +722,7 @@ void step1()
 	generatedFile->Close();
 }
 
+/*
 //Estimates efficiency
 void efficiencyOldMethod()
 {
@@ -724,6 +814,7 @@ void efficiencyOldMethod()
 	hEtaEff->Write("",TObject::kOverwrite);
 	hPhiEff->Write("",TObject::kOverwrite);
 }
+*/
 
 //Creates a efficiency plot with histograms
 TEfficiency *efficiencyPlot(TH1D *hPass, TH1D *hTotal, const char *name, const char *title, bool shouldWrite = false)
@@ -852,7 +943,7 @@ void efficiency()
 
 //Call functions
 void boss() {
-	step1();
+	generateHistograms();
 	//efficiencyOldMethod();
-	efficiency();
+	//efficiency();
 }
