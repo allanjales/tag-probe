@@ -343,19 +343,19 @@ TCanvas *invariantMassAll(TH1D *hMassAll, double S, double dS, bool shouldWrite 
 TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char *canvasName, const char *titleLeft, const char *titleRight, bool shouldWrite = false, const char *saveAs = "")
 {
 	//Create canvas
-	TCanvas *c2 = new TCanvas(canvasName, titleLeft, 1200, 600);
+	TCanvas *c1 = new TCanvas(canvasName, titleLeft, 1200, 600);
 
 	//Divide canvas
-	c2->Divide(2,1);
+	c1->Divide(2,1);
 
 	//Select canvas part
-	c2->cd(1);
+	c1->cd(1);
 
 	//Set margin for canvas part
-	c2->cd(1)->SetTopMargin(0.07);
-	c2->cd(1)->SetRightMargin(0.02);
-	c2->cd(1)->SetBottomMargin(0.11);
-	c2->cd(1)->SetLeftMargin(0.14);
+	c1->cd(1)->SetTopMargin(0.07);
+	c1->cd(1)->SetRightMargin(0.02);
+	c1->cd(1)->SetBottomMargin(0.11);
+	c1->cd(1)->SetLeftMargin(0.14);
 
 	//Draws Main histogram
 	hSigBack->SetMinimum(0);
@@ -388,43 +388,43 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 	*/
 
 	//Add legend
-	TLegend *l2_1 = new TLegend(0.65,0.75,0.92,0.90);
-	l2_1->SetTextSize(0.04);
-	l2_1->AddEntry(hSigBack,	"All",			"lp");
-	l2_1->AddEntry(hSig,		"Signal",		"l");
-	l2_1->AddEntry(hBack,		"Background",	"l");
-	l2_1->Draw();
+	TLegend *l1_1 = new TLegend(0.65,0.75,0.92,0.90);
+	l1_1->SetTextSize(0.04);
+	l1_1->AddEntry(hSigBack,	"All",			"lp");
+	l1_1->AddEntry(hSig,		"Signal",		"l");
+	l1_1->AddEntry(hBack,		"Background",	"l");
+	l1_1->Draw();
 	
 	//Draws information
-	TLatex *tx2_1 = new TLatex();
-	tx2_1->SetTextSize(0.04);
-	tx2_1->SetTextFont(42);
-	tx2_1->SetNDC(kTRUE);
+	TLatex *tx1_1 = new TLatex();
+	tx1_1->SetTextSize(0.04);
+	tx1_1->SetTextFont(42);
+	tx1_1->SetNDC(kTRUE);
 
 	if (strcmp(canvasName, "ProbeSignal_Pt") == 0 || strcmp(canvasName, "TagSignal_Pt") == 0) 
 	{
-		tx2_1->SetTextAlign(12);	//Align left, center
-		tx2_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-		tx2_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
-		tx2_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+		tx1_1->SetTextAlign(12);	//Align left, center
+		tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+		tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+		tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
 	}
 	else
 	{
-		tx2_1->SetTextAlign(22);	//Align center, center
-		tx2_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-		tx2_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
-		tx2_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+		tx1_1->SetTextAlign(22);	//Align center, center
+		tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+		tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+		tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
 	}
 	
 
 	//Select canvas part
-	c2->cd(2);
+	c1->cd(2);
 
 	//Set margin for canvas part
-	c2->cd(2)->SetTopMargin(0.07);
-	c2->cd(2)->SetRightMargin(0.02);
-	c2->cd(2)->SetBottomMargin(0.11);
-	c2->cd(2)->SetLeftMargin(0.13);
+	c1->cd(2)->SetTopMargin(0.07);
+	c1->cd(2)->SetRightMargin(0.02);
+	c1->cd(2)->SetBottomMargin(0.11);
+	c1->cd(2)->SetLeftMargin(0.13);
 
 	//Same range as comparision
 	//hPtSig->GetYaxis()->SetRangeUser(0,hPtSigBack->GetYaxis()->GetYmax());
@@ -435,46 +435,46 @@ TCanvas *createDividedCanvas(TH1D *hSigBack, TH1D *hSig, TH1D *hBack, const char
 	hSig->Draw("same");
 
 	//Add legend
-	TLegend *l2_2 = new TLegend(0.65,0.85,0.92,0.90);
-	l2_2->SetTextSize(0.04);
-	l2_2->AddEntry(hSig, "Signal","l");
-	l2_2->Draw();
+	TLegend *l1_2 = new TLegend(0.65,0.85,0.92,0.90);
+	l1_2->SetTextSize(0.04);
+	l1_2->AddEntry(hSig, "Signal","l");
+	l1_2->Draw();
 
 	//Draws information
-	TLatex *tx2_2 = new TLatex();
-	tx2_2->SetTextSize(0.04);
-	tx2_2->SetTextFont(42);
-	tx2_2->SetNDC(kTRUE);
+	TLatex *tx1_2 = new TLatex();
+	tx1_2->SetTextSize(0.04);
+	tx1_2->SetTextFont(42);
+	tx1_2->SetNDC(kTRUE);
 
 	//Not show frame with mean, std dev
 	gStyle->SetOptStat(0);
 	
 	if (strcmp(canvasName, "ProbeSignal_Pt") == 0 || strcmp(canvasName, "TagSignal_Pt") == 0)
 	{
-		tx2_2->SetTextAlign(12);	//Align left, center
-		tx2_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
+		tx1_2->SetTextAlign(12);	//Align left, center
+		tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
 	}
 	else
 	{
-		tx2_2->SetTextAlign(22);	//Align center, center
-		tx2_2->DrawLatex(0.55,0.5,Form("%g entries (signal)",hSig->GetEntries()));
+		tx1_2->SetTextAlign(22);	//Align center, center
+		tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)",hSig->GetEntries()));
 	}
 
 	//Writes in file
 	if (shouldWrite == true)
 	{
-		c2->Write();
+		c1->Write();
 	}
 
 	//If should save
 	if (strcmp(saveAs, "") != 0)
 	{
 		//Saves as image
-		c2->SaveAs(saveAs);
+		c1->SaveAs(saveAs);
 	} 
 
 	//return
-	return c2;
+	return c1;
 }
 
 //-------------------------------------
@@ -675,7 +675,7 @@ void generateHistograms()
 	cout << "#Signal          = " 	<< count_sigregion - count_sideband	<< endl;
 	cout << endl;
 
-/*
+
 	//Create canvas for others
 	createDividedCanvas(hPtSigBack,  	hPtSig,  	hPtBack,  	 "ProbeSignal_Pt",  "Probe Transversal Momentum", "Transversal Momentum of Signal (Probe)", true, "../PtProbe.png");
 	createDividedCanvas(hEtaSigBack, 	hEtaSig, 	hEtaBack, 	 "ProbeSignal_Eta", "Probe Pseudorapidity", 		 "Pseudorapidity of Signal (Probe)", 	true, "../EtaProbe.png");
@@ -683,7 +683,7 @@ void generateHistograms()
 	createDividedCanvas(hTagPtSigBack,  hTagPtSig,  hTagPtBack,  "TagSignal_Pt",    "Tag Transversal Momentum",	 "Transversal Momentum of Signal (Tag)",    true, "../PtTag.png");
 	createDividedCanvas(hTagEtaSigBack, hTagEtaSig, hTagEtaBack, "TagSignal_Eta",   "Tag Pseudorapidity", 		 "Pseudorapidity of Signal (Tag)", 		    true, "../EtaTag.png");
 	createDividedCanvas(hTagPhiSigBack, hTagPhiSig, hTagPhiBack, "TagSignal_Phi",   "Tag Angle", 				 "Angle of Signal (Tag)", 				    true, "../PhiTag.png");
-*/
+
 
 	//Integrate function to get number of particles in it
 	cout << endl;
@@ -945,5 +945,5 @@ void efficiency()
 void boss() {
 	generateHistograms();
 	//efficiencyOldMethod();
-	//efficiency();
+	efficiency();
 }
