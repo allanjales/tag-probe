@@ -273,15 +273,17 @@ TCanvas *invariantMassAll(TH1D *hMassAll, double S, double dS, bool shouldWrite 
 	//tx->DrawLatex(0.6,0.60,Form("#chi^{2}/ndf = %g/%d",fitr->Chi2(),fitr->Ndf()));
 	tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitr->Chi2()/fitr->Ndf()));
 
+	/*
 	//Show number of particles
-	//tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
-	//tx->DrawLatex(0.64,0.43,"(candidates)");
+	tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
+	tx->DrawLatex(0.64,0.43,"(candidates)");
+	*/
 
 	//Add legend
 	TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
 	l->SetTextSize(0.04);
-	l->AddEntry(hMassAll,	"J/#psi","lp");
-	l->AddEntry(f,			"Fitting","l");
+	l->AddEntry(hMassAll,	"J/#psi"	,"lp");
+	l->AddEntry(f,			"Fitting"	,"l");
 	//l->AddEntry(fs,			"Signal","l");
 	l->AddEntry(fb,			"Background","l");
 	l->Draw();
@@ -343,7 +345,7 @@ TCanvas *invariantMassAll(TH1D *hMassAll, double S, double dS, bool shouldWrite 
 //-------------------------------------
 
 
-class Histograms{
+class Histogram{
 public:
 	const char *quantityName;
 	const char *xAxisName;
@@ -405,18 +407,6 @@ public:
 		hBack  = (TH1D*) hSigBack->Clone("hBack");
 		hBack->SetName(hName.data());
 
-		/*
-		//Define parameters
-		string hName = tagOrProbe + string(particle) + "_" + string(quantityName) + "Back";
-		string hTitle = string(histogramTitle) + " (" + string(tagOrProbe) + ")";
-		string xForm = "Events / (%1." + to_string(decimals) + "f)";
-
-		//Create histogram
-		hBack = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
-		hBack->GetYaxis()->SetTitle(Form(xForm.data(), hSigBack->GetBinWidth(0)));
-		hBack->GetXaxis()->SetTitle(xAxisName);
-		*/
-
 		return true;
 	}
 
@@ -440,11 +430,6 @@ public:
 		string titleRight 	= string(histogramTitle) + " of Signal (" + string(tagOrProbe) + ")";
 		string saveAs 		= "../" + string(quantityName) + string(tagOrProbe) + ".png";
 
-		//Copy histograms
-		TH1D *_hSigBack = hSigBack;
-		TH1D *_hSig 	= hSig;
-		TH1D *_hBack 	= hBack;
-
 		//Create canvas and divide it
 		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
 		c1->Divide(2,1);
@@ -457,20 +442,20 @@ public:
 		c1->cd(1)->SetLeftMargin(0.14);
 
 		//Draws Main histogram
-		_hSigBack->SetMinimum(0);
-		_hSigBack->SetLineWidth(2);		//Line Width
-		_hSigBack->Draw();
+		hSigBack->SetMinimum(0);
+		hSigBack->SetLineWidth(2);		//Line Width
+		hSigBack->Draw();
 
 		//Draws Background histogram
-		_hBack->SetLineColor(kBlue); 	//Line Color
-		_hBack->SetLineStyle(kDashed);	//Line Style
-		_hBack->SetLineWidth(2);			//Line Width
-		_hBack->Draw("same");
+		hBack->SetLineColor(kBlue); 	//Line Color
+		hBack->SetLineStyle(kDashed);	//Line Style
+		hBack->SetLineWidth(2);			//Line Width
+		hBack->Draw("same");
 
 		//Draws Signal histogram
-		_hSig->SetLineColor(kMagenta); 	//Line Color
-		_hSig->SetLineWidth(2);			//Line Width
-		_hSig->Draw("same");
+		hSig->SetLineColor(kMagenta); 	//Line Color
+		hSig->SetLineWidth(2);			//Line Width
+		hSig->Draw("same");
 
 		/*
 		//Set width of line
@@ -489,9 +474,9 @@ public:
 		//Add legend
 		TLegend *l1_1 = new TLegend(0.65,0.75,0.92,0.90);
 		l1_1->SetTextSize(0.04);
-		l1_1->AddEntry(_hSigBack,	"All",			"lp");
-		l1_1->AddEntry(_hSig,		"Signal",		"l");
-		l1_1->AddEntry(_hBack,		"Background",	"l");
+		l1_1->AddEntry(hSigBack,	"All",			"lp");
+		l1_1->AddEntry(hSig,		"Signal",		"l");
+		l1_1->AddEntry(hBack,		"Background",	"l");
 		l1_1->Draw();
 		
 		//Draws information
@@ -500,41 +485,43 @@ public:
 		tx1_1->SetTextFont(42);
 		tx1_1->SetNDC(kTRUE);
 
-		if (strcmp(canvasName.data(), "ProbeMuon_Pt") == 0 || strcmp(canvasName.data(), "TagMuon_Pt") == 0) 
+		if (strcmp(quantityName, "Pt") == 0) 
 		{
 			tx1_1->SetTextAlign(12);	//Align left, center
-			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		_hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		_hSig->GetEntries()));
-			tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	_hBack->GetEntries()));
+			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+			tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
 		}
 		else
 		{
 			tx1_1->SetTextAlign(22);	//Align center, center
-			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		_hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		_hSig->GetEntries()));
-			tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	_hBack->GetEntries()));
+			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+			tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
 		}
 		
 
-		//Select canvas part
+		//Select canvas part and addmargin
 		c1->cd(2);
 		c1->cd(2)->SetTopMargin(0.07);
 		c1->cd(2)->SetRightMargin(0.02);
 		c1->cd(2)->SetBottomMargin(0.11);
 		c1->cd(2)->SetLeftMargin(0.13);
+		if (strcmp(quantityName, "Pt") == 0)
+			c1->cd(2)->SetLeftMargin(0.14);
 
 		//Same range as comparision
 		//hPtSig->GetYaxis()->SetRangeUser(0,hPtSigBack->GetYaxis()->GetYmax());
-		_hSig->SetMinimum(0);
-		_hSig->SetTitle(titleRight.data());
+		hSig->SetMinimum(0);
+		hSig->SetTitle(titleRight.data());
 
 		//Signal
-		_hSig->Draw("same");
+		hSig->Draw("same");
 
 		//Add legend
 		TLegend *l1_2 = new TLegend(0.65,0.85,0.92,0.90);
 		l1_2->SetTextSize(0.04);
-		l1_2->AddEntry(_hSig, "Signal","l");
+		l1_2->AddEntry(hSig, "Signal","l");
 		l1_2->Draw();
 
 		//Draws information
@@ -546,15 +533,15 @@ public:
 		//Not show frame with mean, std dev
 		gStyle->SetOptStat(0);
 		
-		if (strcmp(canvasName.data(), "ProbeMuon_Pt") == 0 || strcmp(canvasName.data(), "TagMuon_Pt") == 0)
+		if (strcmp(quantityName, "Pt") == 0)
 		{
 			tx1_2->SetTextAlign(12);	//Align left, center
-			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", _hSig->GetEntries()));
+			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
 		}
 		else
 		{
 			tx1_2->SetTextAlign(22);	//Align center, center
-			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", _hSig->GetEntries()));
+			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
 		}
 
 		//Writes in file
@@ -574,6 +561,85 @@ public:
 
 		//return
 		return c1;
+	}
+};
+
+class Histograms{
+public:
+	Histogram Tag;
+	Histogram Probe;
+
+	bool defineTexts(const char *quantityName, const char *xAxisName, const char *histogramTitle)
+	{
+		const char *particle = "Muon";
+
+		this->Probe.defineTexts(quantityName, xAxisName, histogramTitle, "Probe", particle);
+		this->  Tag.defineTexts(quantityName, xAxisName, histogramTitle, "Tag", particle);
+
+		return true;
+	}
+
+	bool defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
+	{
+		this->Probe.defineNumbers(nBins, xMin, xMax, decimals);
+		this-   Tag.defineNumbers(nBins, xMin, xMax, decimals);
+
+		return true;
+	}
+
+	bool createSigBackHistogram()
+	{
+		this->Probe.createSigBackHistogram();
+		this->  Tag.createSigBackHistogram();
+
+		return true;
+	}
+
+	bool createBackHistogram()
+	{
+		this->Probe.createBackHistogram();
+		this->  Tag.createBackHistogram();
+
+		return true;
+	}
+
+	bool createSigHistogram()
+	{
+		this->Probe.createSigHistogram();
+		this->  Tag.createSigHistogram();
+
+		return true;
+	}
+
+	bool createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
+	{
+		this->Probe.createDividedCanvas(shouldWrite, shouldSave);
+		this->  Tag.createDividedCanvas(shouldWrite, shouldSave);
+
+		return true;
+	}
+
+	bool write(bool hSigBack, bool hSig, bool hBack)
+	{
+		if (hSigBack == true)
+		{
+			this->Probe.hSigBack->Write();
+			this->  Tag.hSigBack->Write();
+		}
+
+		if (hSig == true)
+		{
+			this->Probe.hSig->Write();
+			this->  Tag.hSig->Write();
+		}
+
+		if (hBack == true)
+		{
+			this->Probe.hBack->Write();
+			this->  Tag.hBack->Write();
+		}
+
+		return true;
 	}
 };
 
@@ -623,46 +689,25 @@ void generateHistograms()
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
 
 	//Create a object
-	Histograms PtProbe;
-	PtProbe.defineTexts("Pt", "P_{t} (GeV/c)", "Transversal Momentum", "Probe");
-	PtProbe.defineNumbers(100, 0., 100., 1);	
-	PtProbe.createSigBackHistogram();
-	PtProbe.createBackHistogram();
+	Histograms Pt;
+	Pt.defineTexts("Pt", "P_{t} (GeV/c)", "Transversal Momentum");
+	Pt.defineNumbers(100, 0., 100., 1);	
+	Pt.createSigBackHistogram();
+	Pt.createBackHistogram();
 
 	//Create a object
-	Histograms EtaProbe;
-	EtaProbe.defineTexts("Eta", "#eta", "Pseudorapidity", "Probe");
-	EtaProbe.defineNumbers(200, -2.5, 2.5);	
-	EtaProbe.createSigBackHistogram();
-	EtaProbe.createBackHistogram();
+	Histograms Eta;
+	Eta.defineTexts("Eta", "#eta", "Pseudorapidity");
+	Eta.defineNumbers(200, -2.5, 2.5);	
+	Eta.createSigBackHistogram();
+	Eta.createBackHistogram();
 
 	//Create a object
-	Histograms PhiProbe;
-	PhiProbe.defineTexts("Phi", "#phi", "Azimuthal Angle", "Probe");
-	PhiProbe.defineNumbers(79, -3.15, 3.15);	
-	PhiProbe.createSigBackHistogram();
-	PhiProbe.createBackHistogram();
-
-	//Create a object
-	Histograms PtTag;
-	PtTag.defineTexts("Pt", "P_{t} (GeV/c)", "Transversal Momentum", "Tag");
-	PtTag.defineNumbers(100, 0., 100., 1);	
-	PtTag.createSigBackHistogram();
-	PtTag.createBackHistogram();
-
-	//Create a object
-	Histograms EtaTag;
-	EtaTag.defineTexts("Eta", "#eta", "Pseudorapidity", "Tag");
-	EtaTag.defineNumbers(200, -2.5, 2.5);	
-	EtaTag.createSigBackHistogram();
-	EtaTag.createBackHistogram();
-
-	//Create a object
-	Histograms PhiTag;
-	PhiTag.defineTexts("Phi", "#phi", "Azimuthal Angle", "Tag");
-	PhiTag.defineNumbers(79, -3.15, 3.15);	
-	PhiTag.createSigBackHistogram();
-	PhiTag.createBackHistogram();
+	Histograms Phi;
+	Phi.defineTexts("Phi", "#phi", "Azimuthal Angle");
+	Phi.defineNumbers(79, -3.15, 3.15);	
+	Phi.createSigBackHistogram();
+	Phi.createBackHistogram();
 
 
 	//Loop between the components
@@ -684,14 +729,14 @@ void generateHistograms()
 				if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 				{
 					//Add to Probe histogram
-					PtProbe.hSigBack->Fill(ProbeMuon_Pt);
-					EtaProbe.hSigBack->Fill(ProbeMuon_Eta);
-					PhiProbe.hSigBack->Fill(ProbeMuon_Phi);
+					Pt .Probe.hSigBack->Fill(ProbeMuon_Pt);
+					Eta.Probe.hSigBack->Fill(ProbeMuon_Eta);
+					Phi.Probe.hSigBack->Fill(ProbeMuon_Phi);
 
 					//Add to Tag histogram
-					PtTag.hSigBack->Fill(TagMuon_Pt);
-					EtaTag.hSigBack->Fill(TagMuon_Eta);
-					PhiTag.hSigBack->Fill(TagMuon_Phi);
+					Pt .Tag.hSigBack->Fill(TagMuon_Pt);
+					Eta.Tag.hSigBack->Fill(TagMuon_Eta);
+					Phi.Tag.hSigBack->Fill(TagMuon_Phi);
 					
 					//Count events
 					count_sigregion++;
@@ -702,14 +747,14 @@ void generateHistograms()
 			if (fabs(InvariantMass - M_JPSI) > W_JPSI*10.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*20.5)
 			{
 				//Add to Probe histogram
-				PtProbe.hBack->Fill(ProbeMuon_Pt);
-				EtaProbe.hBack->Fill(ProbeMuon_Eta);
-				PhiProbe.hBack->Fill(ProbeMuon_Phi);
+				Pt.Probe.hBack->Fill(ProbeMuon_Pt);
+				Eta.Probe.hBack->Fill(ProbeMuon_Eta);
+				Phi.Probe.hBack->Fill(ProbeMuon_Phi);
 
 				//Add to Tag histogram
-				PtTag.hBack->Fill(TagMuon_Pt);
-				EtaTag.hBack->Fill(TagMuon_Eta);
-				PhiTag.hBack->Fill(TagMuon_Phi);
+				Pt.Tag.hBack->Fill(TagMuon_Pt);
+				Eta.Tag.hBack->Fill(TagMuon_Eta);
+				Phi.Tag.hBack->Fill(TagMuon_Phi);
 
 				//Count events
 				count_sideband++;
@@ -719,15 +764,12 @@ void generateHistograms()
 
 	//Number of particles in signal and uncertain
 	double S = count_sigregion - count_sideband;
-	double dS = sqrt(count_sigregion+count_sideband);
+	double dS = sqrt(count_sigregion + count_sideband);
 
 	//Create signal histograms
-	PtProbe.createSigHistogram();
-	EtaProbe.createSigHistogram();
-	PhiProbe.createSigHistogram();
-	PtTag.createSigHistogram();
-	EtaTag.createSigHistogram();
-	PhiTag.createSigHistogram();
+	Pt .createSigHistogram();
+	Eta.createSigHistogram();
+	Phi.createSigHistogram();
 
 	//-------------------------------------
 	// Canvas
@@ -736,10 +778,15 @@ void generateHistograms()
 	//Create file root to store generated files
 	TFile *generatedFile = TFile::Open("../generated_hist.root","RECREATE");
 	generatedFile->mkdir("canvas/");
-	generatedFile->cd("canvas/");
+	generatedFile->   cd("canvas/");
 
 	//Create canvas and fitting
-	//TCanvas *c1 = invariantMassAll(hMassAll, S, dS, true, "../InvariantMassAll.png");
+	TCanvas *c1 = invariantMassAll(hMassAll, S, dS, true, "../InvariantMassAll.png");
+
+	//Create canvas
+	Pt .createDividedCanvas(true, true);
+	Eta.createDividedCanvas(true, true);
+	Phi.createDividedCanvas(true, true);
 
 	//Debug
 	cout << endl;
@@ -750,47 +797,24 @@ void generateHistograms()
 	cout << "#Signal          = " 	<< count_sigregion - count_sideband	<< endl;
 	cout << endl;
 
-	//Create canvas
-	PtProbe.createDividedCanvas(true, true);
-	EtaProbe.createDividedCanvas(true, true);
-	PhiProbe.createDividedCanvas(true, true);
-	PtTag.createDividedCanvas(true, true);
-	EtaTag.createDividedCanvas(true, true);
-	PhiTag.createDividedCanvas(true, true);
-
 	//Integrate function to get number of particles in it
 	cout << endl;
 	cout << "Checking histograms number inconsistency (should be 0)" << endl;
-	cout << "#Probe Pt  = " << PtProbe.hSigBack->GetEntries()  	- PtProbe.hSig->GetEntries()    - PtProbe.hBack->GetEntries()	<< endl;
-	cout << "#Probe Eta = " << EtaProbe.hSigBack->GetEntries() 	- EtaProbe.hSig->GetEntries()   - EtaProbe.hBack->GetEntries()	<< endl;
-	cout << "#Probe Phi = " << PhiProbe.hSigBack->GetEntries() 	- PhiProbe.hSig->GetEntries()   - PhiProbe.hBack->GetEntries()	<< endl;
-	cout << "#Tag   Pt  = " << PtTag.hSigBack->GetEntries()  	- PtTag.hSig->GetEntries()  	- PtTag.hBack->GetEntries()  	<< endl;
-	cout << "#Tag   Eta = " << EtaTag.hSigBack->GetEntries() 	- EtaTag.hSig->GetEntries() 	- EtaTag.hBack->GetEntries() 	<< endl;
-	cout << "#Tag   Phi = " << PhiTag.hSigBack->GetEntries() 	- PhiTag.hSig->GetEntries() 	- PhiTag.hBack->GetEntries() 	<< endl;
+	cout << "#Probe Pt  = " << Pt .Probe.hSigBack->GetEntries()  	- Pt .Probe.hSig->GetEntries()  - Pt .Probe.hBack->GetEntries()	<< endl;
+	cout << "#Probe Eta = " << Eta.Probe.hSigBack->GetEntries() 	- Eta.Probe.hSig->GetEntries() 	- Eta.Probe.hBack->GetEntries()	<< endl;
+	cout << "#Probe Phi = " << Phi.Probe.hSigBack->GetEntries() 	- Phi.Probe.hSig->GetEntries() 	- Phi.Probe.hBack->GetEntries()	<< endl;
+	cout << "#Tag   Pt  = " << Pt .Tag.hSigBack->GetEntries()  		- Pt .Tag.hSig->GetEntries()  	- Pt .Tag.hBack->GetEntries()  	<< endl;
+	cout << "#Tag   Eta = " << Eta.Tag.hSigBack->GetEntries() 		- Eta.Tag.hSig->GetEntries() 	- Eta.Tag.hBack->GetEntries() 	<< endl;
+	cout << "#Tag   Phi = " << Phi.Tag.hSigBack->GetEntries() 		- Phi.Tag.hSig->GetEntries() 	- Phi.Tag.hBack->GetEntries() 	<< endl;
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
-	generatedFile->cd("histograms/");
-	//Save Probe histograms
-	PtProbe.hSigBack->Write();
-	PtProbe.hBack->Write();
-	PtProbe.hSig->Write();
-	EtaProbe.hSigBack->Write();
-	EtaProbe.hBack->Write();
-	EtaProbe.hSig->Write();
-	PhiProbe.hSigBack->Write();
-	PhiProbe.hBack->Write();
-	PhiProbe.hSig->Write();
-	//Save Tag histograms
-	PtTag.hSigBack->Write();
-	PtTag.hBack->Write();
-	PtTag.hSig->Write();
-	EtaTag.hSigBack->Write();
-	EtaTag.hBack->Write();
-	EtaTag.hSig->Write();
-	PhiTag.hSigBack->Write();
-	PhiTag.hBack->Write();
-	PhiTag.hSig->Write();
+	generatedFile->   cd("histograms/");
+
+	Pt .write(true, true, true);
+	Eta.write(true, true, true);
+	Phi.write(true, true, true);
+
 	//Close files
 	generatedFile->Close();
 }
@@ -1019,5 +1043,5 @@ void boss()
 {
 	generateHistograms();
 	//efficiencyOldMethod();
-	//efficiency();
+	efficiency();
 }
