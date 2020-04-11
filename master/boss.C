@@ -564,7 +564,8 @@ public:
 	}
 };
 
-class Histograms{
+//Bunch of 2 histogram class for Tag and Probe
+class TagAndProbe{
 public:
 	Histogram Tag;
 	Histogram Probe;
@@ -689,21 +690,21 @@ void generateHistograms()
 	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
 
 	//Create a object
-	Histograms Pt;
+	TagAndProbe Pt;
 	Pt.defineTexts("Pt", "P_{t} (GeV/c)", "Transversal Momentum");
 	Pt.defineNumbers(100, 0., 100., 1);	
 	Pt.createSigBackHistogram();
 	Pt.createBackHistogram();
 
 	//Create a object
-	Histograms Eta;
+	TagAndProbe Eta;
 	Eta.defineTexts("Eta", "#eta", "Pseudorapidity");
 	Eta.defineNumbers(200, -2.5, 2.5);	
 	Eta.createSigBackHistogram();
 	Eta.createBackHistogram();
 
 	//Create a object
-	Histograms Phi;
+	TagAndProbe Phi;
 	Phi.defineTexts("Phi", "#phi", "Azimuthal Angle");
 	Phi.defineNumbers(79, -3.15, 3.15);	
 	Phi.createSigBackHistogram();
