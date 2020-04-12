@@ -108,242 +108,291 @@ public:
 };
 
 //-------------------------------------
-// Invariant Mass Graph
-//-------------------------------------
-
-//Create canvas and fitting for Invariant Mass
-TCanvas *invariantMassAll(TH1D *hMassAll, double S, double dS, bool shouldWrite = false, const char *saveAs = "")
-{
-	//Create canvas
-	TCanvas *c1 = new TCanvas("AllInvariantMass","Invariant Mass", 600, 600);
-
-	//Set margin for canvas
-	c1->SetTopMargin(0.07);
-	c1->SetRightMargin(0.05);
-	c1->SetBottomMargin(0.11);
-	c1->SetLeftMargin(0.15);
-
-	//Set title size for axis and other stuffs for histogram style
-	hMassAll->GetYaxis()->SetTitleSize(0.04);
-	hMassAll->GetXaxis()->SetTitleSize(0.05);
-	hMassAll->GetXaxis()->CenterTitle(true);
-	//hMassAll->SetBit(TH1::kNoTitle);			//Not show histogram title
-	hMassAll->SetMarkerStyle(20);				//Set markers style
-	hMassAll->SetMarkerColor(kBlack);			//Set markers colors
-	hMassAll->SetLineColor(kBlack);				//Set lines colors (for errorbars)
-
-	//Get min and max from histogram
-	double xMin  = hMassAll->GetXaxis()->GetXmin();
-	double xMax  = hMassAll->GetXaxis()->GetXmax();
-	double scale = 1/hMassAll->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
-
-
-	//Fit Function
-	TF1 *f = new TF1("f", FitFunctions::Merged::FFit_InvariantMassAll, xMin, xMax, 12);
-	f->SetParName(0,	"Gaus(Sg) Height");
-	f->SetParName(1,	"Gaus(Sg) Position");
-	f->SetParName(2,	"Gaus(Sg) Sigma");
-	f->SetParName(3,	"CB(Sg) Alpha");
-	f->SetParName(4,	"CB(Sg) N");
-	f->SetParName(5,	"CB(Sg) Mean");
-	f->SetParName(6,	"CB(Sg) Sigma");
-	f->SetParName(7,	"CB(Sg) Yield");
-	f->SetParName(8,	"Exp1(Bg) Lambda");
-	f->SetParName(9,	"Exp1(Bg) a");
-	f->SetParName(10,	"Exp2(Bg) Lambda");
-	f->SetParName(11,	"Exp2(Bg) a");
-	f->SetNpx(1000);	//Resolution of fit function
-	
-	//Values Signal
-	f->SetParameter(0,	340.2);
-	f->SetParameter(1,	3.09);
-	f->SetParameter(2,	0.037);
-
-	f->SetParameter(3,	1.824);
-	f->SetParameter(4,	1.034);
-	f->SetParameter(5,	3.093);
-	f->SetParameter(6,	0.022);
-	f->SetParameter(7,	8322.27);
-
-	//Values Background
-	f->SetParameter(8,	-0.217);
-	f->SetParameter(9,	1.915);
-	f->SetParameter(10, 263.185);
-	f->SetParameter(11,	0.061);
-
-	//Fit Color
-	f->SetLineColor(kBlue);
-
-	//Fit the function
-	TFitResultPtr fitr = hMassAll->Fit(f, "RNS", "", xMin, xMax);
-	//Get parameters from fit function and put it in par variable
-   	Double_t par[12];
-	f->GetParameters(par);
-	
-	//Signal Fitting
-	TF1 *fs = new TF1("fs", FitFunctions::Merged::Signal_InvariantMassAll, xMin, xMax, 8);
-	fs->SetNpx(1000);				//Resolution of background fit function
-	fs->SetParameters(par);			//Get only background part
-	fs->SetLineColor(kMagenta); 	//Fit Color
-	fs->SetLineStyle(kSolid);		//Fit Style
-
-	//Background Fitting
-	TF1 *fb = new TF1("fb", FitFunctions::Merged::Background_InvariantMassAll, xMin, xMax, 4);
-	fb->SetNpx(1000);				//Resolution of background fit function
-	fb->SetParameters(&par[8]);		//Get only background part
-	fb->SetLineColor(kBlue); 		//Fit Color
-	fb->SetLineStyle(kDashed);		//Fit Style
-
-/*
-	TF1 *fs = new TF1("fs",Signal_InvariantMassAll,xMin,xMax,8);
-	fs->SetParName(0,	"Gaus(Sg) Height");
-	fs->SetParName(1,	"Gaus(Sg) Position");
-	fs->SetParName(2,	"Gaus(Sg) Sigma");
-	fs->SetParName(3,	"CB(Sg) Alpha");
-	fs->SetParName(4,	"CB(Sg) N");
-	fs->SetParName(5,	"CB(Sg) Mean");
-	fs->SetParName(6,	"CB(Sg) Sigma");
-	fs->SetParName(7,	"CB(Sg) Yield");
-	
-	//Values Signal
-	fs->SetParameter(0,	86.2327);
-	fs->SetParameter(1,	3.09508);
-	fs->SetParameter(2,	0.0389252);
-
-	fs->SetParameter(3,	1.83218);
-	fs->SetParameter(4,	0.821031);
-	fs->SetParameter(5,	3.09279);
-	fs->SetParameter(6,	0.0227687);
-	fs->SetParameter(7,	1827.62);
-
-	TF1 *fb = new TF1("fb",Background_InvariantMassAll,xMin,xMax,4);
-	fb->SetParName(0,	"Exp1(Bg) Lambda");
-	fb->SetParName(1,	"Exp1(Bg) a");
-	fb->SetParName(2,	"Exp2(Bg) Lambda");
-	fb->SetParName(3,	"Exp2(Bg) a");
-
-	//Values Background
-	fb->SetParameter(0,	-0.0102751);
-	fb->SetParameter(1,	2.17821);
-	fb->SetParameter(2, 23.9689);
-	fb->SetParameter(3, 0.367475);
-
-	//Sum functions
-	TF1NormSum *fnorm = new TF1NormSum(fs,fb);
-	TF1   * f = new TF1("f", *fnorm, xMin, xMax, fnorm->GetNpar());
-	f->SetParameters(fnorm->GetParameters().data());
-	f->SetParName(1,"NBackground");
-	f->SetParName(0,"NSignal");
-	for (int i = 2; i < f->GetNpar(); ++i)
-		f->SetParName(i, fnorm->GetParName(i));
-	f->SetNpx(1000);	//Resolution of fit function
-
-	//Fit Color
-	f->SetLineColor(kBlue);
-
-	//Fit the function (Remove Q to standard show)
-	TFitResultPtr fitr = hMassAll->Fit(f,"RNS","",xMin,xMax);
-	//fitr->Print();
-	
-	//Signal Fitting
-	fs->SetNpx(1000);				//Resolution of background fit function
-	fs->SetLineColor(kMagenta); 	//Fit Color
-	fs->SetLineStyle(kSolid);		//Fit Style
-
-	//Background Fitting
-	fb->SetNpx(1000);				//Resolution of background fit function
-	fb->SetLineColor(kBlue); 		//Fit Color
-	fb->SetLineStyle(kDashed);		//Fit Style
-*/
-
-	//Draws histogram & fit function
-	hMassAll->Draw("ep");
-	//fs->Draw("same");
-	fb->Draw("same");
-	f->Draw("same");
-
-	//Draws information
-	TLatex *tx = new TLatex();
-	tx->SetTextSize(0.04);
-	tx->SetTextAlign(12);
-	tx->SetTextFont(42);
-	tx->SetNDC(kTRUE);
-
-	//Show chi-squared test
-	//tx->DrawLatex(0.6,0.60,Form("#chi^{2}/ndf = %g/%d",fitr->Chi2(),fitr->Ndf()));
-	tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitr->Chi2()/fitr->Ndf()));
-
-	/*
-	//Show number of particles
-	tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
-	tx->DrawLatex(0.64,0.43,"(candidates)");
-	*/
-
-	//Add legend
-	TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
-	l->SetTextSize(0.04);
-	l->AddEntry(hMassAll,	"J/#psi"	,"lp");
-	l->AddEntry(f,			"Fitting"	,"l");
-	//l->AddEntry(fs,			"Signal","l");
-	l->AddEntry(fb,			"Background","l");
-	l->Draw();
-
-/*
-	//Draw boxes
-	gStyle->SetCanvasPreferGL(kTRUE);
-	TBox *side1 = new TBox(2.9, 0., 3., hMassAll->GetMaximum());
-	side1->SetFillColorAlpha(kRed, 0.35);
-	side1->Draw();
-	TBox *signal = new TBox(3., 0., 3.2, hMassAll->GetMaximum());
-	signal->SetFillColorAlpha(kGreen, 0.35);
-	signal->Draw();
-	TBox *side2 = new TBox(3.2, 0.,3.3, hMassAll->GetMaximum());
-	side2->SetFillColorAlpha(kRed, 0.35);
-	side2->Draw();
-*/
-
-	//Not show frame with mean, std dev
-	gStyle->SetCanvasPreferGL(kTRUE);
-	gStyle->SetOptStat(0);
-	
-	//Show chi-squared test (on prompt)
-	cout << endl;
-	cout << "Fitting overview" << endl;
-	cout << "Chi2/ndf = " << f->GetChisquare()/f->GetNDF() << endl;
-	printf( "#Signal  = %.0f +- %.0f\n", S, dS);
-
-	cout << endl;
-	cout << "HistIntegral = " << hMassAll->Integral(0, hMassAll->GetNbinsX()) << endl;
-
-	//Show integrals
-	cout << endl;
-	cout << "Candidates by integration" << endl;
-	cout << "#Total      = " << f ->Integral(xMin, xMax) * scale << " +- " << f ->IntegralError(xMin, xMax) * scale << endl;
-	cout << "#Background = " << fb->Integral(xMin, xMax) * scale << " +- " << fb->IntegralError(xMin, xMax) * scale << endl;
-	cout << "#Signal     = " << fs->Integral(xMin, xMax) * scale << " +- " << fs->IntegralError(xMin, xMax) * scale << endl;
-
-	//Writes in file
-	if (shouldWrite == true)
-	{
-		//Aqui dá crash quando roda pela segunda vez no meu ROOT
-		c1->Write("",TObject::kOverwrite);
-	}
-
-	//If should save
-	if (strcmp(saveAs, "") != 0)
-	{
-		//Saves as image
-		c1->SaveAs(saveAs);
-	}
-
-	//return
-	return c1;
-}
-
-//-------------------------------------
 // Main functions
 //-------------------------------------
 
+class InvariantMassClass{
+public:
+	Int_t 			nBins;
+	int 			decimals = 4;
+	Double_t 		xMin;
+	Double_t		xMax;
+
+	TH1D*			hMass;
+	TF1*			fitFunction;
+	TF1*			fitFunctionSig;
+	TF1*			fitFunctionBack;
+	TFitResultPtr 	fitResult;
+
+	const char* const fittingParName[12] = {
+			"Gaus(Sg) Height  ",
+			"Gaus(Sg) Position",
+			"Gaus(Sg) Sigma   ",
+
+			"CB  (Sg) Alpha   ",
+			"CB  (Sg) N       ",
+			"CB  (Sg) Mean    ",
+			"CB  (Sg) Sigma   ",
+			"CB  (Sg) Yield   ",
+
+			"Exp1(Bg) Lambda  ",
+			"Exp1(Bg) a       ",
+			"Exp2(Bg) Lambda  ",
+			"Exp2(Bg) a       "
+		};
+
+	Double_t resultParameters[12];
+
+	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 4)
+	{
+		this->nBins 	= nBins;
+		this->xMin 		= xMin;
+		this->xMax 		= xMax;
+		this->decimals 	= decimals;
+	}
+
+	void createMassHistogram()
+	{
+		string xForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
+
+		//Create histogram
+		hMass = new TH1D("Muon_InvariantMass", "Invariant Mass (All);Mass (GeV/c^{2});Events", nBins, xMin, xMax);
+		hMass->GetYaxis()->SetTitle(Form(xForm.data(), hMass->GetBinWidth(0)));
+	}
+
+	/*
+	void fit()
+	{
+		TF1 *fs = new TF1("fs",Signal_InvariantMassAll,xMin,xMax,8);
+		fs->SetParName(0,	"Gaus(Sg) Height");
+		fs->SetParName(1,	"Gaus(Sg) Position");
+		fs->SetParName(2,	"Gaus(Sg) Sigma");
+		fs->SetParName(3,	"CB(Sg) Alpha");
+		fs->SetParName(4,	"CB(Sg) N");
+		fs->SetParName(5,	"CB(Sg) Mean");
+		fs->SetParName(6,	"CB(Sg) Sigma");
+		fs->SetParName(7,	"CB(Sg) Yield");
+		
+		//Values Signal
+		fs->SetParameter(0,	86.2327);
+		fs->SetParameter(1,	3.09508);
+		fs->SetParameter(2,	0.0389252);
+
+		fs->SetParameter(3,	1.83218);
+		fs->SetParameter(4,	0.821031);
+		fs->SetParameter(5,	3.09279);
+		fs->SetParameter(6,	0.0227687);
+		fs->SetParameter(7,	1827.62);
+
+		TF1 *fb = new TF1("fb",Background_InvariantMassAll,xMin,xMax,4);
+		fb->SetParName(0,	"Exp1(Bg) Lambda");
+		fb->SetParName(1,	"Exp1(Bg) a");
+		fb->SetParName(2,	"Exp2(Bg) Lambda");
+		fb->SetParName(3,	"Exp2(Bg) a");
+
+		//Values Background
+		fb->SetParameter(0,	-0.0102751);
+		fb->SetParameter(1,	2.17821);
+		fb->SetParameter(2, 23.9689);
+		fb->SetParameter(3, 0.367475);
+
+		//Sum functions
+		TF1NormSum *fnorm = new TF1NormSum(fs,fb);
+		TF1   * f = new TF1("f", *fnorm, xMin, xMax, fnorm->GetNpar());
+		f->SetParameters(fnorm->GetParameters().data());
+		f->SetParName(1,"NBackground");
+		f->SetParName(0,"NSignal");
+		for (int i = 2; i < f->GetNpar(); ++i)
+			f->SetParName(i, fnorm->GetParName(i));
+		f->SetNpx(1000);	//Resolution of fit function
+
+		//Fit Color
+		f->SetLineColor(kBlue);
+
+		//Fit the function (Remove Q to standard show)
+		TFitResultPtr fitr = hMassAll->Fit(f,"RNS","",xMin,xMax);
+		//fitr->Print();
+		
+		//Signal Fitting
+		fs->SetNpx(1000);				//Resolution of background fit function
+		fs->SetLineColor(kMagenta); 	//Fit Color
+		fs->SetLineStyle(kSolid);		//Fit Style
+
+		//Background Fitting
+		fb->SetNpx(1000);				//Resolution of background fit function
+		fb->SetLineColor(kBlue); 		//Fit Color
+		fb->SetLineStyle(kDashed);		//Fit Style
+	}
+	*/
+
+	void fit()
+	{
+		//Create fit Function
+		fitFunction = new TF1("FitFunction", FitFunctions::Merged::FFit_InvariantMassAll, xMin, xMax, 12);
+
+		//Rename parameters and set value
+		for (int i = 0; i < (sizeof(fittingParName)/sizeof(*fittingParName)); i++)
+		{
+			fitFunction->SetParName(i, fittingParName[i]);
+		}
+
+		//Resolution of fit function
+		fitFunction->SetNpx(1000);
+		
+		//Values Signal
+		fitFunction->SetParameter(0,	340.2);
+		fitFunction->SetParameter(1,	3.09);
+		fitFunction->SetParameter(2,	0.037);
+
+		fitFunction->SetParameter(3,	1.824);
+		fitFunction->SetParameter(4,	1.034);
+		fitFunction->SetParameter(5,	3.093);
+		fitFunction->SetParameter(6,	0.022);
+		fitFunction->SetParameter(7,	8322.27);
+
+		//Values Background
+		fitFunction->SetParameter(8,	-0.217);
+		fitFunction->SetParameter(9,	1.915);
+		fitFunction->SetParameter(10, 263.185);
+		fitFunction->SetParameter(11,	0.061);
+
+		//Fit Color
+		fitFunction->SetLineColor(kBlue);
+
+		//Fit the function
+		fitResult = hMass->Fit(fitFunction, "RNS", "", xMin, xMax);
+
+		//Get parameters from fit function and put it in par variable
+		fitFunction->GetParameters(resultParameters);
+		
+		//Signal Fitting
+		fitFunctionSig = new TF1("FitFunction_Signal", FitFunctions::Merged::Signal_InvariantMassAll, xMin, xMax, 8);
+		fitFunctionSig->SetNpx(1000);							//Resolution of background fit function
+		fitFunctionSig->SetParameters(resultParameters);		//Get only background part
+		fitFunctionSig->SetLineColor(kMagenta); 				//Fit Color
+		fitFunctionSig->SetLineStyle(kSolid);					//Fit Style
+
+		//Background Fitting
+		fitFunctionBack = new TF1("FitFunction_Background", FitFunctions::Merged::Background_InvariantMassAll, xMin, xMax, 4);
+		fitFunctionBack->SetNpx(1000);							//Resolution of background fit function
+		fitFunctionBack->SetParameters(&resultParameters[8]);	//Get only background part
+		fitFunctionBack->SetLineColor(kBlue); 					//Fit Color
+		fitFunctionBack->SetLineStyle(kDashed);					//Fit Style
+	}
+
+	TCanvas *createCanvas(double S, double dS, bool shouldWrite = false, bool shouldSave = false)
+	{
+		const char* saveAs = "../InvariantMassAll.png";
+
+		//Create canvas
+		TCanvas *c1 = new TCanvas("InvariantMass_All","Invariant Mass", 600, 600);
+
+		//Set margin for canvas
+		c1->SetTopMargin(0.07);
+		c1->SetRightMargin(0.05);
+		c1->SetBottomMargin(0.11);
+		c1->SetLeftMargin(0.15);
+
+		//Set title size for axis and other stuffs for histogram style
+		hMass->GetYaxis()->SetTitleSize(0.04);
+		hMass->GetXaxis()->SetTitleSize(0.05);
+		hMass->GetXaxis()->CenterTitle(true);
+		//hMassAll->SetBit(TH1::kNoTitle);		//Not show histogram title
+		hMass->SetMarkerStyle(20);				//Set markers style
+		hMass->SetMarkerColor(kBlack);			//Set markers colors
+		hMass->SetLineColor(kBlack);			//Set lines colors (for errorbars)
+
+		//Get min and max from histogram
+		double xMin  = hMass->GetXaxis()->GetXmin();
+		double xMax  = hMass->GetXaxis()->GetXmax();
+		double scale = 1/hMass->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
+
+		//Calls fit function
+		fit();
+
+		//Draws histogram & fit function
+		hMass->Draw("ep");
+		//fitFunctionSig->Draw("same");
+		fitFunctionBack->Draw("same");
+		fitFunction->Draw("same");
+
+		//Draws information
+		TLatex *tx = new TLatex();
+		tx->SetTextSize(0.04);
+		tx->SetTextAlign(12);
+		tx->SetTextFont(42);
+		tx->SetNDC(kTRUE);
+
+		//Show chi-squared test
+		tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitResult->Chi2()/fitResult->Ndf()));
+
+		/*
+		//Show number of particles
+		tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
+		tx->DrawLatex(0.64,0.43,"(candidates)");
+		*/
+
+		//Add legend
+		TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
+		l->SetTextSize(0.04);
+		l->AddEntry(hMass,				"J/#psi"	,"lp");
+		l->AddEntry(fitFunction,		"Fitting"	,"l");
+		//l->AddEntry(fitFunctionSig,	"Signal"	,"l");
+		l->AddEntry(fitFunctionBack,	"Background","l");
+		l->Draw();
+
+		//Not show frame with mean, std dev
+		gStyle->SetOptStat(0);
+
+		/*
+		//Draw boxes
+		gStyle->SetCanvasPreferGL(kTRUE);
+		TBox *side1 = new TBox(2.9, 0., 3., hMassAll->GetMaximum());
+		side1->SetFillColorAlpha(kRed, 0.35);
+		side1->Draw();
+		TBox *signal = new TBox(3., 0., 3.2, hMassAll->GetMaximum());
+		signal->SetFillColorAlpha(kGreen, 0.35);
+		signal->Draw();
+		TBox *side2 = new TBox(3.2, 0.,3.3, hMassAll->GetMaximum());
+		side2->SetFillColorAlpha(kRed, 0.35);
+		side2->Draw();
+		*/
+		
+		//Show chi-squared test (on prompt)
+		cout << endl;
+		cout << "Fitting overview" << endl;
+		cout << "Chi2/ndf = " << fitFunction->GetChisquare()/fitFunction->GetNDF() << endl;
+		printf( "#Signal  = %.0f +- %.0f\n", S, dS);
+
+		cout << endl;
+		cout << "HistIntegral = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
+
+		//Show integrals
+		cout << endl;
+		cout << "Candidates by integration" << endl;
+		cout << "#Total      = " << fitFunction ->Integral(xMin, xMax) * scale << " +- " << fitFunction ->IntegralError(xMin, xMax) * scale << endl;
+		cout << "#Background = " << fitFunctionBack->Integral(xMin, xMax) * scale << " +- " << fitFunctionBack->IntegralError(xMin, xMax) * scale << endl;
+		cout << "#Signal     = " << fitFunctionSig->Integral(xMin, xMax) * scale << " +- " << fitFunctionSig->IntegralError(xMin, xMax) * scale << endl;
+
+		//Writes in file
+		if (shouldWrite == true)
+		{
+			//Aqui dá crash quando roda pela segunda vez no meu ROOT
+			c1->Write("",TObject::kOverwrite);
+		}
+
+		//If should save
+		if (shouldSave == true)
+		{
+			//Saves as image
+			c1->SaveAs(saveAs);
+		}
+
+		//return
+		return c1;
+
+	}
+};
 
 class Histograms{
 public:
@@ -385,6 +434,8 @@ public:
 		string hName 	= tagOrProbe + string(particle) + "_" + string(quantityName) + "SigBack";
 		string hTitle 	= string(extendedQuantityName) + " (" + string(tagOrProbe) + ")";
 		string xForm 	= "Events / (%1." + to_string(decimals) + "f)";
+		if (strcmp(quantityName, "Pt") == 0)
+			xForm 		= "Events / (%1." + to_string(decimals) + "f GeV/c)";
 
 		//Create histogram
 		hSigBack = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
@@ -665,31 +716,31 @@ void generateHistograms()
 	TreeAT->SetBranchAddress("PassingProbeStandAloneMuon",	&PassingProbeStandAloneMuon);
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
 
-	//Create histograms for Invariant Mass
-	TH1D *hMassAll    = new TH1D("ProbeMuon_InvariantMass", "Invariant Mass (All);Mass (GeV/c^{2});Events",240,2.8,3.4);
-	hMassAll->GetYaxis()->SetTitle(Form("Events / (%1.4f GeV/c^{2})", hMassAll->GetBinWidth(0)));
+	//Create a object for Invariant Mass
+	InvariantMassClass MassAll;
+	MassAll.defineNumbers(240, 2.8, 3.4);
+	MassAll.createMassHistogram();
 
 	//Create a object
 	TagAndProbe Pt;
 	Pt.defineTexts("Pt", "P_{t} (GeV/c)", "Transversal Momentum");
-	Pt.defineNumbers(100, 0., 100., 1);	
+	Pt.defineNumbers(100, 0., 100., 1);
 	Pt.createSigBackHistogram();
 	Pt.createBackHistogram();
 
 	//Create a object
 	TagAndProbe Eta;
 	Eta.defineTexts("Eta", "#eta", "Pseudorapidity");
-	Eta.defineNumbers(200, -2.5, 2.5);	
+	Eta.defineNumbers(200, -2.5, 2.5);
 	Eta.createSigBackHistogram();
 	Eta.createBackHistogram();
 
 	//Create a object
 	TagAndProbe Phi;
 	Phi.defineTexts("Phi", "#phi", "Azimuthal Angle");
-	Phi.defineNumbers(79, -3.15, 3.15);	
+	Phi.defineNumbers(79, -3.15, 3.15);
 	Phi.createSigBackHistogram();
 	Phi.createBackHistogram();
-
 
 	//Loop between the components
 	for (int i = 0; i < TreePC->GetEntries(); i++)
@@ -705,7 +756,7 @@ void generateHistograms()
 			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 			{
 				//Fill invariant mass histogram
-				hMassAll->Fill(InvariantMass);
+				MassAll.hMass->Fill(InvariantMass);
 
 				//if is inside signal region
 				if (fabs(InvariantMass - M_JPSI) < W_JPSI*10.0)
@@ -752,10 +803,8 @@ void generateHistograms()
 	generatedFile->mkdir("canvas/");
 	generatedFile->   cd("canvas/");
 
-	//Create canvas and fitting
-	TCanvas *c1 = invariantMassAll(hMassAll, S, dS, true, "../InvariantMassAll.png");
-
 	//Create canvas
+	MassAll.createCanvas(S, dS, false, false);
 	Pt .createDividedCanvas(true, true);
 	Eta.createDividedCanvas(true, true);
 	Phi.createDividedCanvas(true, true);
