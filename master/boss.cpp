@@ -362,28 +362,24 @@ public:
 	TH1D *hSig;
 	TH1D *hBack;
 
-	bool defineTexts(const char *quantityName, const char *xAxisName, const char *extendedQuantityName, const char *tagOrProbe, const char *particle = "Muon")
+	void defineTexts(const char *quantityName, const char *xAxisName, const char *extendedQuantityName, const char *tagOrProbe, const char *particle = "Muon")
 	{
 		this->quantityName 			= quantityName;
 		this->extendedQuantityName 	= extendedQuantityName;
 		this->xAxisName 			= xAxisName;
 		this->tagOrProbe 			= tagOrProbe;
 		this->particle 				= particle;
-
-		return true;
 	}
 
-	bool defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
+	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
 	{
 		this->nBins 	= nBins;
 		this->xMin 		= xMin;
 		this->xMax 		= xMax;
 		this->decimals 	= decimals;
-
-		return true;
 	}
 
-	bool createSigBackHistogram()
+	void createSigBackHistogram()
 	{
 		//Define parameters
 		string hName 	= tagOrProbe + string(particle) + "_" + string(quantityName) + "SigBack";
@@ -394,11 +390,9 @@ public:
 		hSigBack = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hSigBack->GetYaxis()->SetTitle(Form(xForm.data(), hSigBack->GetBinWidth(0)));
 		hSigBack->GetXaxis()->SetTitle(xAxisName);
-
-		return true;
 	}
 
-	bool createBackHistogram()
+	void createBackHistogram()
 	{
 		//Define parameters
 		string hName = tagOrProbe + string(particle) + "_" + string(quantityName) + "Back";
@@ -406,11 +400,9 @@ public:
 		//Create histogram
 		hBack  = (TH1D*) hSigBack->Clone("hBack");
 		hBack->SetName(hName.data());
-
-		return true;
 	}
 
-	bool createSigHistogram()
+	void createSigHistogram()
 	{
 		//Define parameters
 		string hName = tagOrProbe + string(particle) + "_" + string(quantityName) + "Sig";
@@ -419,8 +411,6 @@ public:
 		hSig  = (TH1D*) hSigBack->Clone("hSig");
 		hSig->SetName(hName.data());
 		hSig->Add(hBack,-1);
-
-		return true;
 	}
 
 	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
@@ -434,7 +424,7 @@ public:
 		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
 		c1->Divide(2,1);
 
-		//Select canvas part
+		//Select canvas part and add margin
 		c1->cd(1);
 		c1->cd(1)->SetTopMargin(0.07);
 		c1->cd(1)->SetRightMargin(0.02);
@@ -458,13 +448,6 @@ public:
 		hSig->Draw("same");
 
 		/*
-		//Set width of line
-		hSigBack->SetLineWidth(2);
-		hSig->SetLineWidth(2);
-		hBack->SetLineWidth(2);
-		*/
-
-		/*
 		//Set fill color
 		hSig->SetFillColor(kMagenta);
 		hSigBack->SetFillColor(kBlue);
@@ -479,12 +462,11 @@ public:
 		l1_1->AddEntry(hBack,		"Background",	"l");
 		l1_1->Draw();
 		
-		//Draws information
+		//Draws text information
 		TLatex *tx1_1 = new TLatex();
 		tx1_1->SetTextSize(0.04);
 		tx1_1->SetTextFont(42);
 		tx1_1->SetNDC(kTRUE);
-
 		if (strcmp(quantityName, "Pt") == 0) 
 		{
 			tx1_1->SetTextAlign(12);	//Align left, center
@@ -501,7 +483,7 @@ public:
 		}
 		
 
-		//Select canvas part and addmargin
+		//Select canvas part and add margin
 		c1->cd(2);
 		c1->cd(2)->SetTopMargin(0.07);
 		c1->cd(2)->SetRightMargin(0.02);
@@ -510,12 +492,9 @@ public:
 		if (strcmp(quantityName, "Pt") == 0)
 			c1->cd(2)->SetLeftMargin(0.14);
 
-		//Same range as comparision
-		//hPtSig->GetYaxis()->SetRangeUser(0,hPtSigBack->GetYaxis()->GetYmax());
+		//Same range as comparision and draws
 		hSig->SetMinimum(0);
 		hSig->SetTitle(titleRight.data());
-
-		//Signal
 		hSig->Draw("same");
 
 		//Add legend
@@ -524,15 +503,11 @@ public:
 		l1_2->AddEntry(hSig, "Signal","l");
 		l1_2->Draw();
 
-		//Draws information
+		//Draws text information
 		TLatex *tx1_2 = new TLatex();
 		tx1_2->SetTextSize(0.04);
 		tx1_2->SetTextFont(42);
 		tx1_2->SetNDC(kTRUE);
-
-		//Not show frame with mean, std dev
-		gStyle->SetOptStat(0);
-		
 		if (strcmp(quantityName, "Pt") == 0)
 		{
 			tx1_2->SetTextAlign(12);	//Align left, center
@@ -544,13 +519,14 @@ public:
 			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
 		}
 
+		//Not show frame with mean, std dev
+		gStyle->SetOptStat(0);
+
 		//Writes in file
 		if (shouldWrite == true)
 		{
 			c1->Write();
 		}
-
-		cout << saveAs << endl;
 
 		//If should save
 		if (shouldSave == true)
@@ -570,57 +546,63 @@ public:
 	Histograms Tag;
 	Histograms Probe;
 
-	bool defineTexts(const char *quantityName, const char *xAxisName, const char *extendedQuantityName)
+	void defineTexts(const char *quantityName, const char *xAxisName, const char *extendedQuantityName)
 	{
 		const char *particle = "Muon";
 
 		this->Probe.defineTexts(quantityName, xAxisName, extendedQuantityName, "Probe", particle);
 		this->  Tag.defineTexts(quantityName, xAxisName, extendedQuantityName, "Tag", particle);
-
-		return true;
 	}
 
-	bool defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
+	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
 	{
 		this->Probe.defineNumbers(nBins, xMin, xMax, decimals);
-		this-   Tag.defineNumbers(nBins, xMin, xMax, decimals);
-
-		return true;
+		this->  Tag.defineNumbers(nBins, xMin, xMax, decimals);
 	}
 
-	bool createSigBackHistogram()
+	void fillSigBackHistogram(Double_t probeValue, Double_t tagValue)
+	{
+		this->Probe.hSigBack->Fill(probeValue);
+		this->  Tag.hSigBack->Fill(tagValue);
+	}
+
+	void fillSigHistogram(Double_t probeValue, Double_t tagValue)
+	{
+		this->Probe.hSig->Fill(probeValue);
+		this->  Tag.hSig->Fill(tagValue);
+	}
+
+	void fillBackHistogram(Double_t probeValue, Double_t tagValue)
+	{
+		this->Probe.hBack->Fill(probeValue);
+		this->  Tag.hBack->Fill(tagValue);
+	}
+
+	void createSigBackHistogram()
 	{
 		this->Probe.createSigBackHistogram();
 		this->  Tag.createSigBackHistogram();
-
-		return true;
 	}
 
-	bool createBackHistogram()
+	void createBackHistogram()
 	{
 		this->Probe.createBackHistogram();
 		this->  Tag.createBackHistogram();
-
-		return true;
 	}
 
-	bool createSigHistogram()
+	void createSigHistogram()
 	{
 		this->Probe.createSigHistogram();
 		this->  Tag.createSigHistogram();
-
-		return true;
 	}
 
-	bool createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
+	void createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
 	{
 		this->Probe.createDividedCanvas(shouldWrite, shouldSave);
 		this->  Tag.createDividedCanvas(shouldWrite, shouldSave);
-
-		return true;
 	}
 
-	bool write(bool hSigBack, bool hSig, bool hBack)
+	void write(bool hSigBack, bool hSig, bool hBack)
 	{
 		if (hSigBack == true)
 		{
@@ -639,8 +621,6 @@ public:
 			this->Probe.hBack->Write();
 			this->  Tag.hBack->Write();
 		}
-
-		return true;
 	}
 };
 
@@ -721,44 +701,35 @@ void generateHistograms()
 		//Accepted particles
 		if (TagMuon_Pt > 7.0 && abs(TagMuon_Eta) <= 2.4)
 		{
-			//Fill invariant mass histogram
-			hMassAll->Fill(InvariantMass);
-
-			//if is inside signal region
-			if (fabs(InvariantMass - M_JPSI) < W_JPSI*10.0)
+			//Passing or failing
+			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 			{
-				if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
-				{
-					//Add to Probe histogram
-					Pt .Probe.hSigBack->Fill(ProbeMuon_Pt);
-					Eta.Probe.hSigBack->Fill(ProbeMuon_Eta);
-					Phi.Probe.hSigBack->Fill(ProbeMuon_Phi);
+				//Fill invariant mass histogram
+				hMassAll->Fill(InvariantMass);
 
-					//Add to Tag histogram
-					Pt .Tag.hSigBack->Fill(TagMuon_Pt);
-					Eta.Tag.hSigBack->Fill(TagMuon_Eta);
-					Phi.Tag.hSigBack->Fill(TagMuon_Phi);
+				//if is inside signal region
+				if (fabs(InvariantMass - M_JPSI) < W_JPSI*10.0)
+				{
+					//Adds to histograms
+					Pt .fillSigBackHistogram(ProbeMuon_Pt, 	TagMuon_Pt);
+					Eta.fillSigBackHistogram(ProbeMuon_Eta, TagMuon_Eta);
+					Phi.fillSigBackHistogram(ProbeMuon_Phi, TagMuon_Phi);
 					
 					//Count events
 					count_sigregion++;
 				}
-			}
 
-			//If is inside sideband region
-			if (fabs(InvariantMass - M_JPSI) > W_JPSI*10.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*20.5)
-			{
-				//Add to Probe histogram
-				Pt.Probe.hBack->Fill(ProbeMuon_Pt);
-				Eta.Probe.hBack->Fill(ProbeMuon_Eta);
-				Phi.Probe.hBack->Fill(ProbeMuon_Phi);
+				//If is inside sideband region
+				if (fabs(InvariantMass - M_JPSI) > W_JPSI*10.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*20.5)
+				{
+					//Adds to histograms
+					Pt .fillBackHistogram(ProbeMuon_Pt,  TagMuon_Pt);
+					Eta.fillBackHistogram(ProbeMuon_Eta, TagMuon_Eta);
+					Phi.fillBackHistogram(ProbeMuon_Phi, TagMuon_Phi);
 
-				//Add to Tag histogram
-				Pt.Tag.hBack->Fill(TagMuon_Pt);
-				Eta.Tag.hBack->Fill(TagMuon_Eta);
-				Phi.Tag.hBack->Fill(TagMuon_Phi);
-
-				//Count events
-				count_sideband++;
+					//Count events
+					count_sideband++;
+				}
 			}
 		}
 	}
