@@ -1045,7 +1045,7 @@ void generateHistograms()
 				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.signalRegionEnd)
 				{
 					//Adds to histograms and count eventes
-					PassingParticles.fillSigBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi);
+					PassingParticles.fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 					MassPass.count_signalRegion++;
 				}
 
@@ -1053,7 +1053,7 @@ void generateHistograms()
 				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassPass.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.sidebandRegionEnd)
 				{
 					//Adds to histograms and count eventes
-					PassingParticles.fillBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi);
+					PassingParticles.fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 					MassPass.count_sidebandRegion++;
 				}
 			}
@@ -1065,7 +1065,7 @@ void generateHistograms()
 				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.signalRegionEnd)
 				{
 					//Adds to histograms and count eventes
-					FailingParticles.fillSigBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi);
+					FailingParticles.fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 					MassFail.count_signalRegion++;
 				}
 
@@ -1073,7 +1073,7 @@ void generateHistograms()
 				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassFail.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.sidebandRegionEnd)
 				{
 					//Adds to histograms and count eventes
-					FailingParticles.fillBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi);
+					FailingParticles.fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 					MassFail.count_sidebandRegion++;
 				}
 			}
