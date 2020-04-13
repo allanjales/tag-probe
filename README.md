@@ -50,6 +50,18 @@ root[1] boss()
 
 ![](result/PhiPassingTag.png)
 
+![](result/PtFailingProbe.png)
+
+![](result/PtFailingTag.png)
+
+![](result/EtaFailingProbe.png)
+
+![](result/EtaFailingTag.png)
+
+![](result/PhiFailingProbe.png)
+
+![](result/PhiFailingTag.png)
+
 ![](result/PtProbe_Efficiency.png)
 
 ![](result/PtTag_Efficiency.png)
