@@ -9,13 +9,15 @@ Link to our [Google Drive](https://drive.google.com/drive/folders/1KZ0OyHnHObX_z
 ## Necessary files and preparation
 
 The analysed datas are from this file:
-* [DoubleMu_data_ntuples.tar](https://drive.google.com/file/d/1z4oNmr3Vcv2JOtH-iBxXOFuWCd4llTNe/view?usp=sharing)
+* [DoubleMu_data_ntuples.tar]() (It is not the one on Google Drive. I need to replace)
 
 After download the file, you will need to merge all `.root` files  in one `data_histoall.root` file and put it in the same diretory of downloaded code. Here follows how to merge the histogram files. Run in the same directory of hisograms:
 
 ```sh
 $ hadd data_histoall.root *.root
 ```
+
+It is necessary to have a folder named `result` on `master` folder side.
 
 ## Development setting
 
@@ -32,33 +34,33 @@ root[1] boss()
 
 ## Generated files and images
 
-Note: The number of candidates were estimated by sideband subtraction.
+![](result/InvariantMassPassing.png)
 
-![](InvariantMassAll.png)
+![](result/InvariantMassFailing.png)
 
-![](PtProbe.png)
+![](result/PtPassingProbe.png)
 
-![](PtTag.png)
+![](result/PtPassingTag.png)
 
-![](EtaProbe.png)
+![](result/EtaPassingProbe.png)
 
-![](EtaTag.png)
+![](result/EtaPassingTag.png)
 
-![](PhiProbe.png)
+![](result/PhiPassingProbe.png)
 
-![](PhiTag.png)
+![](result/PhiPassingTag.png)
 
-![](PtProbe_Efficiency.png)
+![](result/PtProbe_Efficiency.png)
 
-![](PtTag_Efficiency.png)
+![](result/PtTag_Efficiency.png)
 
-![](EtaProbe_Efficiency.png)
+![](result/EtaProbe_Efficiency.png)
 
-![](EtaTag_Efficiency.png)
+![](result/EtaTag_Efficiency.png)
 
-![](PhiProbe_Efficiency.png)
+![](result/PhiProbe_Efficiency.png)
 
-![](PhiTag_Efficiency.png)
+![](result/PhiTag_Efficiency.png)
 
 ## Output
 In addition a .root file is generated named `generated_hist.root` with all canvas above and histograms inside.
