@@ -113,6 +113,9 @@ public:
 
 class InvariantMassClass{
 public:
+	const char *PassingOrFailing;
+	const char *particle = "Muon";
+
 	Int_t 			nBins;
 	int 			decimals = 4;
 	Double_t 		xMin;
@@ -164,11 +167,14 @@ public:
 
 	void createMassHistogram()
 	{
+		string hName 			= string(PassingOrFailing) + string(particle) + "InvariantMass";
+		string hTitle 			= "Invariant Mass (" + string(PassingOrFailing) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
 		//Create histogram
-		hMass = new TH1D("Muon_InvariantMass", "Invariant Mass (All);Mass (GeV/c^{2});Events", nBins, xMin, xMax);
+		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
+		hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2}");
 	}
 
 	/*
@@ -293,16 +299,15 @@ public:
 
 	TCanvas *createCanvas(bool shouldWrite = false, bool shouldSave = false)
 	{
-		const char* saveAs = "../InvariantMassAll.png";
+		string canvasName 	= "InvariantMass_" + string(PassingOrFailing);
+		string canvasTitle	= string(PassingOrFailing) + " Invariant Mass";
+		string saveAs 		= "../result/InvariantMass" + string(PassingOrFailing) + ".png";
 
 		//Create canvas
-		TCanvas *c1 = new TCanvas("InvariantMass_All","Invariant Mass", 600, 600);
+		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 600, 600);
 
 		//Set margin for canvas
-		c1->SetTopMargin(0.07);
-		c1->SetRightMargin(0.05);
-		c1->SetBottomMargin(0.11);
-		c1->SetLeftMargin(0.15);
+		c1->cd(1)->SetMargin(0.15, 0.05, 0.11, 0.07);
 
 		//Set title size for axis and other stuffs for histogram style
 		hMass->GetYaxis()->SetTitleSize(0.04);
@@ -336,7 +341,6 @@ public:
 
 		//Show chi-squared test
 		tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitResult->Chi2()/fitResult->Ndf()));
-
 		/*
 		//Show number of particles
 		tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
@@ -372,7 +376,34 @@ public:
 		side2->SetFillColorAlpha(kRed, 0.35);
 		side2->Draw();
 		*/
-		
+
+		//debugCout();
+
+		//Writes in file
+		if (shouldWrite == true)
+		{
+			//Here code crashes when it runs for the 2nd time
+			c1->Write();
+		}
+
+		//If should save
+		if (shouldSave == true)
+		{
+			//Saves as image
+			c1->SaveAs(saveAs.data());
+		}
+
+		//return
+		return c1;
+	}
+
+	void debugCout()
+	{	
+		//Get min and max from histogram
+		double xMin  = hMass->GetXaxis()->GetXmin();
+		double xMax  = hMass->GetXaxis()->GetXmax();
+		double scale = 1/hMass->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
+
 		//Show chi-squared test (on prompt)
 		cout << endl;
 		cout << "Fitting overview" << endl;
@@ -388,24 +419,12 @@ public:
 		cout << "#Total      = " << fitFunction    ->Integral(xMin, xMax) * scale /*<< " +- " << fitFunction    ->IntegralError(xMin, xMax) * scale*/ << endl;
 		cout << "#Background = " << fitFunctionBack->Integral(xMin, xMax) * scale /*<< " +- " << fitFunctionBack->IntegralError(xMin, xMax) * scale*/ << endl;
 		cout << "#Signal     = " << fitFunctionSig ->Integral(xMin, xMax) * scale /*<< " +- " << fitFunctionSig ->IntegralError(xMin, xMax) * scale*/ << endl;
+		cout << endl;	
+	}
 
-		//Writes in file
-		if (shouldWrite == true)
-		{
-			//Here code crashes when it runs for the 2nd time
-			c1->Write();
-		}
-
-		//If should save
-		if (shouldSave == true)
-		{
-			//Saves as image
-			c1->SaveAs(saveAs);
-		}
-
-		//return
-		return c1;
-
+	InvariantMassClass(const char *PassingOrFailing)
+	{
+		this->PassingOrFailing = PassingOrFailing;
 	}
 };
 
@@ -416,6 +435,7 @@ public:
 	const char *quantityUnit;
 	const char *xAxisName;
 	const char *tagOrProbe;
+	const char *PassingOrFailing;
 	const char *particle = "Muon";
 
 	Int_t 		nBins;
@@ -427,13 +447,14 @@ public:
 	TH1D *hSig;
 	TH1D *hBack;
 
-	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName, const char *tagOrProbe, const char *particle = "Muon")
+	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName, const char *tagOrProbe, const char *PassingOrFailing, const char *particle = "Muon")
 	{
 		this->quantityName 			= quantityName;
 		this->extendedQuantityName 	= extendedQuantityName;
 		this->xAxisName 			= xAxisName;
 		this->quantityUnit			= quantityUnit;
 		this->tagOrProbe 			= tagOrProbe;
+		this->PassingOrFailing 		= PassingOrFailing;
 		this->particle 				= particle;
 	}
 
@@ -448,8 +469,8 @@ public:
 	void createSigBackHistogram()
 	{
 		//Define parameters
-		string hName 		= tagOrProbe + string(particle) + "_" + string(quantityName) + "SigBack";
-		string hTitle 		= string(extendedQuantityName) + " (" + string(tagOrProbe) + ")";
+		string hName 		= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + "SigBack";
+		string hTitle 		= string(extendedQuantityName) + " (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
 		string xAxisTitle 	= xAxisName;
 		string yAxisTitleForm;
 		if (strcmp(quantityUnit, "") == 0)
@@ -471,17 +492,17 @@ public:
 	void createBackHistogram()
 	{
 		//Define parameters
-		string hName = tagOrProbe + string(particle) + "_" + string(quantityName) + "Back";
+		string hName = PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + "Back";
 	
 		//Create histogram
 		hBack = (TH1D*) hSigBack->Clone("hBack");
 		hBack->SetName(hName.data());
 	}
 
-	void createSigHistogram()
+	void subtractSigHistogram()
 	{
 		//Define parameters
-		string hName = tagOrProbe + string(particle) + "_" + string(quantityName) + "Sig";
+		string hName = PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + "Sig";
 	
 		//Create histogram
 		hSig = (TH1D*) hSigBack->Clone("hSig");
@@ -491,10 +512,10 @@ public:
 
 	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
 	{
-		string canvasName 	= tagOrProbe + string(particle) + "_" + string(quantityName);
-		string titleLeft 	= string(extendedQuantityName) + " (" + string(tagOrProbe) + ")";
-		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(tagOrProbe) + ")";
-		string saveAs 		= "../" + string(quantityName) + string(tagOrProbe) + ".png";
+		string canvasName 	= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName);
+		string titleLeft 	= string(extendedQuantityName) + " (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
+		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
+		string saveAs 		= "../result/" + string(quantityName) + string(PassingOrFailing) + string(tagOrProbe) + ".png";
 
 		//Create canvas and divide it
 		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
@@ -611,27 +632,45 @@ public:
 		//return
 		return c1;
 	}
+
+	void debugCout()
+	{
+		int minSpace		= 13;
+
+		//Set information what are shown
+		string beforeInfo 	= "#" + string(tagOrProbe) + " " + string(quantityName);
+		if(strlen(beforeInfo.data()) < minSpace-3)
+		{
+			beforeInfo.append(minSpace - 3 - strlen(beforeInfo.data()), ' ');
+		}
+		beforeInfo += " = ";
+
+		//Show information
+		cout << beforeInfo << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
+	}
 };
 
-//Bunch of 2 histogram class for Tag and Probe
-class TagAndProbe{
+//Bunch of 3 histogram class for Tag and Probe quantities
+class TagProbe{
 public:
 	const char *tagOrProbe;
+	const char *PassingOrFailing;
 
 	Histograms Pt;
 	Histograms Eta;
 	Histograms Phi;
 
-	void define(const char *tagOrProbe)
+	void define(const char *tagOrProbe, const char *PassingOrFailing)
 	{
-		this->tagOrProbe = tagOrProbe;
+		this->tagOrProbe 		= tagOrProbe;
+		this->PassingOrFailing 	= PassingOrFailing;
 	}
 
 	void defineHistogramsTexts()
 	{
-		this->Pt .defineTexts("Pt",  "P_{t}",	"GeV/c", 	"Transversal Momentum", tagOrProbe);
-		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity", 		tagOrProbe);
-		this->Phi.defineTexts("Phi", "#phi", 	"", 		"Azimuthal Angle", 		tagOrProbe);
+		this->Pt .defineTexts("Pt",  "P_{t}",	"GeV/c", 	"Transversal Momentum", tagOrProbe, PassingOrFailing);
+		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity", 		tagOrProbe, PassingOrFailing);
+		this->Phi.defineTexts("Phi", "#phi", 	"", 		"Azimuthal Angle", 		tagOrProbe, PassingOrFailing);
 	}
 
 	void defineHistogramsNumbers()
@@ -646,13 +685,6 @@ public:
 		this->Pt .hSigBack->Fill(PtValue);
 		this->Eta.hSigBack->Fill(EtaValue);
 		this->Phi.hSigBack->Fill(PhiValue);
-	}
-
-	void fillSigHistograms(Double_t PtValue, Double_t EtaValue, Double_t PhiValue)
-	{
-		this->Pt .hSig->Fill(PtValue);
-		this->Eta.hSig->Fill(EtaValue);
-		this->Phi.hSig->Fill(PhiValue);
 	}
 
 	void fillBackHistograms(Double_t PtValue, Double_t EtaValue, Double_t PhiValue)
@@ -676,11 +708,11 @@ public:
 		this->Phi.createBackHistogram();
 	}
 
-	void createSigHistograms()
+	void subtractSigHistogram()
 	{
-		this->Pt .createSigHistogram();
-		this->Eta.createSigHistogram();
-		this->Phi.createSigHistogram();
+		this->Pt .subtractSigHistogram();
+		this->Eta.subtractSigHistogram();
+		this->Phi.subtractSigHistogram();
 	}
 
 	void createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
@@ -712,6 +744,101 @@ public:
 			this->Eta.hBack->Write();
 			this->Phi.hBack->Write();
 		}
+	}
+
+	void debugCout()
+	{
+		this->Pt .debugCout();
+		this->Eta.debugCout();
+		this->Phi.debugCout();
+	}
+
+	TagProbe(const char *tagOrProbe)
+	{
+		this->tagOrProbe 		= tagOrProbe;
+	}
+};
+
+//Holder for tag probe class
+class Particle{
+public:
+	const char *PassingOrFailing;
+
+	TagProbe Tag{"Tag"};
+	TagProbe Probe{"Probe"};
+
+	void define(const char *PassingOrFailing)
+	{
+		this->PassingOrFailing 	= PassingOrFailing;
+		this->Tag  .PassingOrFailing 	= PassingOrFailing;
+		this->Probe.PassingOrFailing 	= PassingOrFailing;
+	}
+
+	void defineHistogramsTexts()
+	{
+		this->Tag  .defineHistogramsTexts();
+		this->Probe.defineHistogramsTexts();
+	}
+
+	void defineHistogramsNumbers()
+	{
+		this->Tag  .defineHistogramsNumbers();
+		this->Probe.defineHistogramsNumbers();
+	}
+
+	void fillSigBackHistograms(Double_t TagPtValue, Double_t TagEtaValue, Double_t TagPhiValue, Double_t ProbePtValue, Double_t ProbeEtaValue, Double_t ProbePhiValue)
+	{
+		this->Tag  .fillSigBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
+		this->Probe.fillSigBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
+	}
+
+	void fillBackHistograms(Double_t TagPtValue, Double_t TagEtaValue, Double_t TagPhiValue, Double_t ProbePtValue, Double_t ProbeEtaValue, Double_t ProbePhiValue)
+	{
+		this->Tag  .fillBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
+		this->Probe.fillBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
+	}
+
+	void createSigBackHistograms()
+	{
+		this->Tag  .createSigBackHistograms();
+		this->Probe.createSigBackHistograms();
+	}
+
+	void createBackHistograms()
+	{
+		this->Tag  .createBackHistograms();
+		this->Probe.createBackHistograms();
+	}
+
+	void subtractSigHistogram()
+	{
+		this->Tag  .subtractSigHistogram();
+		this->Probe.subtractSigHistogram();
+	}
+
+	void createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
+	{
+		this->Tag  .createDividedCanvas(shouldWrite, shouldSave);
+		this->Probe.createDividedCanvas(shouldWrite, shouldSave);
+	}
+
+	void write(bool hSigBack, bool hSig, bool hBack)
+	{
+		this->Tag  .write(hSigBack, hSig, hBack);
+		this->Probe.write(hSigBack, hSig, hBack);
+	}
+
+	void debugCout()
+	{
+		this->Tag  .debugCout();
+		this->Probe.debugCout();
+	}
+
+	Particle(const char *PassingOrFailing)
+	{
+		this->PassingOrFailing 	= PassingOrFailing;
+		this->Tag  .PassingOrFailing 	= PassingOrFailing;
+		this->Probe.PassingOrFailing 	= PassingOrFailing;
 	}
 };
 
@@ -753,25 +880,30 @@ void generateHistograms()
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
 
 	//Create a object for Invariant Mass
-	InvariantMassClass MassAll;
-	MassAll.defineNumbers(240, 2.8, 3.4);
-	MassAll.createMassHistogram();
+	InvariantMassClass MassPass("Passing");
+	MassPass.defineNumbers(240, 2.8, 3.4);
+	MassPass.createMassHistogram();
+
+	InvariantMassClass MassFail("Failing");
+	MassFail.defineNumbers(240, 2.8, 3.4);
+	MassFail.createMassHistogram();
 
 	//Create a object
-	TagAndProbe Tag;
-	Tag.define("Tag");
-	Tag.defineHistogramsTexts();
-	Tag.defineHistogramsNumbers();
-	Tag.createSigBackHistograms();
-	Tag.createBackHistograms();
+	Particle PassingParticles("Passing");
+	PassingParticles.defineHistogramsTexts();
+	PassingParticles.defineHistogramsNumbers();
+	PassingParticles.createSigBackHistograms();
+	PassingParticles.createBackHistograms();
 
-	TagAndProbe Probe;
-	Probe.define("Probe");
-	Probe.defineHistogramsTexts();
-	Probe.defineHistogramsNumbers();
-	Probe.createSigBackHistograms();
-	Probe.createBackHistograms();
+	Particle FailingParticles("Failing");
+	FailingParticles.defineHistogramsTexts();
+	FailingParticles.defineHistogramsNumbers();
+	FailingParticles.createSigBackHistograms();
+	FailingParticles.createBackHistograms();
 
+	Double_t signalRegionEnd 		= 10.0;
+	Double_t sidebandRegionBegin	= 10.5;
+	Double_t sidebandRegionEnd		= 20.5;
 
 	//Loop between the components
 	for (int i = 0; i < TreePC->GetEntries(); i++)
@@ -781,84 +913,96 @@ void generateHistograms()
 		TreeAT->GetEntry(i);
 
 		//Accepted particles
-		if (TagMuon_Pt > 7.0 && abs(TagMuon_Eta) <= 2.4)
+		if (TagMuon_Pt > 7.0 && abs(TagMuon_Eta) <= 2.4 && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 		{
 			//Passing or failing
-			if (PassingProbeTrackingMuon && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
+			if (PassingProbeTrackingMuon)
 			{
 				//Fill invariant mass histogram
-				MassAll.hMass->Fill(InvariantMass);
+				MassPass.hMass->Fill(InvariantMass);
 
 				//if is inside signal region
-				if (fabs(InvariantMass - M_JPSI) < W_JPSI*10.0)
+				if (fabs(InvariantMass - M_JPSI) < W_JPSI*signalRegionEnd)
 				{
-					Probe.fillSigBackHistograms(ProbeMuon_Pt, 	ProbeMuon_Eta, 	ProbeMuon_Phi);
-					Tag  .fillSigBackHistograms(TagMuon_Pt, 	TagMuon_Eta, 	TagMuon_Phi);
-					
-					//Count events
-					MassAll.count_signalRegion++;
+					//Adds to histograms and count eventes
+					PassingParticles.fillSigBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi);
+					MassPass.count_signalRegion++;
 				}
 
 				//If is inside sideband region
-				if (fabs(InvariantMass - M_JPSI) > W_JPSI*10.5 && fabs(InvariantMass - M_JPSI) < W_JPSI*20.5)
+				if (fabs(InvariantMass - M_JPSI) > W_JPSI*sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI*sidebandRegionEnd)
 				{
-					//Adds to histograms
-					Probe.fillBackHistograms(ProbeMuon_Pt, 	ProbeMuon_Eta, 	ProbeMuon_Phi);
-					Tag  .fillBackHistograms(TagMuon_Pt, 	TagMuon_Eta, 	TagMuon_Phi);
+					//Adds to histograms and count eventes
+					PassingParticles.fillBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi);
+					MassPass.count_sidebandRegion++;
+				}
+			}
+			else
+			{
+				MassFail.hMass->Fill(InvariantMass);
 
-					//Count events
-					MassAll.count_sidebandRegion++;
+				//if is inside signal region
+				if (fabs(InvariantMass - M_JPSI) < W_JPSI*signalRegionEnd)
+				{
+					//Adds to histograms and count eventes
+					FailingParticles.fillSigBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi);
+					MassFail.count_signalRegion++;
+				}
+
+				//If is inside sideband region
+				if (fabs(InvariantMass - M_JPSI) > W_JPSI*sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI*sidebandRegionEnd)
+				{
+					//Adds to histograms and count eventes
+					FailingParticles.fillBackHistograms(ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi);
+					MassFail.count_sidebandRegion++;
 				}
 			}
 		}
 	}
 
 	//Number of particles in signal and uncertain
-	MassAll.sidebandCalculus();
+	MassPass.sidebandCalculus();
+	MassFail.sidebandCalculus();
 
 	//Create signal histograms
-	Probe.createSigHistograms();
-	Tag.createSigHistograms();
+	PassingParticles.subtractSigHistogram();
+	FailingParticles.subtractSigHistogram();
 
 	//-------------------------------------
-	// Canvas
+	// Generate and save files
 	//-------------------------------------
 
 	//Create file root to store generated files
-	TFile *generatedFile = TFile::Open("../generated_hist.root","RECREATE");
+	TFile *generatedFile = TFile::Open("../result/generated_hist.root","RECREATE");
 	generatedFile->mkdir("canvas/");
 	generatedFile->   cd("canvas/");
 
 	//Create canvas
-	MassAll.createCanvas(true, true);
-	//Probe.createDividedCanvas(true, true);
-	//Tag.createDividedCanvas(true, true);
+	MassFail.createCanvas(true, true);
+	MassPass.createCanvas(true, true);
+	PassingParticles.createDividedCanvas(true, true);
+	FailingParticles.createDividedCanvas(true, true);
 
 	//Debug
 	cout << endl;
 	cout << "Candidates by sideband subtraction" << endl;
-	cout << "#Tree Entries    = " 	<< TreePC->GetEntries() 		<< endl;
-	cout << "#Signal   region = "	<< MassAll.count_sidebandRegion	<< endl;
-	cout << "#Sideband region = "	<< MassAll.count_sidebandRegion	<< endl;
-	cout << "#Signal          = " 	<< MassAll.S					<< endl;
+	cout << "#Tree Entries    = " 	<< TreePC->GetEntries() 			<< endl;
+	cout << "#Signal   region = "	<< MassPass.count_sidebandRegion	<< endl;
+	cout << "#Sideband region = "	<< MassPass.count_sidebandRegion	<< endl;
+	cout << "#Signal          = " 	<< MassPass.S						<< endl;
 	cout << endl;
 
 	//Integrate function to get number of particles in it
 	cout << endl;
 	cout << "Checking histograms number inconsistency (should be 0)" << endl;
-	cout << "#Probe Pt  = " << Probe.Pt .hSigBack->GetEntries()  	- Probe.Pt .hSig->GetEntries()  - Probe.Pt .hBack->GetEntries()	<< endl;
-	cout << "#Probe Eta = " << Probe.Eta.hSigBack->GetEntries() 	- Probe.Eta.hSig->GetEntries() 	- Probe.Eta.hBack->GetEntries()	<< endl;
-	cout << "#Probe Phi = " << Probe.Phi.hSigBack->GetEntries() 	- Probe.Phi.hSig->GetEntries() 	- Probe.Phi.hBack->GetEntries()	<< endl;
-	cout << "#Tag   Pt  = " << Tag.Pt .hSigBack->GetEntries()  		- Tag.Pt .hSig->GetEntries()  	- Tag.Pt .hBack->GetEntries()  	<< endl;
-	cout << "#Tag   Eta = " << Tag.Eta.hSigBack->GetEntries() 		- Tag.Eta.hSig->GetEntries() 	- Tag.Eta.hBack->GetEntries() 	<< endl;
-	cout << "#Tag   Phi = " << Tag.Phi.hSigBack->GetEntries() 		- Tag.Phi.hSig->GetEntries() 	- Tag.Phi.hBack->GetEntries() 	<< endl;
+	PassingParticles.debugCout();
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
 	generatedFile->   cd("histograms/");
 
-	Tag.write(true, true, true);
-	Probe.write(true, true, true);
+	//Write histograms on file
+	PassingParticles.write(true, true, true);
 
 	//Close files
 	generatedFile->Close();
@@ -1040,22 +1184,22 @@ TCanvas *createEfficiencyCanvas(TEfficiency* pEff, const char *canvasName, const
 void efficiency()
 {
 	//Opens the file
-	TFile *generatedFile = TFile::Open("../generated_hist.root","UPDATE");
+	TFile *generatedFile = TFile::Open("../result/generated_hist.root","UPDATE");
 
 	//Import Probe histograms
-	TH1D *hProbePtSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSigBack");
-	TH1D *hProbePtSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PtSig");
-	TH1D *hProbeEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSigBack");
-	TH1D *hProbeEtaSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_EtaSig");
-	TH1D *hProbePhiSigBack 	= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSigBack");
-	TH1D *hProbePhiSig 		= (TH1D*)generatedFile->Get("histograms/ProbeMuon_PhiSig");
+	TH1D *hProbePtSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_PtSigBack");
+	TH1D *hProbePtSig 		= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_PtSig");
+	TH1D *hProbeEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_EtaSigBack");
+	TH1D *hProbeEtaSig 		= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_EtaSig");
+	TH1D *hProbePhiSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_PhiSigBack");
+	TH1D *hProbePhiSig 		= (TH1D*)generatedFile->Get("histograms/PassingProbeMuon_PhiSig");
 	//Import Tag histograms
-	TH1D *hTagPtSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_PtSigBack");
-	TH1D *hTagPtSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_PtSig");
-	TH1D *hTagEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_EtaSigBack");
-	TH1D *hTagEtaSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_EtaSig");
-	TH1D *hTagPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/TagMuon_PhiSigBack");
-	TH1D *hTagPhiSig 		= (TH1D*)generatedFile->Get("histograms/TagMuon_PhiSig");
+	TH1D *hTagPtSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_PtSigBack");
+	TH1D *hTagPtSig 		= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_PtSig");
+	TH1D *hTagEtaSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_EtaSigBack");
+	TH1D *hTagEtaSig 		= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_EtaSig");
+	TH1D *hTagPhiSigBack 	= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_PhiSigBack");
+	TH1D *hTagPhiSig 		= (TH1D*)generatedFile->Get("histograms/PassingTagMuon_PhiSig");
 
 	//Deletes old dir and creates another
 	generatedFile->Delete("efficiency/");
@@ -1075,12 +1219,12 @@ void efficiency()
 	generatedFile->cd("efficiency/histograms/");
 
 	//Create canvas for others
-	createEfficiencyCanvas(pProbePtEff,   "ProbeMuon_PtEfficiency",  "Transversal Momentum Efficiency for Probe", 	true,	"../PtProbe_Efficiency.png");
-	createEfficiencyCanvas(pProbeEtaEff,  "ProbeMuon_EtaEfficiency", "Pseudorapidity Efficiency for Probe", 		true,	"../EtaProbe_Efficiency.png");
-	createEfficiencyCanvas(pProbePhiEff,  "ProbeMuon_PhiEfficiency", "Angle Efficiency for Probe", 					true,	"../PhiProbe_Efficiency.png");
-	createEfficiencyCanvas(pTagPtEff,     "TagMuon_PtEfficiency", 	 "Transversal Momentum Efficiency for Tag", 	true,	"../PtTag_Efficiency.png");
-	createEfficiencyCanvas(pTagEtaEff,    "TagMuon_EtaEfficiency",	 "Pseudorapidity Efficiency for Tag", 			true,	"../EtaTag_Efficiency.png");
-	createEfficiencyCanvas(pTagPhiEff,    "TagMuon_PhiEfficiency",	 "Angle Efficiency for Tag", 					true,	"../PhiTag_Efficiency.png");
+	createEfficiencyCanvas(pProbePtEff,   "ProbeMuon_PtEfficiency",  "Transversal Momentum Efficiency for Probe", 	true,	"../result/PtProbe_Efficiency.png");
+	createEfficiencyCanvas(pProbeEtaEff,  "ProbeMuon_EtaEfficiency", "Pseudorapidity Efficiency for Probe", 		true,	"../result/EtaProbe_Efficiency.png");
+	createEfficiencyCanvas(pProbePhiEff,  "ProbeMuon_PhiEfficiency", "Angle Efficiency for Probe", 					true,	"../result/PhiProbe_Efficiency.png");
+	createEfficiencyCanvas(pTagPtEff,     "TagMuon_PtEfficiency", 	 "Transversal Momentum Efficiency for Tag", 	true,	"../result/PtTag_Efficiency.png");
+	createEfficiencyCanvas(pTagEtaEff,    "TagMuon_EtaEfficiency",	 "Pseudorapidity Efficiency for Tag", 			true,	"../result/EtaTag_Efficiency.png");
+	createEfficiencyCanvas(pTagPhiEff,    "TagMuon_PhiEfficiency",	 "Angle Efficiency for Tag", 					true,	"../result/PhiTag_Efficiency.png");
 }
 
 //Call functions
