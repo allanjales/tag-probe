@@ -28,7 +28,7 @@ Go on your folder where the file code is downloaded and run:
 ```sh
 $ cd master
 $ root -l -n
-root[0] .L boss.C
+root[0] .L boss.cpp
 root[1] boss()
 ```
 
