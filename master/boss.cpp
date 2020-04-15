@@ -114,9 +114,55 @@ public:
 // Main functions
 //-------------------------------------
 
-class InvariantMassClass{
+class SidebandClass{
 public:
-	const char *PassingOrFailing;
+	const char *PassingOrFailing = NULL;
+
+	Double_t signalRegionEnd 		= 10.0;
+	Double_t sidebandRegionBegin	= 10.5;
+	Double_t sidebandRegionEnd		= 20.5;
+
+	int 	count_signalRegion = 0;
+	int 	count_sidebandRegion = 0;
+
+	double 	Signal  = 0;
+	double 	dSignal = 0;
+
+	void calculus()
+	{
+		Signal  = count_signalRegion - count_sidebandRegion;
+		dSignal = sqrt(count_signalRegion + count_sidebandRegion);
+	}
+
+	void debugCout()
+	{
+		cout << endl;
+		cout << "Candidates by sideband subtraction in " << PassingOrFailing 			<< endl;
+		cout << "#Total           = "	<< count_signalRegion + count_sidebandRegion	<< endl;
+		cout << "#Signal   region = "	<< count_signalRegion							<< endl;
+		cout << "#Sideband region = "	<< count_sidebandRegion							<< endl;
+		printf( "#Signal          = %.0f +- %.0f\n", Signal, dSignal);
+		cout << endl;
+	}
+};
+
+class InvariantMassClass{
+private:
+	TF1* fitFunction 		= NULL;
+	TF1* fitFunctionSig 	= NULL;
+	TF1* fitFunctionBack 	= NULL;
+	TFitResultPtr fitResult = 0;
+	
+	//References
+	TF1* &f  = fitFunction;
+	TF1* &fs = fitFunctionSig;
+	TF1* &fb = fitFunctionBack;
+
+	//Bins per each x axis unit 
+	double scale = 0;
+
+public:
+	const char *PassingOrFailing = NULL;
 	const char *particle = "Muon";
 
 	Int_t 			nBins;
@@ -124,12 +170,9 @@ public:
 	Double_t 		xMin;
 	Double_t		xMax;
 
-	TH1D*			hMass;
-	TF1*			fitFunction;
-	TF1*			fitFunctionSig;
-	TF1*			fitFunctionBack;
-	TFitResultPtr 	fitResult;
+	TH1D* hMass = NULL;
 
+	//Fitting
 	const char* const fittingParName[12] = {
 			"Gaus(Sg) Height  ",
 			"Gaus(Sg) Position",
@@ -149,25 +192,7 @@ public:
 
 	Double_t resultParameters[12];
 
-	Double_t signalRegionEnd 		= 10.0;
-	Double_t sidebandRegionBegin	= 10.5;
-	Double_t sidebandRegionEnd		= 20.5;
-
-	int 	count_signalRegion = 0;
-	int 	count_sidebandRegion = 0;
-	double 	S  = 0;
-	double 	dS = 0;
-	
-	//References
-	TF1* &f  = fitFunction;
-	TF1* &fs = fitFunctionSig;
-	TF1* &fb = fitFunctionBack;
-
-	void sidebandCalculus()
-	{
-		S = count_signalRegion - count_sidebandRegion;
-		dS = sqrt(count_signalRegion + count_sidebandRegion);
-	}
+	SidebandClass Sideband;
 
 	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 4)
 	{
@@ -187,6 +212,9 @@ public:
 		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
 		hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2}");
+
+		//Get scale from histogram
+		scale = 1/hMass->GetBinWidth(0);
 	}
 
 	/*
@@ -333,14 +361,6 @@ public:
 		hMass->SetMarkerColor(kBlack);			//Set markers colors
 		hMass->SetLineColor(kBlack);			//Set lines colors (for errorbars)
 
-		//Get min and max from histogram
-		double xMin  = hMass->GetXaxis()->GetXmin();
-		double xMax  = hMass->GetXaxis()->GetXmax();
-		double scale = 1/hMass->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
-
-		//Calls fit function
-		fit();
-
 		//Draws histogram & fit function
 		hMass->Draw("ep");
 		//fs->Draw("same");
@@ -365,7 +385,7 @@ public:
 		//Add legend
 		TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
 		l->SetTextSize(0.04);
-		l->AddEntry(hMass,				"J/#psi"	,"lp");
+		l->AddEntry(hMass,	"J/#psi"	,"lp");
 		l->AddEntry(f,		"Fitting"	,"l");
 		//l->AddEntry(fs,	"Signal"	,"l");
 		l->AddEntry(fb,		"Background","l");
@@ -412,56 +432,48 @@ public:
 	}
 
 	void debugCout()
-	{	
-		//Get min and max from histogram
-		double xMin  = hMass->GetXaxis()->GetXmin();
-		double xMax  = hMass->GetXaxis()->GetXmax();
-		double scale = 1/hMass->GetBinWidth(0);		//How many bins there is in each x axis unit / For integral 
-
+	{
 		//Show chi-squared test (on prompt)
 		cout << endl;
-		cout << "Fitting overview" << endl;
+		cout << "Fitting overview for " << PassingOrFailing << endl;
 		cout << "Chi2/ndf = " << f->GetChisquare()/f->GetNDF() << endl;
-		printf( "#Signal  = %.0f +- %.0f\n", S, dS);
-
 		cout << endl;
-		cout << "HistIntegral = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
 
 		//Show integrals
-		cout << endl;
-		cout << "Candidates by integration" << endl;
-		cout << "#Total      = " << f ->Integral(xMin, xMax) * scale /*<< " +- " << f ->IntegralError(xMin, xMax) * scale*/ << endl;
-		cout << "#Background = " << fb->Integral(xMin, xMax) * scale /*<< " +- " << fb->IntegralError(xMin, xMax) * scale*/ << endl;
-		cout << "#Signal     = " << fs->Integral(xMin, xMax) * scale /*<< " +- " << fs->IntegralError(xMin, xMax) * scale*/ << endl;
+		cout << "Candidates by integration for " << PassingOrFailing << endl;
+		cout << "#HistIntegral = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
+		cout << "#Total        = " << f ->Integral(xMin, xMax) * scale /*<< " +- " << f ->IntegralError(xMin, xMax) * scale*/ << endl;
+		cout << "#Background   = " << fb->Integral(xMin, xMax) * scale /*<< " +- " << fb->IntegralError(xMin, xMax) * scale*/ << endl;
+		cout << "#Signal       = " << fs->Integral(xMin, xMax) * scale /*<< " +- " << fs->IntegralError(xMin, xMax) * scale*/ << endl;
 		cout << endl;	
 	}
 
 	InvariantMassClass(const char *PassingOrFailing)
 	{
-		this->PassingOrFailing = PassingOrFailing;
+		this->PassingOrFailing 			= PassingOrFailing;
+		this->Sideband.PassingOrFailing = PassingOrFailing;
 	}
 };
 
 class Histograms{
 public:
-	const char *quantityName;
-	const char *extendedQuantityName;
-	const char *quantityUnit;
-	const char *xAxisName;
-	const char *tagOrProbe;
-	const char *PassingOrFailing;
-	const char *particle = "Muon";
+	const char *quantityName 			= NULL;
+	const char *extendedQuantityName	= NULL;
+	const char *quantityUnit			= NULL;
+	const char *xAxisName				= NULL;
+	const char *tagOrProbe				= NULL;
+	const char *PassingOrFailing		= NULL;
+	const char *particle 				= "Muon";
 
 	Int_t 		nBins;
 	int 		decimals = 3;
 	Double_t 	xMin;
 	Double_t	xMax;
 
-	TH1D *hSigBack;
-	TH1D *hSig;
-	TH1D *hBack;
-
-	TEfficiency* pEff = 0;
+	TH1D *hSigBack 		= NULL;
+	TH1D *hSig 			= NULL;
+	TH1D *hBack 		= NULL;
+	TEfficiency* pEff 	= NULL;
 
 	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName, const char *tagOrProbe, const char *PassingOrFailing, const char *particle = "Muon")
 	{
@@ -751,8 +763,8 @@ public:
 //Bunch of 3 histogram class for Tag and Probe quantities
 class TagProbe{
 public:
-	const char *tagOrProbe;
-	const char *PassingOrFailing;
+	const char *tagOrProbe			= NULL;
+	const char *PassingOrFailing	= NULL;
 
 	Histograms Pt;
 	Histograms Eta;
@@ -874,7 +886,7 @@ public:
 //Holder for tag probe class
 class Particle{
 public:
-	const char *PassingOrFailing;
+	const char *PassingOrFailing = NULL;
 
 	TagProbe Tag{"Tag"};
 	TagProbe Probe{"Probe"};
@@ -967,7 +979,7 @@ public:
 };
 
 //Select particles, draws and save histograms
-void generateHistograms()
+void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDrawQuantitiesCanvas = true, bool shouldDrawEfficiencyCanvas = true)
 {
 	TFile *file0 = TFile::Open("../data_histoall.root");		//Opens the file
 	TTree *TreePC = (TTree*)file0->Get("demo/PlotControl");		//Opens TTree of file
@@ -1042,19 +1054,19 @@ void generateHistograms()
 				MassPass.hMass->Fill(InvariantMass);
 
 				//if is inside signal region
-				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.signalRegionEnd)
+				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.Sideband.signalRegionEnd)
 				{
 					//Adds to histograms and count eventes
 					PassingParticles.fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta,	TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-					MassPass.count_signalRegion++;
+					MassPass.Sideband.count_signalRegion++;
 				}
 
 				//If is inside sideband region
-				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassPass.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.sidebandRegionEnd)
+				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassPass.Sideband.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassPass.Sideband.sidebandRegionEnd)
 				{
 					//Adds to histograms and count eventes
 					PassingParticles.fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-					MassPass.count_sidebandRegion++;
+					MassPass.Sideband.count_sidebandRegion++;
 				}
 			}
 			else
@@ -1062,27 +1074,35 @@ void generateHistograms()
 				MassFail.hMass->Fill(InvariantMass);
 
 				//if is inside signal region
-				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.signalRegionEnd)
+				if (fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.Sideband.signalRegionEnd)
 				{
 					//Adds to histograms and count eventes
 					FailingParticles.fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-					MassFail.count_signalRegion++;
+					MassFail.Sideband.count_signalRegion++;
 				}
 
 				//If is inside sideband region
-				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassFail.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.sidebandRegionEnd)
+				if (fabs(InvariantMass - M_JPSI) > W_JPSI * MassFail.Sideband.sidebandRegionBegin && fabs(InvariantMass - M_JPSI) < W_JPSI * MassFail.Sideband.sidebandRegionEnd)
 				{
 					//Adds to histograms and count eventes
 					FailingParticles.fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-					MassFail.count_sidebandRegion++;
+					MassFail.Sideband.count_sidebandRegion++;
 				}
 			}
 		}
 	}
 
 	//Number of particles in signal and uncertain
-	MassPass.sidebandCalculus();
-	MassFail.sidebandCalculus();
+	MassPass.Sideband.calculus();
+	MassFail.Sideband.calculus();
+
+	//Fit
+	MassPass.fit();
+	MassFail.fit();
+
+	//Debug
+	MassPass.debugCout();
+	MassFail.debugCout();
 
 	//Create signal histograms
 	PassingParticles.subtractSigHistogram();
@@ -1097,21 +1117,22 @@ void generateHistograms()
 	generatedFile->mkdir("canvas/");
 	generatedFile->   cd("canvas/");
 
-	//Create canvas
-	MassFail.createCanvas(true, true);
-	MassPass.createCanvas(true, true);
 
-	PassingParticles.createDividedCanvas(true, true);
-	FailingParticles.createDividedCanvas(true, true);
+	if (shouldDrawInvariantMassCanvas)
+	{
+		MassFail.createCanvas(true, true);
+		MassPass.createCanvas(true, true);
+	}
+
+	if (shouldDrawQuantitiesCanvas)
+	{
+		PassingParticles.createDividedCanvas(true, true);
+		FailingParticles.createDividedCanvas(true, true);
+	}
 
 	//Debug
-	cout << endl;
-	cout << "Candidates by sideband subtraction" << endl;
-	cout << "#Tree Entries    = " 	<< TreePC->GetEntries() 			<< endl;
-	cout << "#Signal   region = "	<< MassPass.count_sidebandRegion	<< endl;
-	cout << "#Sideband region = "	<< MassPass.count_sidebandRegion	<< endl;
-	cout << "#Signal          = " 	<< MassPass.S						<< endl;
-	cout << endl;
+	MassPass.Sideband.debugCout();
+	MassFail.Sideband.debugCout();
 
 	//Integrate function to get number of particles in it
 	cout << endl;
@@ -1142,8 +1163,12 @@ void generateHistograms()
 	generatedFile->mkdir("efficiency/canvas/");
 	generatedFile->cd("efficiency/canvas/");
 
-	PassingParticles.createEfficiencyCanvas();
-	FailingParticles.createEfficiencyCanvas();
+
+	if (shouldDrawEfficiencyCanvas)
+	{
+		PassingParticles.createEfficiencyCanvas();
+		FailingParticles.createEfficiencyCanvas();
+	}
 
 	//Close files
 	generatedFile->Close();
@@ -1152,5 +1177,5 @@ void generateHistograms()
 //Call functions
 void boss()
 {
-	generateHistograms();
+	generateHistograms(false, false, false);
 }
