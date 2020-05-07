@@ -1008,6 +1008,30 @@ class Particle
 {
 private:
 	int method = 0;
+	//if 1 -> sideband
+	//if 2 -> fitting
+
+	void prepareMethod()
+	{
+		if (this->method == 1)
+		{
+			this->PassingParticles.prepareSideband();
+			this->FailingParticles.prepareSideband();
+			this->AllParticles.prepareSideband();
+			return;
+		}
+		
+		if (this->method == 2)
+		{
+			this->PassingParticles.prepareFitting();
+			this->FailingParticles.prepareFitting();
+			this->AllParticles.prepareFitting();
+			return;
+		}
+
+		cout << "WARNING! Invalid method" << endl;
+	}
+
 public:
 	PassingFailing PassingParticles{"Passing"};
 	PassingFailing FailingParticles{"Failing"};
@@ -1016,6 +1040,53 @@ public:
 	void setMethod(int method)
 	{
 		this->method = method;
+		this->prepareMethod();
+	}
+
+	void doFit()
+	{
+		this->PassingParticles.Mass.fit();
+		this->FailingParticles.Mass.fit();
+		this->AllParticles.Mass.fit();
+	}
+
+	void updateSelectionParameters()
+	{
+		this->PassingParticles.updateSelectorParameters();
+		this->FailingParticles.updateSelectorParameters();
+		this->AllParticles.updateSelectorParameters();
+	}
+
+	void subtractSigHistogramsIfNeeded(bool ignoreCaution = false)
+	{	
+		if (this->method == 1)
+		{
+			this->PassingParticles.subtractSigHistograms();
+			this->FailingParticles.subtractSigHistograms();
+			this->AllParticles.subtractSigHistograms();
+			return;
+		}
+
+		if (!ignoreCaution)
+			cout << "CAUTION! Subtract histogram not needed";
+	}
+
+	//Debug methods
+
+	void massDebugCout()
+	{
+		this->PassingParticles.Mass.debugCout();
+		this->FailingParticles.Mass.debugCout();
+		this->AllParticles.Mass.debugCout();
+	}
+
+	void consistencyDebugCout()
+	{
+		cout << endl;
+		cout << "Checking histograms number inconsistency (should be 0)" << endl;
+		this->PassingParticles.debugCout();
+		this->FailingParticles.debugCout();
+		this->AllParticles.debugCout();
 	}
 };
 
@@ -1057,22 +1128,8 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
 
 	//Create a object
-	PassingFailing PassingParticles("Passing");
-	PassingFailing FailingParticles("Failing");
-	PassingFailing AllParticles("All");
-
-	if (method == 0)
-	{
-		PassingParticles.prepareSideband();
-		FailingParticles.prepareSideband();
-		AllParticles	.prepareSideband();
-	}
-	else
-	{
-		PassingParticles.prepareFitting();
-		FailingParticles.prepareFitting();
-		AllParticles	.prepareFitting();
-	}
+	Particle Muon;
+	Muon.setMethod(1);
 
 	//Loop between the components
 	for (int i = 0; i < TreePC->GetEntries(); i++)
@@ -1084,21 +1141,15 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4 && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 		{
 			if (PassingProbeTrackingMuon)
-				PassingParticles.Mass.fill(InvariantMass);
+				Muon.PassingParticles.Mass.fill(InvariantMass);
 			else
-				FailingParticles.Mass.fill(InvariantMass);
-			AllParticles.Mass.fill(InvariantMass);
+				Muon.FailingParticles.Mass.fill(InvariantMass);
+			Muon.AllParticles.Mass.fill(InvariantMass);
 		}
 	}
 
-	//Fit
-	PassingParticles.Mass.fit();
-	FailingParticles.Mass.fit();
-	AllParticles	.Mass.fit();
-
-	PassingParticles.updateSelectorParameters();
-	FailingParticles.updateSelectorParameters();
-	AllParticles	.updateSelectorParameters();
+	Muon.doFit();
+	Muon.updateSelectionParameters();
 
 	//Loop between the components again
 	for (int i = 0; i < TreePC->GetEntries(); i++)
@@ -1110,25 +1161,17 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4 && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 		{
 			if (PassingProbeTrackingMuon)
-				PassingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.PassingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 			else
-				FailingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-			AllParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.FailingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			Muon.AllParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
 	}
 
 	//Debug
-	PassingParticles.Mass.debugCout();
-	FailingParticles.Mass.debugCout();
-	AllParticles	.Mass.debugCout();
+	Muon.massDebugCout();
 
-	//Create signal histograms
-	if (method == 0)
-	{
-		PassingParticles.subtractSigHistograms();
-		FailingParticles.subtractSigHistograms();
-		AllParticles	.subtractSigHistograms();
-	}
+	Muon.subtractSigHistogramsIfNeeded(true);
 
 	//-------------------------------------
 	// Generate and save files
@@ -1142,33 +1185,29 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawInvariantMassCanvas)
 	{
-		PassingParticles.Mass.createCanvas(true, true, true);
-		FailingParticles.Mass.createCanvas(true, true, true);
-		AllParticles	.Mass.createCanvas(true, true, true);
+		Muon.PassingParticles.Mass.createCanvas(true, true, true);
+		Muon.FailingParticles.Mass.createCanvas(true, true, true);
+		Muon.AllParticles	.Mass.createCanvas(true, true, true);
 	}
 
 	if (shouldDrawQuantitiesCanvas)
 	{
-		PassingParticles.createDividedCanvas(true, true);
-		FailingParticles.createDividedCanvas(true, true);
-		AllParticles	.createDividedCanvas(true, true);
+		Muon.PassingParticles.createDividedCanvas(true, true);
+		Muon.FailingParticles.createDividedCanvas(true, true);
+		Muon.AllParticles	.createDividedCanvas(true, true);
 	}
 
-	//Integrate function to get number of particles in it
-	cout << endl;
-	cout << "Checking histograms number inconsistency (should be 0)" << endl;
-	PassingParticles.debugCout();
-	FailingParticles.debugCout();
-	AllParticles	.debugCout();
+	//Debug
+	Muon.consistencyDebugCout();
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
 	generatedFile->   cd("histograms/");
 
 	//Write histograms on file
-	PassingParticles.write(true, true, true);
-	FailingParticles.write(true, true, true);
-	AllParticles	.write(true, true, true);
+	Muon.PassingParticles.write(true, true, true);
+	Muon.FailingParticles.write(true, true, true);
+	Muon.AllParticles	.write(true, true, true);
 
 
 	//Save plots
@@ -1176,20 +1215,21 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->cd("efficiency/plots/");
 
 	//Creates efficiency plots
-	PassingParticles.createEfficiencyPlot();
-	FailingParticles.createEfficiencyPlot();
-	AllParticles	.createEfficiencyPlot();
+	Muon.PassingParticles.createEfficiencyPlot();
+	Muon.FailingParticles.createEfficiencyPlot();
+	Muon.AllParticles	.createEfficiencyPlot();
 
 
 	//Saves new histograms and canvas in file
 	generatedFile->mkdir("efficiency/canvas/");
 	generatedFile->cd("efficiency/canvas/");
 
+		Muon.PassingParticles.createEfficiencyCanvas();
 	if (shouldDrawEfficiencyCanvas)
 	{
-		PassingParticles.createEfficiencyCanvas();
-		FailingParticles.createEfficiencyCanvas();
-		AllParticles	.createEfficiencyCanvas();
+		Muon.PassingParticles.createEfficiencyCanvas();
+		Muon.FailingParticles.createEfficiencyCanvas();
+		Muon.AllParticles	.createEfficiencyCanvas();
 	}
 
 	//Close files
