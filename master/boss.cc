@@ -222,13 +222,37 @@ public:
 		fb->SetParameters(&resultParameters[8]);	//Get only background part
 		fb->SetLineColor(color); 					//Fit Color
 		fb->SetLineStyle(kDashed);					//Fit style
+	}
 
+	void updateMassParameters(int method = 0)
+	{
 		//Get value and uncertain of signal
-		double position = fs->GetMaximumX();
-		double x1 = fs->GetX(fs->GetMaximum()/2);
-		double x2 = fs->GetX(fs->GetMaximum()/2, x1+0.0001, position + x1*3);
-		double fwhm = x2 - x1;
-		double sigma = fwhm/2;
+		double position = 0;
+		double fwhm = 0;
+		double sigma = 0;
+
+		if (method == 1)
+		{
+			//Get value and uncertain of signal
+			int bin0 = this->hMass->GetMaximumBin();
+			position = this->hMass->GetBinCenter(bin0);
+			int bin1 = this->hMass->FindFirstBinAbove(this->hMass->GetMaximum()/2);
+			int bin2 = this->hMass->FindLastBinAbove(this->hMass->GetMaximum()/2);
+			fwhm = this->hMass->GetBinCenter(bin2) - this->hMass->GetBinCenter(bin1);
+			sigma = fwhm/2;
+		}
+
+		if (method == 2)
+		{
+			//Get value and uncertain of signal
+			position = this->fs->GetMaximumX();
+			double x1 = this->fs->GetX(this->fs->GetMaximum()/2);
+			double x2 = this->fs->GetX(this->fs->GetMaximum()/2, x1+0.0001, position + x1*3);
+			fwhm = x2 - x1;
+			sigma = fwhm/2;
+		}
+
+		cout << position << endl;
 
 		this->Selector.M_JPSI = position;
 		this->Selector.W_JPSI = sigma;
@@ -457,7 +481,7 @@ public:
 		}
 		else
 		{
-			cout << "WARNING! Sig Histogram already exists!" << endl;
+			cout << "WARNING! Sig Histogram already exists! Could not Subtract" << endl;
 		}
 
 		this->hSig->Add(hSigBack,1);
@@ -648,6 +672,12 @@ public:
 		} 
 		gPad->Update();
 
+		//Add legend
+		TLegend *l = new TLegend(0.75,0.82,0.92,0.88);
+		l->SetTextSize(0.04);
+		l->AddEntry(pEff, "Data", "lp");
+		l->Draw();
+
 		//Set x range
 		if (strcmp(quantityName, "Pt") == 0)
 		{
@@ -705,9 +735,9 @@ public:
 
 	void defineHistogramsTexts()
 	{
-		this->Pt .defineTexts("Pt",  "P_{t}",	"GeV/c", 	"Transversal Momentum", tagOrProbe, PassingOrFailing);
+		this->Pt .defineTexts("Pt",  "p_{t}",	"GeV/c", 	"Transversal Momentum", tagOrProbe, PassingOrFailing);
 		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity", 		tagOrProbe, PassingOrFailing);
-		this->Phi.defineTexts("Phi", "#phi", 	"", 		"Azimuthal Angle", 		tagOrProbe, PassingOrFailing);
+		this->Phi.defineTexts("Phi", "#phi", 	"rad", 		"Azimuthal Angle", 		tagOrProbe, PassingOrFailing);
 	}
 
 	void defineHistogramsNumbers()
@@ -860,7 +890,7 @@ public:
 		this->createSigBackHistograms();
 		this->createBackHistograms();
 		this->Mass.createMassHistogram();
-		this->method = 0;
+		this->method = 1;
 	}
 
 	void prepareFitting()
@@ -871,7 +901,7 @@ public:
 		this->createSigHistograms();
 		this->createBackHistograms();
 		this->Mass.createMassHistogram();
-		this->method = 1;
+		this->method = 2;
 	}
 
 	void defineHistogramsTexts()
@@ -955,7 +985,7 @@ public:
 
 	void fillHistograms(double InvariantMass, double TagMuon_Pt, double TagMuon_Eta, double TagMuon_Phi, double ProbeMuon_Pt, double ProbeMuon_Eta, double ProbeMuon_Phi)
 	{
-		if (method == 0)
+		if (method == 1)
 		{
 			//If is inside signal region
 			if (this->Mass.isInSignalRegion(InvariantMass))
@@ -969,7 +999,8 @@ public:
 				this->fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 			}
 		}
-		else
+		
+		if (method == 2)
 		{
 			//If is inside signal region
 			if (this->Mass.isInSignalRegion(InvariantMass))
@@ -986,6 +1017,7 @@ public:
 
 	void updateSelectorParameters()
 	{
+		this->Mass.updateMassParameters(this->method);
 		this->Tag  .setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
 		this->Probe.setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
 	}
@@ -1002,6 +1034,51 @@ public:
 	}
 };
 
+
+class InvariantMassAll
+{
+private:
+	TF1* fitFunctionAll 			= NULL;
+	TF1* fitFunctionAllSig 			= NULL;
+	TF1* fitFunctionAllBack 		= NULL;
+	TF1* fitFunctionPass 			= NULL;
+	TF1* fitFunctionPassSig 		= NULL;
+	TF1* fitFunctionPassBack 		= NULL;
+	TF1* fitFunctionFail 			= NULL;
+	TF1* fitFunctionFailSig 		= NULL;
+	TF1* fitFunctionFailBack 		= NULL;
+	
+	TFitResultPtr fitResult = 0;
+
+	TH1D* hMassAll = NULL;
+	TH1D* hMassPass = NULL;
+	TH1D* hMassFail = NULL;
+public:
+	const char *particle = "Muon";
+
+	int			nBins;
+	int			decimals = 4;
+	double 		xMin;
+	double		xMax;
+
+	//Fitting
+	const char* const fittingParName[12] = {
+			"Gaus(Sg) Height  ",
+			"Gaus(Sg) Position",
+			"Gaus(Sg) Sigma   ",
+
+			"CB  (Sg) Alpha   ",
+			"CB  (Sg) N       ",
+			"CB  (Sg) Mean    ",
+			"CB  (Sg) Sigma   ",
+			"CB  (Sg) Yield   ",
+
+			"Exp1(Bg) Height  ",
+			"Exp1(Bg) Width   ",
+			"Exp2(Bg) Height  ",
+			"Exp2(Bg) Width   "
+		};
+};
 
 //Holder for PassingFailing class
 class Particle
@@ -1033,6 +1110,7 @@ private:
 	}
 
 public:
+	InvariantMassAll Mass;
 	PassingFailing PassingParticles{"Passing"};
 	PassingFailing FailingParticles{"Failing"};
 	PassingFailing AllParticles{"All"};
@@ -1071,8 +1149,6 @@ public:
 			cout << "CAUTION! Subtract histogram not needed";
 	}
 
-	//Debug methods
-
 	void massDebugCout()
 	{
 		this->PassingParticles.Mass.debugCout();
@@ -1093,13 +1169,20 @@ public:
 //Select particles, draws and save histograms
 void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDrawQuantitiesCanvas = true, bool shouldDrawEfficiencyCanvas = true)
 {
-	int method = 0;
-	//if 0 -> sideband
-	//if 1 -> fitting
-
 	TFile *file0 = TFile::Open("../data_histoall.root");		//Opens the file
 	TTree *TreePC = (TTree*)file0->Get("demo/PlotControl");		//Opens TTree of file
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
+
+
+	//Temporary var for test
+	bool newData = false;
+
+	if (newData)
+	{
+	file0 = TFile::Open("../JPsiToMuMu_mergeMCNtuple.root");	//Opens the file
+	TreePC = (TTree*)file0->Get("tagandprobe/PlotControl");		//Opens TTree of file
+	TreeAT = (TTree*)file0->Get("tagandprobe/AnalysisTree");	//Opens TTree of file
+	}
 	
 	//Create variables for PlotControl
 	double ProbeMuon_Pt;
@@ -1122,7 +1205,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TreePC->SetBranchAddress("TagMuon_Pt",					&TagMuon_Pt);
 	TreePC->SetBranchAddress("TagMuon_Eta",					&TagMuon_Eta);
 	TreePC->SetBranchAddress("TagMuon_Phi",					&TagMuon_Phi);
+	if (!newData)
 	TreePC->SetBranchAddress("InvariantMass",				&InvariantMass);
+	else
+	TreeAT->SetBranchAddress("InvariantMass",				&InvariantMass);
 	TreeAT->SetBranchAddress("PassingProbeTrackingMuon",	&PassingProbeTrackingMuon);
 	TreeAT->SetBranchAddress("PassingProbeStandAloneMuon",	&PassingProbeStandAloneMuon);
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
@@ -1187,7 +1273,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	{
 		Muon.PassingParticles.Mass.createCanvas(true, true, true);
 		Muon.FailingParticles.Mass.createCanvas(true, true, true);
-		Muon.AllParticles	.Mass.createCanvas(true, true, true);
+		Muon.AllParticles	 .Mass.createCanvas(true, true, true);
 	}
 
 	if (shouldDrawQuantitiesCanvas)
@@ -1224,7 +1310,6 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->mkdir("efficiency/canvas/");
 	generatedFile->cd("efficiency/canvas/");
 
-		Muon.PassingParticles.createEfficiencyCanvas();
 	if (shouldDrawEfficiencyCanvas)
 	{
 		Muon.PassingParticles.createEfficiencyCanvas();
