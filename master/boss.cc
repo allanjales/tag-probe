@@ -31,8 +31,6 @@ using namespace std;
 
 class ParticleSelector{
 public:
-	const char *PassingOrFailing = "Unknown";
-
 	double M_JPSI = 3.097;
 	double W_JPSI = 0.010;
 
@@ -102,9 +100,14 @@ private:
 
 	//Bins per each x axis unit (for integrations)
 	double scale = 0;
+
+	int *method = 0;
+
+	//Variables from above
+	const char **PassingOrFailing = NULL;
+	const char **particleName = 0;
+
 public:
-	const char *PassingOrFailing = NULL;
-	const char *particle = "Muon";
 
 	int			nBins;
 	int			decimals = 4;
@@ -137,10 +140,19 @@ public:
 
 	int color = kBlue;
 
-	void define(const char *PassingOrFailing)
+	void setMethod(int **motherMethod)
 	{
-		this->PassingOrFailing 			= PassingOrFailing;
-		this->Selector.PassingOrFailing = PassingOrFailing;
+		this->method = *motherMethod;
+	}
+
+	void setParticleName(const char **motherParticleName)
+	{
+		this->particleName = motherParticleName;
+	}
+
+	void setPassingOrFailing(const char **motherPassingOrFailing)
+	{
+		this->PassingOrFailing = motherPassingOrFailing;
 	}
 
 	void defineNumbers(int nBins, double xMin, double xMax, int decimals = 4)
@@ -153,8 +165,8 @@ public:
 
 	void createMassHistogram()
 	{
-		string hName 			= string(PassingOrFailing) + string(particle) + "InvariantMass";
-		string hTitle 			= "Invariant Mass (" + string(PassingOrFailing) + ")";
+		string hName 			= string(*PassingOrFailing) + string(*particleName) + "InvariantMass";
+		string hTitle 			= "Invariant Mass (" + string(*PassingOrFailing) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
 		//Create histogram
@@ -205,7 +217,7 @@ public:
 
 		//Fit the function
 		cout << endl;
-		cout << PassingOrFailing << " " << particle << endl;
+		cout << *PassingOrFailing << " " << *particleName << endl;
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
 		f->GetParameters(resultParameters);
 		
@@ -224,14 +236,13 @@ public:
 		fb->SetLineStyle(kDashed);					//Fit style
 	}
 
-	void updateMassParameters(int method = 0)
+	void updateMassParameters()
 	{
 		//Get value and uncertain of signal
 		double position = 0;
 		double fwhm = 0;
-		double sigma = 0;
 
-		if (method == 1)
+		if (*method == 1)
 		{
 			//Get value and uncertain of signal
 			int bin0 = this->hMass->GetMaximumBin();
@@ -239,20 +250,18 @@ public:
 			int bin1 = this->hMass->FindFirstBinAbove(this->hMass->GetMaximum()/2);
 			int bin2 = this->hMass->FindLastBinAbove(this->hMass->GetMaximum()/2);
 			fwhm = this->hMass->GetBinCenter(bin2) - this->hMass->GetBinCenter(bin1);
-			sigma = fwhm/2;
 		}
 
-		if (method == 2)
+		if (*method == 2 || *method == 3)
 		{
 			//Get value and uncertain of signal
 			position = this->fs->GetMaximumX();
 			double x1 = this->fs->GetX(this->fs->GetMaximum()/2);
 			double x2 = this->fs->GetX(this->fs->GetMaximum()/2, x1+0.0001, position + x1*3);
 			fwhm = x2 - x1;
-			sigma = fwhm/2;
 		}
 
-		cout << position << endl;
+		double sigma = fwhm/2.355;
 
 		this->Selector.M_JPSI = position;
 		this->Selector.W_JPSI = sigma;
@@ -262,9 +271,9 @@ public:
 
 	TCanvas *createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSave = false)
 	{
-		string canvasName 	= "InvariantMass_" + string(PassingOrFailing);
-		string canvasTitle	= string(PassingOrFailing) + " Invariant Mass";
-		string saveAs 		= "../result/InvariantMass" + string(PassingOrFailing) + ".png";
+		string canvasName 	= "InvariantMass_" + string(*PassingOrFailing);
+		string canvasTitle	= string(*PassingOrFailing) + " Invariant Mass";
+		string saveAs 		= "../result/InvariantMass" + string(*PassingOrFailing) + ".png";
 
 		//Create canvas
 		gStyle->SetCanvasPreferGL(kTRUE);
@@ -297,6 +306,7 @@ public:
 
 		//Show chi-squared test
 		tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitResult->Chi2()/fitResult->Ndf()));
+		tx->DrawLatex(0.19,0.88,Form("#bf{CMS Open Data}"));
 		/*
 		//Show number of particles
 		tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
@@ -322,6 +332,8 @@ public:
 		//Draw regions
 		if (drawRegions == true)
 		{
+			cout << Selector.M_JPSI << endl;
+			cout << Selector.W_JPSI << endl;
 			TBox *side1 = Selector.createTBox(Ymax, -1);
 			side1->SetFillColorAlpha(kRed, 0.35);
 			side1->Draw();
@@ -331,7 +343,6 @@ public:
 			TBox *side2 = Selector.createTBox(Ymax, 1);
 			side2->SetFillColorAlpha(kRed, 0.35);
 			side2->Draw();
-		
 		}
 
 		//Writes in file
@@ -371,7 +382,7 @@ public:
 
 		//Show chi-squared test (on prompt)
 		cout << endl;
-		cout << "Fitting overview for " << PassingOrFailing << endl;
+		cout << "Fitting overview for " << *PassingOrFailing << endl;
 		cout << "Chi2/ndf          = " << f->GetChisquare()/f->GetNDF() << endl;
 		cout << "Gaus(Sg) Position = " << resultParameters[1] << endl;
 		cout << "Gaus(Sg) Sigma    = " << resultParameters[2] << endl;
@@ -382,7 +393,7 @@ public:
 		cout << endl;
 
 		//Show integrals
-		cout << "Candidates by integration for " << PassingOrFailing << endl;
+		cout << "Candidates by integration for " << *PassingOrFailing << endl;
 		cout << "#HistIntegral = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
 		cout << "#Total        = " << f ->Integral(xMin, xMax) * scale << endl;
 		cout << "#Background   = " << fb->Integral(xMin, xMax) * scale << endl;
@@ -393,11 +404,16 @@ public:
 
 class Histograms{
 private:
+	//Variables from above
+	const char **particleName;
+	const char **PassingOrFailing;
+	const char **tagOrProbe;
+
 	void createHistogram(TH1D* &histo, const char *histoName)
 	{
 		//Define parameters
-		string hName 		= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + string(histoName);
-		string hTitle 		= string(extendedQuantityName) + " (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
+		string hName 		= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + string(histoName);
+		string hTitle 		= string(extendedQuantityName) + " (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
 		string xAxisTitle 	= xAxisName;
 		string yAxisTitleForm;
 		if (strcmp(quantityUnit, "") == 0)
@@ -421,9 +437,6 @@ public:
 	const char *extendedQuantityName	= NULL;
 	const char *quantityUnit			= NULL;
 	const char *xAxisName				= NULL;
-	const char *tagOrProbe				= NULL;
-	const char *PassingOrFailing		= NULL;
-	const char *particle 				= "Muon";
 
 	Int_t 		nBins;
 	int 		decimals = 3;
@@ -438,15 +451,28 @@ public:
 	TH1D *hBack 		= NULL;
 	TEfficiency* pEff 	= NULL;
 
-	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName, const char *tagOrProbe, const char *PassingOrFailing, const char *particle = "Muon")
+
+	void setTagOrProbe(const char **tagOrProbe)
+	{
+		this->tagOrProbe = tagOrProbe;
+	}
+
+	void setParticleName(const char **motherParticleName)
+	{
+		this->particleName = motherParticleName;
+	}
+
+	void setPassingOrFailing(const char **motherPassingOrFailing)
+	{
+		this->PassingOrFailing = motherPassingOrFailing;
+	}
+
+	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName)
 	{
 		this->quantityName 			= quantityName;
 		this->extendedQuantityName 	= extendedQuantityName;
 		this->xAxisName 			= xAxisName;
 		this->quantityUnit			= quantityUnit;
-		this->tagOrProbe 			= tagOrProbe;
-		this->PassingOrFailing 		= PassingOrFailing;
-		this->particle 				= particle;
 	}
 
 	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
@@ -491,10 +517,10 @@ public:
 
 	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
 	{
-		string canvasName 	= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName);
-		string titleLeft 	= string(extendedQuantityName) + " (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
-		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string(quantityName) + string(PassingOrFailing) + string(tagOrProbe) + ".png";
+		string canvasName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName);
+		string titleLeft 	= string(extendedQuantityName) + " (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string saveAs 		= "../result/" + string(quantityName) + string(*PassingOrFailing) + string(*tagOrProbe) + ".png";
 
 		//Create canvas and divide it
 		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
@@ -550,6 +576,7 @@ public:
 			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
 			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
 			tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
 		}
 		else
 		{
@@ -557,14 +584,14 @@ public:
 			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
 			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
 			tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
 		}
-		
 
 		//Select canvas part and set margin
 		c1->cd(2);
 		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
-		//Same range as comparision and draws
+		//Same range as comparision and Draws
 		hSig->SetMinimum(0);
    		//hSig->SetMaximum(Ymax);
 		hSig->SetTitle(titleRight.data());
@@ -585,11 +612,13 @@ public:
 		{
 			tx1_2->SetTextAlign(12);	//Align left, center
 			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
+			tx1_2->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
 		}
 		else
 		{
 			tx1_2->SetTextAlign(22);	//Align center, center
 			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
+			tx1_2->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
 		}
 
 		//Not show frame with mean, std dev
@@ -618,8 +647,8 @@ public:
 		TH1D* &hPass  = hSig;
 		TH1D* &hTotal = hSigBack;
 
-		string pName 	= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + "Efficiency";
-		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
+		string pName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + "Efficiency";
+		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
 
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
@@ -651,9 +680,9 @@ public:
 	//Creates canvas for efficiency plots
 	TCanvas *createEfficiencyCanvas(bool shouldWrite = false, bool shouldSave = false)
 	{
-		string canvasName 	= PassingOrFailing + string(tagOrProbe) + string(particle) + "_" + string(quantityName) + "Efficiency";
-		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(PassingOrFailing) + " " + string(tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string(quantityName) + string(PassingOrFailing) + string(tagOrProbe) + "_Efficiency.png";
+		string canvasName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + "Efficiency";
+		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string saveAs 		= "../result/" + string(quantityName) + string(*PassingOrFailing) + string(*tagOrProbe) + "_Efficiency.png";
 
 		//Draw on canvas
 		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
@@ -677,6 +706,14 @@ public:
 		l->SetTextSize(0.04);
 		l->AddEntry(pEff, "Data", "lp");
 		l->Draw();
+
+		//CMS Open Data
+		TLatex *txCOD = new TLatex();
+		txCOD->SetTextSize(0.04);
+		txCOD->SetTextAlign(12);
+		txCOD->SetTextFont(42);
+		txCOD->SetNDC(kTRUE);
+		txCOD->DrawLatex(0.14,0.85,Form("#bf{CMS Open Data}"));
 
 		//Set x range
 		if (strcmp(quantityName, "Pt") == 0)
@@ -705,7 +742,7 @@ public:
 		const int minLegendSpace = 21;
 
 		//Set information what are shown
-		string legend = "#" + string(PassingOrFailing) + " " + string(tagOrProbe) + " " + string(quantityName);
+		string legend = "#" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
 		if(strlen(legend.data()) < minLegendSpace-3)
 		{
 			legend.append(minLegendSpace - 3 - strlen(legend.data()), ' ');
@@ -719,25 +756,44 @@ public:
 
 //Bunch of 3 histogram class for Tag and Probe quantities
 class TagProbe{
+private:
+	//Variables from above
+	const char **PassingOrFailing = 0;
+	const char **particleName = 0;
+
 public:
 	const char *tagOrProbe			= NULL;
-	const char *PassingOrFailing	= NULL;
 
 	Histograms Pt;
 	Histograms Eta;
 	Histograms Phi;
 
-	void define(const char *tagOrProbe, const char *PassingOrFailing)
+	void setTagOrProbe(const char *tagOrProbe)
 	{
-		this->tagOrProbe 		= tagOrProbe;
-		this->PassingOrFailing 	= PassingOrFailing;
+		this->tagOrProbe = tagOrProbe;
+	}
+
+	void setParticleName(const char **motherParticleName)
+	{
+		this->particleName = motherParticleName;
+		this->Pt .setParticleName(motherParticleName);
+		this->Eta.setParticleName(motherParticleName);
+		this->Phi.setParticleName(motherParticleName);
+	}
+
+	void setPassingOrFailing(const char **motherPassingOrFailing)
+	{
+		this->PassingOrFailing = motherPassingOrFailing;
+		this->Pt .setPassingOrFailing(motherPassingOrFailing);
+		this->Eta.setPassingOrFailing(motherPassingOrFailing);
+		this->Phi.setPassingOrFailing(motherPassingOrFailing);
 	}
 
 	void defineHistogramsTexts()
 	{
-		this->Pt .defineTexts("Pt",  "p_{t}",	"GeV/c", 	"Transversal Momentum", tagOrProbe, PassingOrFailing);
-		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity", 		tagOrProbe, PassingOrFailing);
-		this->Phi.defineTexts("Phi", "#phi", 	"rad", 		"Azimuthal Angle", 		tagOrProbe, PassingOrFailing);
+		this->Pt .defineTexts("Pt",  "p_{t}",	"GeV/c", 	"Transversal Momentum");
+		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity");
+		this->Phi.defineTexts("Phi", "#phi", 	"rad", 		"Azimuthal Angle");
 	}
 
 	void defineHistogramsNumbers()
@@ -861,13 +917,21 @@ public:
 	TagProbe(const char *tagOrProbe)
 	{
 		this->tagOrProbe = tagOrProbe;
+
+		this->Pt .setTagOrProbe(&this->tagOrProbe);
+		this->Eta.setTagOrProbe(&this->tagOrProbe);
+		this->Phi.setTagOrProbe(&this->tagOrProbe);
 	}
 };
 
 //Holder for TagProbe class
 class PassingFailing{
 private:
-	int method = 0;
+	int *method = 0;
+
+	//Variables from above
+    const char **particleName = 0;
+
 public:
 	const char *PassingOrFailing = NULL;
 
@@ -875,12 +939,18 @@ public:
 	TagProbe Probe{"Probe"};
 	InvariantMassClass Mass;
 
-	void define(const char *PassingOrFailing)
+	void setMethod(int *motherMethod)
 	{
-		this->PassingOrFailing 	= PassingOrFailing;
-		this->Mass.define(PassingOrFailing);
-		this->Tag  .PassingOrFailing = PassingOrFailing;
-		this->Probe.PassingOrFailing = PassingOrFailing;
+		this->method = motherMethod;
+		this->Mass .setMethod(&motherMethod);
+	}
+
+	void setParticleName(const char **motherParticleName)
+	{
+		this->particleName = motherParticleName;
+		this->Mass .setParticleName(motherParticleName);
+		this->Tag  .setParticleName(motherParticleName);
+		this->Probe.setParticleName(motherParticleName);
 	}
 
 	void prepareSideband()
@@ -890,7 +960,6 @@ public:
 		this->createSigBackHistograms();
 		this->createBackHistograms();
 		this->Mass.createMassHistogram();
-		this->method = 1;
 	}
 
 	void prepareFitting()
@@ -901,7 +970,6 @@ public:
 		this->createSigHistograms();
 		this->createBackHistograms();
 		this->Mass.createMassHistogram();
-		this->method = 2;
 	}
 
 	void defineHistogramsTexts()
@@ -985,7 +1053,7 @@ public:
 
 	void fillHistograms(double InvariantMass, double TagMuon_Pt, double TagMuon_Eta, double TagMuon_Phi, double ProbeMuon_Pt, double ProbeMuon_Eta, double ProbeMuon_Phi)
 	{
-		if (method == 1)
+		if (*method == 1 || *method == 2)
 		{
 			//If is inside signal region
 			if (this->Mass.isInSignalRegion(InvariantMass))
@@ -1000,7 +1068,7 @@ public:
 			}
 		}
 		
-		if (method == 2)
+		if (*method == 3)
 		{
 			//If is inside signal region
 			if (this->Mass.isInSignalRegion(InvariantMass))
@@ -1017,7 +1085,7 @@ public:
 
 	void updateSelectorParameters()
 	{
-		this->Mass.updateMassParameters(this->method);
+		this->Mass.updateMassParameters();
 		this->Tag  .setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
 		this->Probe.setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
 	}
@@ -1030,7 +1098,11 @@ public:
 
 	PassingFailing(const char *PassingOrFailing)
 	{
-		this->define(PassingOrFailing);
+		this->PassingOrFailing 	= PassingOrFailing;
+
+		this->Mass .setPassingOrFailing(&this->PassingOrFailing);
+		this->Tag  .setPassingOrFailing(&this->PassingOrFailing);
+		this->Probe.setPassingOrFailing(&this->PassingOrFailing);
 	}
 };
 
@@ -1054,8 +1126,6 @@ private:
 	TH1D* hMassPass = NULL;
 	TH1D* hMassFail = NULL;
 public:
-	const char *particle = "Muon";
-
 	int			nBins;
 	int			decimals = 4;
 	double 		xMin;
@@ -1085,24 +1155,25 @@ class Particle
 {
 private:
 	int method = 0;
-	//if 1 -> sideband
+	//if 1 -> histogram
 	//if 2 -> fitting
+	//if 3 -> sideband
 
 	void prepareMethod()
 	{
-		if (this->method == 1)
+		if (this->method == 1 || this->method == 2)
 		{
-			this->PassingParticles.prepareSideband();
-			this->FailingParticles.prepareSideband();
-			this->AllParticles.prepareSideband();
+			this->Pass.prepareSideband();
+			this->Fail.prepareSideband();
+			this->Both.prepareSideband();
 			return;
 		}
 		
-		if (this->method == 2)
+		if (this->method == 3)
 		{
-			this->PassingParticles.prepareFitting();
-			this->FailingParticles.prepareFitting();
-			this->AllParticles.prepareFitting();
+			this->Pass.prepareFitting();
+			this->Fail.prepareFitting();
+			this->Both.prepareFitting();
 			return;
 		}
 
@@ -1110,10 +1181,13 @@ private:
 	}
 
 public:
+	const char *particleName = "Muon";
+
 	InvariantMassAll Mass;
-	PassingFailing PassingParticles{"Passing"};
-	PassingFailing FailingParticles{"Failing"};
-	PassingFailing AllParticles{"All"};
+
+	PassingFailing Pass{"Passing"};
+	PassingFailing Fail{"Failing"};
+	PassingFailing Both{"All"};
 
 	void setMethod(int method)
 	{
@@ -1123,25 +1197,25 @@ public:
 
 	void doFit()
 	{
-		this->PassingParticles.Mass.fit();
-		this->FailingParticles.Mass.fit();
-		this->AllParticles.Mass.fit();
+		this->Pass.Mass.fit();
+		this->Fail.Mass.fit();
+		this->Both.Mass.fit();
 	}
 
 	void updateSelectionParameters()
 	{
-		this->PassingParticles.updateSelectorParameters();
-		this->FailingParticles.updateSelectorParameters();
-		this->AllParticles.updateSelectorParameters();
+		this->Pass.updateSelectorParameters();
+		this->Fail.updateSelectorParameters();
+		this->Both.updateSelectorParameters();
 	}
 
 	void subtractSigHistogramsIfNeeded(bool ignoreCaution = false)
 	{	
-		if (this->method == 1)
+		if (this->method == 1 || this->method == 2)
 		{
-			this->PassingParticles.subtractSigHistograms();
-			this->FailingParticles.subtractSigHistograms();
-			this->AllParticles.subtractSigHistograms();
+			this->Pass.subtractSigHistograms();
+			this->Fail.subtractSigHistograms();
+			this->Both.subtractSigHistograms();
 			return;
 		}
 
@@ -1151,18 +1225,29 @@ public:
 
 	void massDebugCout()
 	{
-		this->PassingParticles.Mass.debugCout();
-		this->FailingParticles.Mass.debugCout();
-		this->AllParticles.Mass.debugCout();
+		this->Pass.Mass.debugCout();
+		this->Fail.Mass.debugCout();
+		this->Both.Mass.debugCout();
 	}
 
 	void consistencyDebugCout()
 	{
 		cout << endl;
 		cout << "Checking histograms number inconsistency (should be 0)" << endl;
-		this->PassingParticles.debugCout();
-		this->FailingParticles.debugCout();
-		this->AllParticles.debugCout();
+		this->Pass.debugCout();
+		this->Fail.debugCout();
+		this->Both.debugCout();
+	}
+
+	Particle()
+	{
+		this->Pass.setParticleName(&this->particleName);
+		this->Fail.setParticleName(&this->particleName);
+		this->Both.setParticleName(&this->particleName);
+
+		this->Pass.setMethod(&this->method);
+		this->Fail.setMethod(&this->method);
+		this->Both.setMethod(&this->method);
 	}
 };
 
@@ -1217,8 +1302,13 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	Particle Muon;
 	Muon.setMethod(1);
 
+	int numberEntries = TreePC->GetEntries();
+
+	if (newData)
+		numberEntries = 10000;
+
 	//Loop between the components
-	for (int i = 0; i < TreePC->GetEntries(); i++)
+	for (int i = 0; i < numberEntries; i++)
 	{
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
@@ -1227,10 +1317,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4 && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 		{
 			if (PassingProbeTrackingMuon)
-				Muon.PassingParticles.Mass.fill(InvariantMass);
+				Muon.Pass.Mass.fill(InvariantMass);
 			else
-				Muon.FailingParticles.Mass.fill(InvariantMass);
-			Muon.AllParticles.Mass.fill(InvariantMass);
+				Muon.Fail.Mass.fill(InvariantMass);
+			Muon.Both.Mass.fill(InvariantMass);
 		}
 	}
 
@@ -1238,7 +1328,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	Muon.updateSelectionParameters();
 
 	//Loop between the components again
-	for (int i = 0; i < TreePC->GetEntries(); i++)
+	for (int i = 0; i < numberEntries; i++)
 	{
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
@@ -1247,10 +1337,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4 && !PassingProbeStandAloneMuon && !PassingProbeGlobalMuon)
 		{
 			if (PassingProbeTrackingMuon)
-				Muon.PassingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.Pass.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 			else
-				Muon.FailingParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-			Muon.AllParticles.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.Fail.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			Muon.Both.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
 	}
 
@@ -1271,16 +1361,16 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawInvariantMassCanvas)
 	{
-		Muon.PassingParticles.Mass.createCanvas(true, true, true);
-		Muon.FailingParticles.Mass.createCanvas(true, true, true);
-		Muon.AllParticles	 .Mass.createCanvas(true, true, true);
+		Muon.Pass.Mass.createCanvas(true, true, true);
+		Muon.Fail.Mass.createCanvas(true, true, true);
+		Muon.Both.Mass.createCanvas(true, true, true);
 	}
 
 	if (shouldDrawQuantitiesCanvas)
 	{
-		Muon.PassingParticles.createDividedCanvas(true, true);
-		Muon.FailingParticles.createDividedCanvas(true, true);
-		Muon.AllParticles	.createDividedCanvas(true, true);
+		Muon.Pass.createDividedCanvas(true, true);
+		Muon.Fail.createDividedCanvas(true, true);
+		Muon.Both.createDividedCanvas(true, true);
 	}
 
 	//Debug
@@ -1291,9 +1381,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->   cd("histograms/");
 
 	//Write histograms on file
-	Muon.PassingParticles.write(true, true, true);
-	Muon.FailingParticles.write(true, true, true);
-	Muon.AllParticles	.write(true, true, true);
+	Muon.Pass.write(true, true, true);
+	Muon.Fail.write(true, true, true);
+	Muon.Both.write(true, true, true);
 
 
 	//Save plots
@@ -1301,9 +1391,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->cd("efficiency/plots/");
 
 	//Creates efficiency plots
-	Muon.PassingParticles.createEfficiencyPlot();
-	Muon.FailingParticles.createEfficiencyPlot();
-	Muon.AllParticles	.createEfficiencyPlot();
+	Muon.Pass.createEfficiencyPlot();
+	Muon.Fail.createEfficiencyPlot();
+	Muon.Both.createEfficiencyPlot();
 
 
 	//Saves new histograms and canvas in file
@@ -1312,47 +1402,17 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawEfficiencyCanvas)
 	{
-		Muon.PassingParticles.createEfficiencyCanvas();
-		Muon.FailingParticles.createEfficiencyCanvas();
-		Muon.AllParticles	.createEfficiencyCanvas();
+		Muon.Pass.createEfficiencyCanvas();
+		Muon.Fail.createEfficiencyCanvas();
+		Muon.Both.createEfficiencyCanvas();
 	}
 
 	//Close files
 	generatedFile->Close();
 }
 
-//Test
-void exibir(double ptr[])
-{
-	for (int i = 0; i < 4; i++)
-	{
-		cout << ptr[i] << endl;
-	}
-}
-
-void test()
-{
-	cout << "TEST!" << endl;
-
-	double var1 = 1.2;
-	double var2 = 1.4;
-	double foo  = 1.3;
-	double bar  = 1.5;
-
-	double ptr[4];
-
-	ptr[0] = var1;
-	ptr[1] = var2;
-	ptr[2] = foo;
-	ptr[3] = bar;
-
-	var2 = 12.0;
-
-	exibir(ptr);
-}
-
 //Call functions
 void boss()
 {
-	generateHistograms(true, false, false);
+	generateHistograms(true, true, true);
 }
