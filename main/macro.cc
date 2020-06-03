@@ -202,7 +202,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 }
 
 //Call functions
-void Macro()
+void macro()
 {
 	bool shouldDrawInvariantMassCanvas 	= true;
 	bool shouldDrawQuantitiesCanvas 	= false;

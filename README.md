@@ -1,13 +1,14 @@
 # Tag & Probe Fitting
 
-> Fitting for tag &amp; probe project
-> Teste pelo git
+> Tag &amp; probe efficiency calculus project
 
 ## Note
 
 Link to our [Google Drive](https://drive.google.com/drive/folders/1KZ0OyHnHObX_z6l_ZQ3LN4n7lWHzJ9Fy).
 
 ## Necessary files and preparation
+
+Note: Some steps below are now outdate. We are working on data file.
 
 The analysed datas are from this file:
 * [DoubleMu_data_ntuples.tar]() (It is not the one on Google Drive. I need to replace)
@@ -27,69 +28,30 @@ It is necessary to have [ROOT](https://root.cern.ch/root/html534/guides/users-gu
 Go on your folder where the file code is downloaded and run:
 
 ```sh
-$ cd master
+$ cd main
 $ root -l -n
-root[0] .L boss.cpp
-root[1] boss()
+root[0] .L macro.cc
+root[1] macro()
 ```
 
 ## Generated files and images
 
 ![](result/InvariantMassPassing.png)
 
-![](result/InvariantMassFailing.png)
-
 
 ![](result/PtPassingProbe.png)
 
-![](result/PtPassingTag.png)
-
 ![](result/EtaPassingProbe.png)
 
-![](result/EtaPassingTag.png)
-
 ![](result/PhiPassingProbe.png)
-
-![](result/PhiPassingTag.png)
 
 
 ![](result/PtPassingProbe_Efficiency.png)
 
-![](result/PtPassingTag_Efficiency.png)
-
 ![](result/EtaPassingProbe_Efficiency.png)
-
-![](result/EtaPassingTag_Efficiency.png)
 
 ![](result/PhiPassingProbe_Efficiency.png)
 
-![](result/PhiPassingTag_Efficiency.png)
-
-
-![](result/PtFailingProbe.png)
-
-![](result/PtFailingTag.png)
-
-![](result/EtaFailingProbe.png)
-
-![](result/EtaFailingTag.png)
-
-![](result/PhiFailingProbe.png)
-
-![](result/PhiFailingTag.png)
-
-
-![](result/PtFailingProbe_Efficiency.png)
-
-![](result/PtFailingTag_Efficiency.png)
-
-![](result/EtaFailingProbe_Efficiency.png)
-
-![](result/EtaFailingTag_Efficiency.png)
-
-![](result/PhiFailingProbe_Efficiency.png)
-
-![](result/PhiFailingTag_Efficiency.png)
 
 ## Output
 In addition a .root file is generated named `generated_hist.root` with all canvas above and histograms inside.
