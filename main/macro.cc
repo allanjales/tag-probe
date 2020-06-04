@@ -40,12 +40,20 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
 
 	//Temporary var for test
-	bool useNewData = false;
-	int  limitData 	= 0;
+	int useNewData = 0;
+	//0 -> Raphael Ntupple
+	//1 -> New 2011 Run Ntupple
+	//2 -> New MC Ntupple
+	int  limitData 	= 0; //0 -> do not limit
 
-	if (useNewData)
+	if (useNewData != 0)
 	{
 		file0 = TFile::Open("../Run2011AMuOnia_mergeNtuple.root");	//Opens the file
+		
+		//If is MC
+		if (useNewData == 2)
+			file0 = TFile::Open("../JPsiToMuMu_mergeMCNtuple.root");
+
 		TreePC = (TTree*)file0->Get("tagandprobe/PlotControl");		//Opens TTree of file
 		TreeAT = (TTree*)file0->Get("tagandprobe/AnalysisTree");	//Opens TTree of file
 	}
@@ -69,7 +77,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TreePC->SetBranchAddress("TagMuon_Pt",					&TagMuon_Pt);
 	TreePC->SetBranchAddress("TagMuon_Eta",					&TagMuon_Eta);
 	TreePC->SetBranchAddress("TagMuon_Phi",					&TagMuon_Phi);
-	if (!useNewData)
+	if (useNewData == 0)
 	TreePC->SetBranchAddress("InvariantMass",				&InvariantMass);
 	else
 	TreeAT->SetBranchAddress("InvariantMass",				&InvariantMass);
@@ -147,8 +155,6 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
-	
-	Muon.Pass.Probe.Eta.createDividedCanvas(false, false);
 
 	if (shouldDrawQuantitiesCanvas)
 	{
