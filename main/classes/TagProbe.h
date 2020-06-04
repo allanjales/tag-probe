@@ -1,16 +1,17 @@
 //Holder for 3 Histograms Quantities
 class TagProbe{
 private:
-	int *method = 0;
-	const char **PassingOrFailing = 0;
-	const char **particleName = 0;
+	int *method;
+	double *subtractionFactor;
+	const char **particleName;
+	const char **PassingOrFailing;
 
 public:
 	const char *tagOrProbe			= NULL;
 
-	Histograms Pt {this->method, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Eta{this->method, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Phi{this->method, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
 
 	void defineHistogramsTexts()
 	{
@@ -60,14 +61,7 @@ public:
 		this->Eta.createBackHistogram();
 		this->Phi.createBackHistogram();
 	}
-
-	void createSigHistograms()
-	{
-		this->Pt .createSigHistogram();
-		this->Eta.createSigHistogram();
-		this->Phi.createSigHistogram();
-	}
-
+	
 	void subtractSigHistograms()
 	{
 		this->Pt .subtractSigHistogram();
@@ -127,17 +121,7 @@ public:
 		this->Phi.debugCout();
 	}
 
-	void setRange(double signalRegionEnd, double sidebandRegionEnd)
-	{
-		this->Pt .signalRegionEnd 	= signalRegionEnd;
-		this->Pt .sidebandRegionEnd = sidebandRegionEnd;
-		this->Eta.signalRegionEnd 	= signalRegionEnd;
-		this->Eta.sidebandRegionEnd = sidebandRegionEnd;
-		this->Phi.signalRegionEnd 	= signalRegionEnd;
-		this->Phi.sidebandRegionEnd = sidebandRegionEnd;
-	}
-
-	TagProbe(int *method, const char **particleName, const char **PassingOrFailing, const char *tagOrProbe)
-		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char *tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

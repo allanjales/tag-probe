@@ -2,6 +2,7 @@
 class Histograms{
 private:
 	int *method;
+	double *subtractionFactor;
 	const char **particleName;
 	const char **PassingOrFailing;
 	const char **tagOrProbe;
@@ -74,26 +75,19 @@ public:
 		this->createHistogram(hBack, "Back");
 	}
 
-	void createSigHistogram()
-	{
-		this->createHistogram(hSig, "Sig");
-	}
-
 	void subtractSigHistogram()
 	{
 		if (this->hSig == NULL)
 		{
-			//Create histogram
-			this->createSigHistogram();;
+			this->createHistogram(hSig, "Sig");
+
+			this->hSig->Add(hSigBack,1);
+			this->hSig->Add(hBack,-*this->subtractionFactor);
 		}
 		else
 		{
 			cout << "WARNING! Sig Histogram already exists! Could not Subtract" << endl;
 		}
-
-		this->hSig->Add(hSigBack,1);
-		double factor = signalRegionEnd/abs(sidebandRegionEnd - signalRegionEnd);
-		this->hSig->Add(hBack,-factor);
 	}
 
 	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
@@ -318,12 +312,13 @@ public:
 		return c1;
 	}
 
+	/*
 	void debugCout()
 	{
 		const int minLegendSpace = 21;
 
 		//Set information what are shown
-		string legend = "#" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
+		string legend = "- #" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
 		if(strlen(legend.data()) < minLegendSpace-3)
 		{
 			legend.append(minLegendSpace - 3 - strlen(legend.data()), ' ');
@@ -333,8 +328,37 @@ public:
 		//Show information
 		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
 	}
+	*/
 
-	Histograms(int *method, const char **particleName, const char **PassingOrFailing, const char **tagOrProbe)
-		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	string fillAfter(string text, char fillWith, int targetLength)
+	{
+		//Store size of text
+		int textLength = strlen(text.data());
+
+		//Fill de text in the end
+		if(textLength < targetLength)
+		{
+			text.append(targetLength - textLength, fillWith);
+		}
+
+		return text;
+	}
+
+	void debugCout()
+	{
+		const int minLegendSpace = 21;
+
+		//Set information what are shown
+		string legend = "- #";
+		legend += fillAfter(string(*PassingOrFailing) + " " + string(*tagOrProbe), ' ', 15);
+		legend += fillAfter(string(quantityName), 		' ', 4);
+		legend += "= ";
+
+		//Show information
+		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
+	}
+
+	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char **tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

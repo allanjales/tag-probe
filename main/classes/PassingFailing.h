@@ -2,14 +2,17 @@
 class PassingFailing{
 private:
 	int *method;
-    const char **particleName;
+	const char **particleName;
+
+protected:
+	double subtractionFactor = 1.0;
 
 public:
 	const char *PassingOrFailing;
 
-	TagProbe Tag  {this->method, this->particleName, &this->PassingOrFailing, "Tag"};
-	TagProbe Probe{this->method, this->particleName, &this->PassingOrFailing, "Probe"};
-	InvariantMassClass Mass{this->method, this->particleName, &this->PassingOrFailing};
+	InvariantMass Mass{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing};
+	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Tag"};
+	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Probe"};
 
 	void prepareMethod()
 	{
@@ -105,8 +108,6 @@ public:
 	void updateSelectorParameters()
 	{
 		this->Mass.updateMassParameters();
-		this->Tag  .setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
-		this->Probe.setRange(Mass.Selector.signalRegionEnd, Mass.Selector.sidebandRegionEnd);
 	}
 
 	void debugCout()

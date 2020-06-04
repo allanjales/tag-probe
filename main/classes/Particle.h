@@ -28,9 +28,9 @@ public:
 
 	void doFit()
 	{
-		this->Pass.Mass.fit();
-		this->Fail.Mass.fit();
-		this->Both.Mass.fit();
+		this->Pass.Mass.doFit();
+		this->Fail.Mass.doFit();
+		this->Both.Mass.doFit();
 	}
 
 	void updateSelectionParameters()

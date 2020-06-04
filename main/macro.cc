@@ -50,7 +50,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		TreeAT = (TTree*)file0->Get("tagandprobe/AnalysisTree");	//Opens TTree of file
 	}
 	
-	//Create variables for PlotControl
+	//Create variables
 	double ProbeMuon_Pt;
 	double ProbeMuon_Eta;
 	double ProbeMuon_Phi;
@@ -58,8 +58,6 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	double TagMuon_Eta;
 	double TagMuon_Phi;
 	double InvariantMass;
-
-	//Create variables for AnalysisTree
 	int PassingProbeTrackingMuon;
 	int PassingProbeStandAloneMuon;
 	int PassingProbeGlobalMuon;
@@ -149,6 +147,8 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
+	
+	Muon.Pass.Probe.Eta.createDividedCanvas(false, false);
 
 	if (shouldDrawQuantitiesCanvas)
 	{

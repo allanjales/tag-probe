@@ -1,63 +1,16 @@
-//Store invariant mass
-class ParticleSelector{
-public:
-	double M_JPSI = 3.097;
-	double W_JPSI = 0.010;
-
-	double signalRegionEnd 		= 3.0;
-	double sidebandRegionEnd	= 6.0;
-
-	bool isInSignalRegion(Double_t InvariantMass)
-	{
-		if (fabs(InvariantMass - M_JPSI) < W_JPSI * signalRegionEnd)
-			return true;
-
-		return false;
-	}
-
-	bool isInSidebandRegion(Double_t InvariantMass)
-	{
-		if (fabs(InvariantMass - M_JPSI) > W_JPSI * signalRegionEnd && fabs(InvariantMass - M_JPSI) < W_JPSI * sidebandRegionEnd)
-			return true;
-
-		return false;
-	}
-
-	TBox *createTBox(double Ymax, int index = 0)
-	{
-		//index = -1 -> left region
-		//index = 0 -> signal region
-		//index = 1 -> right region
-
-		double dx1, dx2 = 0;
-
-		switch(index)
-		{
-			case -1:
-				dx1 = -sidebandRegionEnd;
-				dx2 = -signalRegionEnd;
-				break;
-			case 0:
-				dx1 = -signalRegionEnd;
-				dx2 = +signalRegionEnd;
-				break;
-			case 1:
-				dx1 = +sidebandRegionEnd;
-				dx2 = +signalRegionEnd;
-				break;
-		}
-
-		double x1 = M_JPSI + W_JPSI * dx1;
-		double x2 = M_JPSI + W_JPSI * dx2;
-
-		TBox *region = new TBox(x1, 0., x2, Ymax);
-
-		return region;
-	}
-};
-
-class InvariantMassClass{
+//Store invariant mass class
+class InvariantMass{
 private:
+	int *method;
+	double *subtractionFactor;
+	const char **particleName;
+	const char **PassingOrFailing;
+
+	TH1D* hMass = NULL;
+
+	//Bins per each x axis unit (for integrations)
+	double scale = 0;
+
 	TF1* fitFunction 		= NULL;
 	TF1* fitFunctionSig 	= NULL;
 	TF1* fitFunctionBack 	= NULL;
@@ -68,21 +21,18 @@ private:
 	TF1* &fs = fitFunctionSig;
 	TF1* &fb = fitFunctionBack;
 
-	//Bins per each x axis unit (for integrations)
-	double scale = 0;
-
-	int *method = 0;
-	const char **particleName = 0;
-	const char **PassingOrFailing = NULL;
+	//extracted from method
+	double M_JPSI = 3.097;
+	double W_JPSI = 0.010;
+	double signalRegion 	= 3.0;
+	double sidebandRegion	= 6.0;
 
 public:
-
 	int			nBins;
 	int			decimals = 4;
 	double 		xMin;
 	double		xMax;
-
-	TH1D* hMass = NULL;
+	int color = kBlue;
 
 	//Fitting
 	const char* const fittingParName[12] = {
@@ -103,10 +53,6 @@ public:
 		};
 
 	Double_t resultParameters[12];
-
-	ParticleSelector Selector;
-
-	int color = kBlue;
 
 	void defineNumbers(int nBins, double xMin, double xMax, int decimals = 4)
 	{
@@ -136,7 +82,23 @@ public:
 		this->hMass->Fill(value);
 	}
 
-	void fit()
+	bool isInSignalRegion(Double_t InvariantMass)
+	{
+		if (fabs(InvariantMass - M_JPSI) < W_JPSI * signalRegion)
+			return true;
+
+		return false;
+	}
+
+	bool isInSidebandRegion(Double_t InvariantMass)
+	{
+		if (fabs(InvariantMass - M_JPSI) > W_JPSI * signalRegion && fabs(InvariantMass - M_JPSI) < W_JPSI * sidebandRegion)
+			return true;
+
+		return false;
+	}
+
+	void doFit()
 	{
 		//Create fit Function
 		f = new TF1("FitFunction", FitFunctions::Merged::FFit_InvariantMassAll, xMin, xMax, 12);
@@ -170,7 +132,7 @@ public:
 
 		//Fit the function
 		cout << endl;
-		cout << *PassingOrFailing << " " << *particleName << endl;
+		cout << "Fitting " << *PassingOrFailing << " " << *particleName << "..." << endl;
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
 		f->GetParameters(resultParameters);
 		
@@ -192,34 +154,66 @@ public:
 	void updateMassParameters()
 	{
 		//Get value and uncertain of signal
-		double position = 0;
+		double center = 0;
 		double fwhm = 0;
 
-		if (*method == 1)
+		if (*this->method == 1)
 		{
 			//Get value and uncertain of signal
 			int bin0 = this->hMass->GetMaximumBin();
-			position = this->hMass->GetBinCenter(bin0);
+			center   = this->hMass->GetBinCenter(bin0);
 			int bin1 = this->hMass->FindFirstBinAbove(this->hMass->GetMaximum()/2);
 			int bin2 = this->hMass->FindLastBinAbove(this->hMass->GetMaximum()/2);
-			fwhm = this->hMass->GetBinCenter(bin2) - this->hMass->GetBinCenter(bin1);
+			fwhm     = this->hMass->GetBinCenter(bin2) - this->hMass->GetBinCenter(bin1);
 		}
 
-		if (*method == 2 || *method == 3)
+		if (*this->method == 2)
 		{
 			//Get value and uncertain of signal
-			position = this->fs->GetMaximumX();
+			center    = this->fs->GetMaximumX();
 			double x1 = this->fs->GetX(this->fs->GetMaximum()/2);
-			double x2 = this->fs->GetX(this->fs->GetMaximum()/2, x1+0.0001, position + x1*3);
-			fwhm = x2 - x1;
+			double x2 = this->fs->GetX(this->fs->GetMaximum()/2, x1+0.0001, center + x1*3);
+			fwhm      = x2 - x1;
 		}
 
 		double sigma = fwhm/2.355;
 
-		this->Selector.M_JPSI = position;
-		this->Selector.W_JPSI = sigma;
-		this->Selector.signalRegionEnd = 3.;
-		this->Selector.sidebandRegionEnd = 6.;
+		this->M_JPSI = center;
+		this->W_JPSI = sigma;
+
+		*this->subtractionFactor = signalRegion/abs(sidebandRegion - signalRegion);
+	}
+
+	TBox *createTBox(double Ymax, int index = 0)
+	{
+		//index = -1 -> left region
+		//index = 0 -> signal region
+		//index = 1 -> right region
+
+		double dx1, dx2 = 0;
+
+		switch(index)
+		{
+			case -1:
+				dx1 = -sidebandRegion;
+				dx2 = -signalRegion;
+				break;
+			case 0:
+				dx1 = -signalRegion;
+				dx2 = +signalRegion;
+				break;
+			case 1:
+				dx1 = +sidebandRegion;
+				dx2 = +signalRegion;
+				break;
+		}
+
+		double x1 = M_JPSI + W_JPSI * dx1;
+		double x2 = M_JPSI + W_JPSI * dx2;
+
+		TBox *region = new TBox(x1, 0., x2, Ymax);
+
+		return region;
 	}
 
 	TCanvas *createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSave = false)
@@ -296,15 +290,15 @@ public:
 		//Draw regions
 		if (drawRegions == true)
 		{
-			cout << Selector.M_JPSI << endl;
-			cout << Selector.W_JPSI << endl;
-			TBox *side1 = Selector.createTBox(Ymax, -1);
+			cout << this->M_JPSI << endl;
+			cout << this->W_JPSI << endl;
+			TBox *side1 = this->createTBox(Ymax, -1);
 			side1->SetFillColorAlpha(kRed, 0.35);
 			side1->Draw();
-			TBox *signal = Selector.createTBox(Ymax, 0);
+			TBox *signal = this->createTBox(Ymax, 0);
 			signal->SetFillColorAlpha(kGreen, 0.35);
 			signal->Draw();
-			TBox *side2 = Selector.createTBox(Ymax, 1);
+			TBox *side2 = this->createTBox(Ymax, 1);
 			side2->SetFillColorAlpha(kRed, 0.35);
 			side2->Draw();
 		}
@@ -326,46 +320,23 @@ public:
 		return c1;
 	}
 
-	bool isInSignalRegion(Double_t InvariantMass)
-	{
-		return this->Selector.isInSignalRegion(InvariantMass);
-	}
-
-	bool isInSidebandRegion(Double_t InvariantMass)
-	{
-		return this->Selector.isInSidebandRegion(InvariantMass);
-	}
-
 	void debugCout()
 	{
-		double position = f->GetMaximumX();
-		int bin1 = hMass->FindFirstBinAbove(hMass->GetMaximum()/2);
-		int bin2 = hMass->FindLastBinAbove(hMass->GetMaximum()/2);
-		double fwhm = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
-		double sigma = fwhm/2;
-
 		//Show chi-squared test (on prompt)
 		cout << endl;
-		cout << "Fitting overview for " << *PassingOrFailing << endl;
-		cout << "Chi2/ndf          = " << f->GetChisquare()/f->GetNDF() << endl;
-		cout << "Gaus(Sg) Position = " << resultParameters[1] << endl;
-		cout << "Gaus(Sg) Sigma    = " << resultParameters[2] << endl;
-		cout << "CB  (Sg) Mean     = " << resultParameters[5] << endl;
-		cout << "CB  (Sg) Sigma    = " << resultParameters[6] << endl;
-		cout << "Position result   = " << position << "+-" << sigma << endl;
-		cout << "Limits            = " << position - sigma*3 << " ~ " << position + sigma*3 << endl;
-		cout << endl;
-
-		//Show integrals
-		cout << "Candidates by integration for " << *PassingOrFailing << endl;
-		cout << "#HistIntegral = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
-		cout << "#Total        = " << f ->Integral(xMin, xMax) * scale << endl;
-		cout << "#Background   = " << fb->Integral(xMin, xMax) * scale << endl;
-		cout << "#Signal       = " << fs->Integral(xMin, xMax) * scale << endl;
+		cout << "Fitting overview for " << *PassingOrFailing << " " << *particleName << endl;
+		cout << "- Chi2/ndf          = " << f->GetChisquare()/f->GetNDF() << endl;
+		cout << "- Gaus(Sg) Position = " << resultParameters[1] << " +- " << resultParameters[2] << endl;
+		cout << "- CB  (Sg) Position = " << resultParameters[5] << " +- " << resultParameters[6] << endl;
+		cout << "- Position result   = " << M_JPSI << " +- " << W_JPSI << " [" << M_JPSI - W_JPSI*3 << ", " << M_JPSI + W_JPSI*3  << "]" << endl;
+		cout << "- #HistIntegral     = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
+		cout << "- #Total      (fit) = " << f ->Integral(xMin, xMax) * scale << endl;
+		cout << "- #Background (fit) = " << fb->Integral(xMin, xMax) * scale << endl;
+		cout << "- #Signal     (fit) = " << fs->Integral(xMin, xMax) * scale << endl;
 		cout << endl;
 	}
 
-	InvariantMassClass(int *method, const char **particleName, const char **PassingOrFailing)
-		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing)
+	InvariantMass(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing)
 	{}
 };
