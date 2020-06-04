@@ -94,9 +94,15 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	if (limitData > 0)
 		numberEntries = limitData;
 
+	string progressFormat = "%d/2 progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"d/%d\r";
+
 	//Loop between the components
 	for (int i = 0; i < numberEntries; i++)
 	{
+		//Show progress
+		if (i%500 == 0 || i == numberEntries - 1)
+			printf((progressFormat).data(), 1, (float)i/(float)numberEntries*100, i, numberEntries);
+
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
 
@@ -117,6 +123,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	//Loop between the components again
 	for (int i = 0; i < numberEntries; i++)
 	{
+		//Show progress
+		if (i%500 == 0 || i == numberEntries - 1)
+			printf((progressFormat).data(), 2, (float)i/(float)numberEntries*100, i, numberEntries);
+
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
 
@@ -130,6 +140,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 			Muon.Both.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
 	}
+	cout << endl;
 
 	//Debug
 	Muon.massDebugCout();
@@ -155,6 +166,8 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
+	
+	Muon.Pass.Probe.Eta.createDividedCanvas(false, false);
 
 	if (shouldDrawQuantitiesCanvas)
 	{

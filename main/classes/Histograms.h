@@ -312,24 +312,6 @@ public:
 		return c1;
 	}
 
-	/*
-	void debugCout()
-	{
-		const int minLegendSpace = 21;
-
-		//Set information what are shown
-		string legend = "- #" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
-		if(strlen(legend.data()) < minLegendSpace-3)
-		{
-			legend.append(minLegendSpace - 3 - strlen(legend.data()), ' ');
-		}
-		legend += " = ";
-
-		//Show information
-		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
-	}
-	*/
-
 	string fillAfter(string text, char fillWith, int targetLength)
 	{
 		//Store size of text
