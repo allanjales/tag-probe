@@ -1,3 +1,5 @@
+#include "PassingFailing.h"
+
 //Holder for 3 PassingFailing class
 class Particle
 {

@@ -23,11 +23,6 @@
 
 #include <iostream>
 
-#include "classes/FitFunctions.h"
-#include "classes/InvariantMass.h"
-#include "classes/Histograms.h"
-#include "classes/TagProbe.h"
-#include "classes/PassingFailing.h"
 #include "classes/Particle.h"
 
 using namespace std;
@@ -40,7 +35,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
 
 	//Temporary var for test
-	int useNewData = 2;
+	int useNewData = 0;
 	//0 -> Raphael Ntupple
 	//1 -> New 2011 Run Ntupple
 	//2 -> New MC Ntupple
@@ -130,13 +125,27 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawInvariantMassCanvas)
 	{
-		bool drawRegions 	= false;
+		int drawMode = 0;
+
+		bool drawRegions;
 		bool shouldWrite 	= true;
 		bool shouldSave 	= true;
+		
+		if (drawMode == 0 || drawMode == 1)
+		{
+			drawRegions = false;
+			Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+			Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+			Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		}
 
-		Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		if (drawMode == 0 || drawMode == 2)
+		{
+			drawRegions = true;
+			Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+			Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+			Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		}
 	}
 
 	//Loop between the components again
@@ -219,9 +228,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 //Call functions
 void macro()
 {
-	bool shouldDrawInvariantMassCanvas 	= true;
-	bool shouldDrawQuantitiesCanvas 	= true;
-	bool shouldDrawEfficiencyCanvas 	= true;
+	bool shouldDrawInvariantMassCanvas 	= false;
+	bool shouldDrawQuantitiesCanvas 	= false;
+	bool shouldDrawEfficiencyCanvas 	= false;
 
 	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
 }

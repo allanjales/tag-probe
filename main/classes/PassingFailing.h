@@ -1,3 +1,6 @@
+#include "InvariantMass.h"
+#include "TagProbe.h"
+
 //Holder for 2 TagProbe class
 class PassingFailing{
 private:

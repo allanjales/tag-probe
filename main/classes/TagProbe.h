@@ -1,3 +1,5 @@
+#include "Histograms.h"
+
 //Holder for 3 Histograms Quantities
 class TagProbe{
 private:

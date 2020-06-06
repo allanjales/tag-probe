@@ -1,3 +1,5 @@
+#include "FitFunctions.h"
+
 //Store invariant mass class
 class InvariantMass{
 private:
@@ -222,6 +224,13 @@ public:
 		string canvasTitle	= string(*PassingOrFailing) + " Invariant Mass";
 		string saveAs 		= "../result/InvariantMass" + string(*PassingOrFailing) + ".png";
 
+		if (drawRegions)
+		{
+			canvasName 	= "InvariantMass_" + string(*PassingOrFailing) + "_region";
+			canvasTitle	= string(*PassingOrFailing) + " Invariant Mass with Regions";
+			saveAs 		= "../result/InvariantMass" + string(*PassingOrFailing) + "_region" + ".png";
+		}
+
 		//Create canvas
 		gStyle->SetCanvasPreferGL(kTRUE);
 		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 600, 600);
@@ -290,8 +299,6 @@ public:
 		//Draw regions
 		if (drawRegions == true)
 		{
-			cout << this->M_JPSI << endl;
-			cout << this->W_JPSI << endl;
 			TBox *side1 = this->createTBox(Ymax, -1);
 			side1->SetFillColorAlpha(kRed, 0.35);
 			side1->Draw();
