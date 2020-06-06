@@ -40,7 +40,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
 
 	//Temporary var for test
-	int useNewData = 0;
+	int useNewData = 2;
 	//0 -> Raphael Ntupple
 	//1 -> New 2011 Run Ntupple
 	//2 -> New MC Ntupple
@@ -100,8 +100,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	for (int i = 0; i < numberEntries; i++)
 	{
 		//Show progress
-		if (i%500 == 0 || i == numberEntries - 1)
-			printf((progressFormat).data(), 1, (float)i/(float)numberEntries*100, i, numberEntries);
+		printf((progressFormat).data(), 1, (float)i/(float)numberEntries*100, i, numberEntries);
 
 		TreePC->GetEntry(i);
 		TreeAT->GetEntry(i);
@@ -119,33 +118,6 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	Muon.doFit();
 	Muon.updateSelectionParameters();
-
-	//Loop between the components again
-	for (int i = 0; i < numberEntries; i++)
-	{
-		//Show progress
-		if (i%500 == 0 || i == numberEntries - 1)
-			printf((progressFormat).data(), 2, (float)i/(float)numberEntries*100, i, numberEntries);
-
-		TreePC->GetEntry(i);
-		TreeAT->GetEntry(i);
-
-		//Accepted particles
-		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4)
-		{
-			if (PassingProbeTrackingMuon)
-				Muon.Pass.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-			else
-				Muon.Fail.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-			Muon.Both.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-		}
-	}
-	cout << endl;
-
-	//Debug
-	Muon.massDebugCout();
-	
-	Muon.subtractSigHistograms();
 
 	//-------------------------------------
 	// Generate and save files
@@ -166,8 +138,32 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
+
+	//Loop between the components again
+	for (int i = 0; i < numberEntries; i++)
+	{
+		//Show progress
+		printf((progressFormat).data(), 2, (float)i/(float)numberEntries*100, i, numberEntries);
+
+		TreePC->GetEntry(i);
+		TreeAT->GetEntry(i);
+
+		//Accepted particles
+		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4)
+		{
+			if (PassingProbeTrackingMuon)
+				Muon.Pass.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			else
+				Muon.Fail.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			Muon.Both.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+		}
+	}
+	cout << endl;
+
+	//Debug
+	Muon.massDebugCout();
 	
-	Muon.Pass.Probe.Eta.createDividedCanvas(false, false);
+	Muon.subtractSigHistograms();
 
 	if (shouldDrawQuantitiesCanvas)
 	{
@@ -224,8 +220,8 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 void macro()
 {
 	bool shouldDrawInvariantMassCanvas 	= true;
-	bool shouldDrawQuantitiesCanvas 	= false;
-	bool shouldDrawEfficiencyCanvas 	= false;
+	bool shouldDrawQuantitiesCanvas 	= true;
+	bool shouldDrawEfficiencyCanvas 	= true;
 
 	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
 }
