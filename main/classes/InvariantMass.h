@@ -26,13 +26,17 @@ private:
 
 	TF1* fitFunction 		= NULL;
 	TF1* fitFunctionSig 	= NULL;
+	TF1* fitFunctionGaus 	= NULL;
+	TF1* fitFunctionCB 		= NULL;
 	TF1* fitFunctionBack 	= NULL;
 	TFitResultPtr fitResult = 0;
 	
 	//References
-	TF1* &f  = fitFunction;
-	TF1* &fs = fitFunctionSig;
-	TF1* &fb = fitFunctionBack;
+	TF1* &f  	= fitFunction;
+	TF1* &fs 	= fitFunctionSig;
+	TF1* &fsG 	= fitFunctionGaus;
+	TF1* &fsCB 	= fitFunctionCB;
+	TF1* &fb 	= fitFunctionBack;
 
 	//extracted from method
 	double M_JPSI = 3.097;
@@ -120,6 +124,7 @@ public:
 		f->SetNpx(1000);
 		f->SetLineStyle(kSolid);
 		f->SetLineColor(color);
+		f->SetLineWidth(3);
 
 		//Rename parameters
 		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
@@ -145,7 +150,7 @@ public:
 		f->SetParameter(10, 263.185);
 		f->SetParameter(11,	0.061); 
 
-		//Fit the function
+		//Fit function
 		cout << endl;
 		cout << "Fitting " << *PassingOrFailing << " " << *particleName << "..." << endl;
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
@@ -157,13 +162,31 @@ public:
 		fs->SetParameters(resultParameters);		//Get only signal part
 		fs->SetLineColor(kMagenta); 				//Fit Color
 		fs->SetLineStyle(kSolid);					//Fit Style
+		fs->SetLineWidth(3);						//Fit width
+		
+		//Signal Gaus Fitting
+		fsG = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
+		fsG->SetNpx(1000);							//Resolution of signal fit function
+		fsG->SetParameters(resultParameters);		//Get only signal part
+		fsG->SetLineColor(kGreen);	 				//Fit Color
+		fsG->SetLineStyle(kDashed);					//Fit Style
+		fsG->SetLineWidth(3);						//Fit width
+		
+		//Signal CB Fitting
+		fsCB = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
+		fsCB->SetNpx(1000);							//Resolution of signal fit function
+		fsCB->SetParameters(&resultParameters[3]);	//Get only signal part
+		fsCB->SetLineColor(kRed); 					//Fit Color
+		fsCB->SetLineStyle(kDotted);				//Fit Style
+		fsCB->SetLineWidth(3);						//Fit width
 
 		//Background Fitting
 		fb = new TF1("FitFunction_Background", FitFunctions::Merged::Background_InvariantMassAll, xMin, xMax, 4);
 		fb->SetNpx(1000);							//Resolution of background fit function
 		fb->SetParameters(&resultParameters[8]);	//Get only background part
 		fb->SetLineColor(color); 					//Fit Color
-		fb->SetLineStyle(kDashed);					//Fit style
+		fb->SetLineStyle(kDashDotted);				//Fit style
+		fb->SetLineWidth(3);						//Fit width
 	}
 
 	void updateMassParameters()
@@ -265,8 +288,9 @@ public:
 
 		if (fitFunction != NULL)
 		{
-			//fs->Draw("same");
 			fb->Draw("same");
+			fsG->Draw("same");
+			fsCB->Draw("same");
 			f->Draw("same");
 		}
 
@@ -291,14 +315,15 @@ public:
 		}
 
 		//Add legend
-		TLegend *l = new TLegend(0.65,0.77,0.92,0.90);
+		TLegend *l = new TLegend(0.65,0.68,0.92,0.90);
 		l->SetTextSize(0.04);
 		l->AddEntry(hMass,	"Data"	,"lp");
 		if (fitFunction != NULL)
 		{
-			l->AddEntry(f,		"Fitting"	,"l");
-			//l->AddEntry(fs,	"Signal"	,"l");
-			l->AddEntry(fb,		"Background","l");
+			l->AddEntry(f,		"Total Fit",	"l");
+			l->AddEntry(fsG,	"Gaussian",		"l");
+			l->AddEntry(fsCB,	"Crystal Ball",	"l");
+			l->AddEntry(fb,		"Exp + Exp",	"l");
 		}
 		l->Draw();
 

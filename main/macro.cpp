@@ -17,7 +17,7 @@
 using namespace std;
 
 //Select particles, draws and save histograms
-void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDrawQuantitiesCanvas = true, bool shouldDrawEfficiencyCanvas = true)
+void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDrawInvariantMassCanvasRegion = true, bool shouldDrawQuantitiesCanvas = true, bool shouldDrawEfficiencyCanvas = true)
 {
 	TFile *file0 = TFile::Open("../data_histoall.root");		//Opens the file
 	TTree *TreePC = (TTree*)file0->Get("demo/PlotControl");		//Opens TTree of file
@@ -114,27 +114,24 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawInvariantMassCanvas)
 	{
-		int drawMode = 0;
-
-		bool drawRegions;
+		bool drawRegions 	= false;
 		bool shouldWrite 	= true;
 		bool shouldSave 	= true;
-		
-		if (drawMode == 0 || drawMode == 1)
-		{
-			drawRegions = false;
-			Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-			Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-			Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		}
 
-		if (drawMode == 0 || drawMode == 2)
-		{
-			drawRegions = true;
-			Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-			Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-			Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		}
+		Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+	}
+
+	if (shouldDrawInvariantMassCanvasRegion)
+	{
+		bool drawRegions 	= true;
+		bool shouldWrite 	= true;
+		bool shouldSave 	= true;
+
+		Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
 
 	//Loop between the components again
@@ -217,9 +214,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 //Call functions
 void macro()
 {
-	bool shouldDrawInvariantMassCanvas 	= false;
-	bool shouldDrawQuantitiesCanvas 	= false;
-	bool shouldDrawEfficiencyCanvas 	= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
-	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
+	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawInvariantMassCanvasRegion, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
 }
