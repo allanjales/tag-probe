@@ -1,3 +1,16 @@
+#include "TH1.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TFitResult.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TFrame.h"
+
+#include <iostream>
+
+using namespace std;
+
 #include "FitFunctions.h"
 
 //Store invariant mass class
@@ -7,8 +20,6 @@ private:
 	double *subtractionFactor;
 	const char **particleName;
 	const char **PassingOrFailing;
-
-	TH1D* hMass = NULL;
 
 	//Bins per each x axis unit (for integrations)
 	double scale = 0;
@@ -35,6 +46,8 @@ public:
 	double 		xMin;
 	double		xMax;
 	int color = kBlue;
+
+	TH1D* hMass = NULL;
 
 	//Fitting
 	const char* const fittingParName[12] = {

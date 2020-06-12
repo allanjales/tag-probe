@@ -1,3 +1,16 @@
+#include "TH1.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TLegend.h"
+#include "TLatex.h"
+#include "TEfficiency.h"
+#include "TFrame.h"
+#include "TGraphAsymmErrors.h"
+
+#include <iostream>
+
+using namespace std;
+
 //Pt, Eta, Phi histograms
 class Histograms{
 private:

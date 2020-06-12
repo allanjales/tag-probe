@@ -7,19 +7,8 @@
 */
 
 #include "TROOT.h"
-#include "TMath.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TH1.h"
-#include "TF1.h"
-#include "TCanvas.h"
-#include "TStyle.h"
-#include "TFitResult.h"
-#include "TLegend.h"
-#include "TLatex.h"
-#include "TEfficiency.h"
-#include "TFrame.h"
-#include "TGraphAsymmErrors.h"
 
 #include <iostream>
 

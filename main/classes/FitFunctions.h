@@ -1,3 +1,4 @@
+#include "TMath.h"
 
 //-------------------------------------
 // Fit functions for Invariant Mass
