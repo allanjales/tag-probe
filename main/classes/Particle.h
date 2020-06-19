@@ -49,6 +49,13 @@ public:
 		this->Both.subtractSigHistograms();
 	}
 
+	void writehMass()
+	{
+		this->Pass.Mass.hMass->Write();
+		this->Fail.Mass.hMass->Write();
+		this->Both.Mass.hMass->Write();
+	}
+
 	void massDebugCout()
 	{
 		this->Pass.Mass.debugCout();

@@ -24,7 +24,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
 
 	//Temporary var for test
-	int useNewData = 0;
+	int useNewData = 2;
 	//0 -> Raphael Ntupple
 	//1 -> New 2011 Run Ntupple
 	//2 -> New MC Ntupple
@@ -186,6 +186,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	Muon.Fail.write(writehSigBack, writehSig, writehBack);
 	Muon.Both.write(writehSigBack, writehSig, writehBack);
 
+	//Write mass histograms
+	Muon.writehMass();
+
 	//Save plots
 	generatedFile->mkdir("efficiency/plots/");
 	generatedFile->cd("efficiency/plots/");
@@ -215,9 +218,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 void macro()
 {
 	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
 	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawInvariantMassCanvasRegion, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
 }
