@@ -11,6 +11,7 @@
 #include "TTree.h"
 
 #include <iostream>
+#include <string>
 
 #include "classes/Particle.h"
 
@@ -22,10 +23,14 @@ void openFile()
 	Particle Muon;
 	Muon.setMethod(1);
 
-	int useData = 0;
+	const char *files[3] = {"raphael.root",
+							"run2011.root",
+							"mc2020.root"};
+
+	int useFile = 1;
 
 	//Open and read files
-	TFile *file0 = TFile::Open("resultsForTesting/run2011.root");
+	TFile *file0 = TFile::Open((string("resultsForTesting/") + string(files[useFile])).data());
 	
 	Muon.Pass.Mass.hMass = (TH1D*)file0->Get("histograms/PassingMuonInvariantMass");
 	Muon.Fail.Mass.hMass = (TH1D*)file0->Get("histograms/FailingMuonInvariantMass");
