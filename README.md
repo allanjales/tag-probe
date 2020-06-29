@@ -15,7 +15,17 @@ It is necessary to have a folder named `result` on `main` folder side.
 
 ## Preferences
 
-You can change the method to estimate signal region by modifying `Muon.setMethod(1)` line by choosing 1 (estimate by FWHM of histograms) or 2 (estimate by FWHM of fitting).
+You can change the method to estimate signal region by modifying `Muon.setMethod(1)` line by choosing 1 (estimate by FWHM of histograms) or 2 (estimate by FWHM of fitting):
+
+```cpp
+Muon.setMethod(1);
+```
+
+Change this line to specify the ntupple you are analysing by choosing 0 (Old ntupple), 1 (Run 2011 ntupple) or 2 (Monte Carlo ntupple):
+
+```cpp
+int useNewData = 0;
+```
 
 ## Development setting
 
