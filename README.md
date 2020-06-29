@@ -21,10 +21,10 @@ You can change the method to estimate signal region by modifying `Muon.setMethod
 Muon.setMethod(1);
 ```
 
-Change this line to specify the ntupple you are analysing by choosing 0 (Old ntupple), 1 (Run 2011 ntupple) or 2 (Monte Carlo ntupple):
+Change this line to specify the ntupple you are analysing by choosing 0 (old ntupple), 1 (run 2011 ntupple) or 2 (monte carlo ntupple):
 
 ```cpp
-int useNewData = 0;
+int useNewData = 1;
 ```
 
 ## Development setting
