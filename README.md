@@ -26,7 +26,7 @@ Go on your folder where the file code is downloaded and run:
 ```sh
 $ cd main
 $ root -l -n
-root[0] .L macro.cc+
+root[0] .L macro.cpp+
 root[1] macro()
 ```
 
