@@ -6,23 +6,24 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
+	const char **particleReconstruction;
 	const char **PassingOrFailing;
 
 public:
-	const char *tagOrProbe			= NULL;
+	const char *tagOrProbe = NULL;
 
-	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
 
-	void defineHistogramsTexts()
+	void defineDefaultHistogramsTexts()
 	{
 		this->Pt .defineTexts("Pt",  "p_{t}",	"GeV/c", 	"Transversal Momentum");
 		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity");
 		this->Phi.defineTexts("Phi", "#phi", 	"rad", 		"Azimuthal Angle");
 	}
 
-	void defineHistogramsNumbers()
+	void defineDefaultHistogramsNumbers()
 	{
 		this->Pt .defineNumbers(100,	 0., 	100., 1);
 		this->Eta.defineNumbers(200, 	-2.5, 	2.5);
@@ -123,7 +124,7 @@ public:
 		this->Phi.debugCout();
 	}
 
-	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char *tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing, const char *tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

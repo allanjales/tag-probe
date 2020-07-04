@@ -1,6 +1,6 @@
-#include "PassingFailing.h"
+#include "LocalReconstruction.h"
 
-//Holder for 3 PassingFailing class
+//Holder for 3 Type class
 class Particle
 {
 private:
@@ -10,17 +10,13 @@ private:
 
 	void prepareMethod()
 	{
-		this->Pass.prepareMethod();
-		this->Fail.prepareMethod();
-		this->Both.prepareMethod();
+		this->Tracker.prepareMethod();
 	}
 
 public:
 	const char *particleName = "Muon";
 
-	PassingFailing Pass{&this->method, &this->particleName, "Passing"};
-	PassingFailing Fail{&this->method, &this->particleName, "Failing"};
-	PassingFailing Both{&this->method, &this->particleName, "All"};
+	LocalReconstruction Tracker{&this->method, &this->particleName, "Tracker"};
 
 	void setMethod(int method)
 	{
@@ -30,45 +26,31 @@ public:
 
 	void doFit()
 	{
-		this->Pass.Mass.doFit();
-		this->Fail.Mass.doFit();
-		this->Both.Mass.doFit();
+		this->Tracker.doFit();
 	}
 
 	void updateSelectionParameters()
 	{
-		this->Pass.updateSelectorParameters();
-		this->Fail.updateSelectorParameters();
-		this->Both.updateSelectorParameters();
+		this->Tracker.updateSelectionParameters();
 	}
 
 	void subtractSigHistograms()
 	{
-		this->Pass.subtractSigHistograms();
-		this->Fail.subtractSigHistograms();
-		this->Both.subtractSigHistograms();
+		this->Tracker.subtractSigHistograms();
 	}
 
 	void writehMass()
 	{
-		this->Pass.Mass.hMass->Write();
-		this->Fail.Mass.hMass->Write();
-		this->Both.Mass.hMass->Write();
+		this->Tracker.writehMass();
 	}
 
 	void massDebugCout()
 	{
-		this->Pass.Mass.debugCout();
-		this->Fail.Mass.debugCout();
-		this->Both.Mass.debugCout();
+		this->Tracker.massDebugCout();
 	}
 
 	void consistencyDebugCout()
 	{
-		cout << endl;
-		cout << "Checking histograms number inconsistency (should be 0)" << endl;
-		this->Pass.debugCout();
-		this->Fail.debugCout();
-		this->Both.debugCout();
+		this->Tracker.consistencyDebugCout();
 	}
 };

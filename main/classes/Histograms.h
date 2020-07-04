@@ -17,6 +17,7 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
+	const char **particleReconstruction;
 	const char **PassingOrFailing;
 	const char **tagOrProbe;
 
@@ -353,7 +354,7 @@ public:
 		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
 	}
 
-	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char **tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing, const char **tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

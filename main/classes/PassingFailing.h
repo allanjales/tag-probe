@@ -6,36 +6,37 @@ class PassingFailing{
 private:
 	int *method;
 	const char **particleName;
+	const char **particleReconstruction;
 
 protected:
 	double subtractionFactor = 1.0;
 
 public:
-	const char *PassingOrFailing;
+	const char *PassingOrFailing = NULL;
 
-	InvariantMass Mass{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing};
-	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Tag"};
-	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Probe"};
+	InvariantMass Mass{this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing};
+	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing, "Tag"};
+	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing, "Probe"};
 
 	void prepareMethod()
 	{
-		this->defineHistogramsTexts();
-		this->defineHistogramsNumbers();
+		this->defineDefaultHistogramsTexts();
+		this->defineDefaultHistogramsNumbers();
 		this->createSigBackHistograms();
 		this->createBackHistograms();
 		this->Mass.createMassHistogram();
 	}
 
-	void defineHistogramsTexts()
+	void defineDefaultHistogramsTexts()
 	{
-		this->Tag  .defineHistogramsTexts();
-		this->Probe.defineHistogramsTexts();
+		this->Tag  .defineDefaultHistogramsTexts();
+		this->Probe.defineDefaultHistogramsTexts();
 	}
 
-	void defineHistogramsNumbers()
+	void defineDefaultHistogramsNumbers()
 	{
-		this->Tag  .defineHistogramsNumbers();
-		this->Probe.defineHistogramsNumbers();
+		this->Tag  .defineDefaultHistogramsNumbers();
+		this->Probe.defineDefaultHistogramsNumbers();
 		this->Mass.defineNumbers(240, 2.8, 3.4);
 	}
 
@@ -119,7 +120,7 @@ public:
 		this->Probe.debugCout();
 	}
 
-	PassingFailing(int *method, const char **particleName, const char *PassingOrFailing)
-		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing)
+	PassingFailing(int *method, const char **particleName, const char **particleReconstruction, const char *PassingOrFailing)
+		: method(method), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing)
 	{}
 };

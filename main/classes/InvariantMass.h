@@ -19,6 +19,7 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
+	const char **particleReconstruction;
 	const char **PassingOrFailing;
 
 	//Bins per each x axis unit (for integrations)
@@ -135,12 +136,14 @@ public:
 		
 		//Values Signal
 		f->SetParameter(0,	340.2);
-		f->SetParameter(1,	3.09);
+		f->SetParameter(1,	3.093);
+		f->SetParLimits(1,  3.08, 3.11);
 		f->SetParameter(2,	0.037);
 
 		f->SetParameter(3,	1.824);
 		f->SetParameter(4,	1.034);
 		f->SetParameter(5,	3.093);
+		f->SetParLimits(5,  3.08, 3.11);
 		f->SetParameter(6,	0.022);
 		f->SetParameter(7,	8322.27);
 
@@ -381,7 +384,7 @@ public:
 		cout << endl;
 	}
 
-	InvariantMass(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing)
+	InvariantMass(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing)
 	{}
 };

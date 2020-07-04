@@ -24,7 +24,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
 
 	//Temporary var for test
-	int useNewData = 2;
+	int useNewData = 0;
 	//0 -> Raphael Ntupple
 	//1 -> New 2011 Run Ntupple
 	//2 -> New MC Ntupple
@@ -93,10 +93,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4)
 		{
 			if (PassingProbeTrackingMuon)
-				Muon.Pass.Mass.fill(InvariantMass);
+				Muon.Tracker.Pass.Mass.fill(InvariantMass);
 			else
-				Muon.Fail.Mass.fill(InvariantMass);
-			Muon.Both.Mass.fill(InvariantMass);
+				Muon.Tracker.Fail.Mass.fill(InvariantMass);
+			Muon.Tracker.All .Mass.fill(InvariantMass);
 		}
 	}
 
@@ -118,9 +118,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		bool shouldWrite 	= true;
 		bool shouldSave 	= true;
 
-		Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.All .Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
 
 	if (shouldDrawInvariantMassCanvasRegion)
@@ -129,9 +129,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		bool shouldWrite 	= true;
 		bool shouldSave 	= true;
 
-		Muon.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
-		Muon.Both.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.Pass.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.Fail.Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
+		Muon.Tracker.All .Mass.createCanvas(drawRegions, shouldWrite, shouldSave);
 	}
 
 	//Loop between the components again
@@ -147,10 +147,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4)
 		{
 			if (PassingProbeTrackingMuon)
-				Muon.Pass.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.Tracker.Pass.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 			else
-				Muon.Fail.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
-			Muon.Both.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+				Muon.Tracker.Fail.fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			Muon.Tracker.All .fillHistograms(InvariantMass, TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
 	}
 	cout << endl;
@@ -165,9 +165,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 		bool shouldWrite 	= true;
 		bool shouldSave 	= true;
 
-		Muon.Pass.createDividedCanvas(shouldWrite, shouldSave);
-		Muon.Fail.createDividedCanvas(shouldWrite, shouldSave);
-		Muon.Both.createDividedCanvas(shouldWrite, shouldSave);
+		Muon.Tracker.Pass.createDividedCanvas(shouldWrite, shouldSave);
+		Muon.Tracker.Fail.createDividedCanvas(shouldWrite, shouldSave);
+		Muon.Tracker.All .createDividedCanvas(shouldWrite, shouldSave);
 	}
 
 	//Debug
@@ -182,9 +182,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	bool writehSig 		= true;
 	bool writehBack 	= true;
 
-	Muon.Pass.write(writehSigBack, writehSig, writehBack);
-	Muon.Fail.write(writehSigBack, writehSig, writehBack);
-	Muon.Both.write(writehSigBack, writehSig, writehBack);
+	Muon.Tracker.Pass.write(writehSigBack, writehSig, writehBack);
+	Muon.Tracker.Fail.write(writehSigBack, writehSig, writehBack);
+	Muon.Tracker.All .write(writehSigBack, writehSig, writehBack);
 
 	//Write mass histograms
 	Muon.writehMass();
@@ -194,9 +194,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->cd("efficiency/plots/");
 
 	//Creates efficiency plots
-	Muon.Pass.createEfficiencyPlot();
-	Muon.Fail.createEfficiencyPlot();
-	Muon.Both.createEfficiencyPlot();
+	Muon.Tracker.Pass.createEfficiencyPlot();
+	Muon.Tracker.Fail.createEfficiencyPlot();
+	Muon.Tracker.All .createEfficiencyPlot();
 
 
 	//Saves new histograms and canvas in file
@@ -205,9 +205,9 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawEfficiencyCanvas)
 	{
-		Muon.Pass.createEfficiencyCanvas();
-		Muon.Fail.createEfficiencyCanvas();
-		Muon.Both.createEfficiencyCanvas();
+		Muon.Tracker.Pass.createEfficiencyCanvas();
+		Muon.Tracker.Fail.createEfficiencyCanvas();
+		Muon.Tracker.All .createEfficiencyCanvas();
 	}
 
 	//Close files
