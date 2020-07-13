@@ -17,7 +17,6 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
-	const char **particleReconstruction;
 	const char **PassingOrFailing;
 	const char **tagOrProbe;
 
@@ -106,10 +105,10 @@ public:
 
 	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
 	{
-		string canvasName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName);
+		string canvasName 	= string(*particleName) + " " + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
 		string titleLeft 	= string(extendedQuantityName) + " (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
 		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string(quantityName) + string(*PassingOrFailing) + string(*tagOrProbe) + ".png";
+		string saveAs 		= "../result/" + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*PassingOrFailing) + ".png";
 
 		//Create canvas and divide it
 		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
@@ -181,7 +180,7 @@ public:
 		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
 		//Same range as comparision and Draws
-		hSig->SetMinimum(0);
+		//hSig->SetMinimum(0);
    		//hSig->SetMaximum(Ymax);
 		hSig->SetTitle(titleRight.data());
 		hSig->Draw("same");
@@ -236,7 +235,7 @@ public:
 		TH1D* &hPass  = hSig;
 		TH1D* &hTotal = hSigBack;
 
-		string pName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + "Efficiency";
+		string pName 	= string(*particleName) + " " + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName) + " Efficiency";
 		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
 
 		//Set Y axis title for efficiency plot
@@ -247,6 +246,7 @@ public:
 		{
 			//Fills histogram
 			pEff = new TEfficiency(*hPass, *hTotal);
+			pEff->SetName(pName.data());
 		}
 
 		//Set plot config
@@ -269,9 +269,9 @@ public:
 	//Creates canvas for efficiency plots
 	TCanvas *createEfficiencyCanvas(bool shouldWrite = false, bool shouldSave = false)
 	{
-		string canvasName 	= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + "Efficiency";
+		string canvasName 	=  string(*particleName) + " " + string(*tagOrProbe) + " " + string(quantityName) + " " + string(*PassingOrFailing) + " Efficiency" ;
 		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string(quantityName) + string(*PassingOrFailing) + string(*tagOrProbe) + "_Efficiency.png";
+		string saveAs 		= "../result/" + string("Efficiency_") + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*PassingOrFailing) +".png";
 
 		//Draw on canvas
 		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
@@ -354,7 +354,7 @@ public:
 		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
 	}
 
-	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing, const char **tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char **tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

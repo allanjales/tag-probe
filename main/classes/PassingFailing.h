@@ -1,4 +1,3 @@
-#include "InvariantMass.h"
 #include "TagProbe.h"
 
 //Holder for 2 TagProbe class
@@ -6,17 +5,25 @@ class PassingFailing{
 private:
 	int *method;
 	const char **particleName;
-	const char **particleReconstruction;
 
-protected:
-	double subtractionFactor = 1.0;
+	double scale = 1.;
 
 public:
 	const char *PassingOrFailing = NULL;
 
-	InvariantMass Mass{this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing};
-	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing, "Tag"};
-	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, this->particleReconstruction, &this->PassingOrFailing, "Probe"};
+	TH1D* hMass = NULL;
+
+	//In sigmas
+	double signalRegion 	= 3.0;
+	double sidebandRegion	= 6.0;
+
+	//This will be changed by InvariantMass object
+	double M_JPSI = 0;
+	double W_JPSI = 0;
+	double subtractionFactor = 1.;
+
+	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Tag"};
+	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Probe"};
 
 	void prepareMethod()
 	{
@@ -24,7 +31,6 @@ public:
 		this->defineDefaultHistogramsNumbers();
 		this->createSigBackHistograms();
 		this->createBackHistograms();
-		this->Mass.createMassHistogram();
 	}
 
 	void defineDefaultHistogramsTexts()
@@ -37,7 +43,6 @@ public:
 	{
 		this->Tag  .defineDefaultHistogramsNumbers();
 		this->Probe.defineDefaultHistogramsNumbers();
-		this->Mass.defineNumbers(240, 2.8, 3.4);
 	}
 
 	void fillSigBackHistograms(Double_t TagPtValue, Double_t TagEtaValue, Double_t TagPhiValue, Double_t ProbePtValue, Double_t ProbeEtaValue, Double_t ProbePhiValue)
@@ -94,24 +99,67 @@ public:
 		this->Probe.createEfficiencyCanvas(shouldWrite, shouldSave);
 	}
 
+	TBox *createTBox(double Ymax, int index = 0)
+	{
+		//index = -1 -> left region
+		//index = 0 -> signal region
+		//index = 1 -> right region
+
+		double dx1, dx2 = 0;
+
+		switch(index)
+		{
+			case -1:
+				dx1 = -sidebandRegion;
+				dx2 = -signalRegion;
+				break;
+			case 0:
+				dx1 = -signalRegion;
+				dx2 = +signalRegion;
+				break;
+			case 1:
+				dx1 = +sidebandRegion;
+				dx2 = +signalRegion;
+				break;
+		}
+
+		double x1 = M_JPSI + W_JPSI * dx1;
+		double x2 = M_JPSI + W_JPSI * dx2;
+
+		TBox *region = new TBox(x1, 0., x2, Ymax);
+
+		return region;
+	}
+
+	bool isInSignalRegion(double InvariantMass)
+	{
+		if (fabs(InvariantMass - M_JPSI) < W_JPSI * signalRegion)
+			return true;
+
+		return false;
+	}
+
+	bool isInSidebandRegion(double InvariantMass)
+	{
+		if (fabs(InvariantMass - M_JPSI) > W_JPSI * signalRegion && fabs(InvariantMass - M_JPSI) < W_JPSI * sidebandRegion)
+			return true;
+
+		return false;
+	}
+
 	void fillHistograms(double InvariantMass, double TagMuon_Pt, double TagMuon_Eta, double TagMuon_Phi, double ProbeMuon_Pt, double ProbeMuon_Eta, double ProbeMuon_Phi)
 	{
 		//If is inside signal region
-		if (this->Mass.isInSignalRegion(InvariantMass))
+		if (this->isInSignalRegion(InvariantMass))
 		{
 			this->fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
 
 		//If is inside sideband region
-		if (this->Mass.isInSidebandRegion(InvariantMass))
+		if (this->isInSidebandRegion(InvariantMass))
 		{
 			this->fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
 		}
-	}
-
-	void updateSelectorParameters()
-	{
-		this->Mass.updateMassParameters();
 	}
 
 	void debugCout()
@@ -120,7 +168,7 @@ public:
 		this->Probe.debugCout();
 	}
 
-	PassingFailing(int *method, const char **particleName, const char **particleReconstruction, const char *PassingOrFailing)
-		: method(method), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing)
+	PassingFailing(int *method, const char **particleName, const char *PassingOrFailing)
+		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing)
 	{}
 };

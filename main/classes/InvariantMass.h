@@ -7,11 +7,78 @@
 #include "TLatex.h"
 #include "TFrame.h"
 
+#include "Fit/Fitter.h"
+#include "Fit/BinData.h"
+#include "Fit/Chi2FCN.h"
+#include "Math/WrappedMultiTF1.h"
+#include "HFitInterface.h"
+
 #include <iostream>
 
 using namespace std;
 
 #include "FitFunctions.h"
+
+//GLoal Chi2 operator for simutaneous fit
+struct GlobalChi2 {
+   const  ROOT::Math::IMultiGenFunction * fChi2_1;
+   const  ROOT::Math::IMultiGenFunction * fChi2_2;
+
+
+	int iparPass[12] = {0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+					};
+
+	int iparPassFail[24] = {0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,	
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+					};
+
+   double operator() (const double *par) const {
+      double p1[12];
+      for (int i = 0; i < 12; ++i) p1[i] = par[iparPass[i]];
+
+      double p2[24];
+      for (int i = 0; i < 24; ++i) p2[i] = par[iparPassFail[i]];
+
+      return (*fChi2_1)(p1) + (*fChi2_2)(p2);
+   }
+
+   GlobalChi2(  ROOT::Math::IMultiGenFunction & f1,
+                ROOT::Math::IMultiGenFunction & f2) :
+      fChi2_1(&f1), fChi2_2(&f2) {}
+};
 
 //Store invariant mass class
 class InvariantMass{
@@ -19,42 +86,21 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
-	const char **particleReconstruction;
-	const char **PassingOrFailing;
 
-	//Bins per each x axis unit (for integrations)
-	double scale = 0;
+	//Pointer to objects
+	PassingFailing* ObjPass = NULL;
+	PassingFailing* ObjFail = NULL;
+	PassingFailing* ObjAll = NULL;
 
-	TF1* fitFunction 		= NULL;
-	TF1* fitFunctionSig 	= NULL;
-	TF1* fitFunctionGaus 	= NULL;
-	TF1* fitFunctionCB 		= NULL;
-	TF1* fitFunctionBack 	= NULL;
-	TFitResultPtr fitResult = 0;
-	
-	//References
-	TF1* &f  	= fitFunction;
-	TF1* &fs 	= fitFunctionSig;
-	TF1* &fsG 	= fitFunctionGaus;
-	TF1* &fsCB 	= fitFunctionCB;
-	TF1* &fb 	= fitFunctionBack;
+	//Self fit functions
+	TF1* fitFunctionPass 	= NULL;
+	TF1* fitFunctionFail 	= NULL;
+	TF1* fitFunctionAll		= NULL;
 
-	//extracted from method
-	double M_JPSI = 3.097;
-	double W_JPSI = 0.010;
-	double signalRegion 	= 3.0;
-	double sidebandRegion	= 6.0;
+	ROOT::Fit::FitResult fitResult;
 
 public:
-	int			nBins;
-	int			decimals = 4;
-	double 		xMin;
-	double		xMax;
-	int color = kBlue;
 
-	TH1D* hMass = NULL;
-
-	//Fitting
 	const char* const fittingParName[12] = {
 			"Gaus(Sg) Height  ",
 			"Gaus(Sg) Position",
@@ -72,7 +118,10 @@ public:
 			"Exp2(Bg) Width   "
 		};
 
-	Double_t resultParameters[12];
+	int			nBins;
+	int			decimals = 4;
+	double 		xMin;
+	double		xMax;
 
 	void defineNumbers(int nBins, double xMin, double xMax, int decimals = 4)
 	{
@@ -82,220 +131,183 @@ public:
 		this->decimals 	= decimals;
 	}
 
-	void createMassHistogram()
+	void createMassHistogram(TH1D* &hMass, const char* PassingOrFailing)
 	{
-		string hName 			= string(*PassingOrFailing) + string(*particleName) + "InvariantMass";
-		string hTitle 			= "Invariant Mass (" + string(*PassingOrFailing) + ")";
+		string hName 			= string(PassingOrFailing) + string(*particleName) + "InvariantMass";
+		string hTitle 			= "Invariant Mass (" + string(PassingOrFailing) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
 		//Create histogram
 		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
 		hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
-
-		//Get scale from histogram
-		this->scale = 1/hMass->GetBinWidth(0);
 	}
 
-	void fill(double value)
+	void createAllMassHistograms()
 	{
-		this->hMass->Fill(value);
+		createMassHistogram((*this->ObjPass).hMass, "Passing tracker");
+		createMassHistogram((*this->ObjFail).hMass, "Failing tracker");
+		createMassHistogram((*this->ObjAll).hMass,  "All");
 	}
 
-	bool isInSignalRegion(Double_t InvariantMass)
+	ROOT::Fit::FitResult doFit()
 	{
-		if (fabs(InvariantMass - M_JPSI) < W_JPSI * signalRegion)
-			return true;
+		TH1D* &hPass = (*this->ObjPass).hMass;
+		TH1D* &hFail = (*this->ObjFail).hMass;
+		TH1D* &hPassFail = (*this->ObjAll).hMass;
 
-		return false;
-	}
-
-	bool isInSidebandRegion(Double_t InvariantMass)
-	{
-		if (fabs(InvariantMass - M_JPSI) > W_JPSI * signalRegion && fabs(InvariantMass - M_JPSI) < W_JPSI * sidebandRegion)
-			return true;
-
-		return false;
-	}
-
-	void doFit()
-	{
-		//Create fit Function
-		f = new TF1("FitFunction", FitFunctions::Merged::FFit_InvariantMassAll, xMin, xMax, 12);
-		f->SetNpx(1000);
-		f->SetLineStyle(kSolid);
-		f->SetLineColor(color);
-		f->SetLineWidth(3);
-
+		//Passing Fitting
+		TF1* &fPass = this->fitFunctionPass;
+		fPass = new TF1("FitFunction_Pass", FitFunctions::Merged::Pass_InvariantMass, xMin, xMax, 12);
+		
 		//Rename parameters
 		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 		for (int i = 0; i < arraySize; i++)
 		{
-			f->SetParName(i, fittingParName[i]);
+			fPass->SetParName(i, this->fittingParName[i]);
 		}
-		
-		//Values Signal
-		f->SetParameter(0,	340.2);
-		f->SetParameter(1,	3.093);
-		f->SetParLimits(1,  3.08, 3.11);
-		f->SetParameter(2,	0.037);
 
-		f->SetParameter(3,	1.824);
-		f->SetParameter(4,	1.034);
-		f->SetParameter(5,	3.093);
-		f->SetParLimits(5,  3.08, 3.11);
-		f->SetParameter(6,	0.022);
-		f->SetParameter(7,	8322.27);
-
-		//Values Background
-		f->SetParameter(8,	-0.217);
-		f->SetParameter(9,	1.915);
-		f->SetParameter(10, 263.185);
-		f->SetParameter(11,	0.061); 
-
-		//Fit function
-		cout << endl;
-		cout << "Fitting " << *PassingOrFailing << " " << *particleName << "..." << endl;
-		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
-		f->GetParameters(resultParameters);
+		//Failing Fitting
+		TF1* &fFail = this->fitFunctionFail;
+		fFail = new TF1("FitFunction_Fail", FitFunctions::Merged::Fail_InvariantMass, xMin, xMax, 12);
 		
-		//Signal Fitting
-		fs = new TF1("FitFunction_Signal", FitFunctions::Merged::Signal_InvariantMassAll, xMin, xMax, 8);
-		fs->SetNpx(1000);							//Resolution of signal fit function
-		fs->SetParameters(resultParameters);		//Get only signal part
-		fs->SetLineColor(kMagenta); 				//Fit Color
-		fs->SetLineStyle(kSolid);					//Fit Style
-		fs->SetLineWidth(3);						//Fit width
-		
-		//Signal Gaus Fitting
-		fsG = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
-		fsG->SetNpx(1000);							//Resolution of signal fit function
-		fsG->SetParameters(resultParameters);		//Get only signal part
-		fsG->SetLineColor(kGreen);	 				//Fit Color
-		fsG->SetLineStyle(kDashed);					//Fit Style
-		fsG->SetLineWidth(3);						//Fit width
-		
-		//Signal CB Fitting
-		fsCB = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
-		fsCB->SetNpx(1000);							//Resolution of signal fit function
-		fsCB->SetParameters(&resultParameters[3]);	//Get only signal part
-		fsCB->SetLineColor(kRed); 					//Fit Color
-		fsCB->SetLineStyle(kDotted);				//Fit Style
-		fsCB->SetLineWidth(3);						//Fit width
+		//Rename parameters
+		for (int i = 0; i < arraySize; i++)
+		{
+			fFail->SetParName(i, this->fittingParName[i]);
+		}
 
-		//Background Fitting
-		fb = new TF1("FitFunction_Background", FitFunctions::Merged::Background_InvariantMassAll, xMin, xMax, 4);
-		fb->SetNpx(1000);							//Resolution of background fit function
-		fb->SetParameters(&resultParameters[8]);	//Get only background part
-		fb->SetLineColor(color); 					//Fit Color
-		fb->SetLineStyle(kDashDotted);				//Fit style
-		fb->SetLineWidth(3);						//Fit width
+		//Both Fitting
+		TF1* &fPassFail = this->fitFunctionAll;
+		fPassFail = new TF1("FitFunction_Both", FitFunctions::Merged::Both_InvariantMass, xMin, xMax, 24);
+		
+		//Rename parameters
+		for (int i = 0; i < arraySize*2; i++)
+		{
+			fPassFail->SetParName(i, this->fittingParName[i%arraySize]);
+		}
+
+		//Simultaneuos fit
+		ROOT::Math::WrappedMultiTF1 wfPass(*fPass, 1);
+		ROOT::Math::WrappedMultiTF1 wfPassFail(*fPassFail, 1);
+
+		ROOT::Fit::DataOptions opt;
+
+		ROOT::Fit::DataRange rangePass;
+		rangePass.SetRange(xMin, xMax);
+		ROOT::Fit::BinData dataPass(opt, rangePass);
+		ROOT::Fit::FillData(dataPass, hPass);
+
+		ROOT::Fit::DataRange rangePassFail;
+		rangePassFail.SetRange(xMin, xMax);
+		ROOT::Fit::BinData dataPassFail(opt, rangePassFail);
+		ROOT::Fit::FillData(dataPassFail, hPassFail);
+
+		ROOT::Fit::Chi2Function chi2_Pass(dataPass, wfPass);
+		ROOT::Fit::Chi2Function chi2_PassFail(dataPassFail, wfPassFail);
+
+		GlobalChi2 globalChi2(chi2_Pass, chi2_PassFail);
+
+		ROOT::Fit::Fitter fitter;
+
+		double par0[24] = {340.2,
+							3.09,
+							0.037,
+							1.824,
+							1.034,
+							3.093,
+							0.022,
+							8322.27,
+							-0.217,
+							1.915,
+							263.185,
+							0.061,
+							340.2,
+							3.09,
+							0.037,
+							1.824,
+							1.034,
+							3.093,
+							0.022,
+							8322.27,
+							-0.217,
+							1.915,
+							263.185,
+							0.061
+						};
+
+		//Create before the parameter settings in order to fix or set range on them
+		fitter.Config().SetParamsSettings(24, par0);
+
+		//Fit FCN function directly
+		//(specify optionally data size and flag to indicate that is a chi2 fit)
+		fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
+		ROOT::Fit::FitResult result = fitter.Result();
+		result.Print(std::cout);
+
+		//Update Failing fit
+		double resultParameters[24];
+		fPassFail->GetParameters(resultParameters);
+		fFail->SetParameters(&resultParameters[12]);	//Get only failing part
+
+		//Update result
+		this->fitResult = result;
+
+		return this->fitResult;
 	}
 
-	void updateMassParameters()
+	void updateMassFor(PassingFailing* &Obj, TF1* &signalFit)
 	{
-		//Get value and uncertain of signal
-		double center = 0;
-		double fwhm = 0;
+		double value;
+		double fwhm;
 
 		if (*this->method == 1)
 		{
-			//Get value and uncertain of signal
-			int bin0 = this->hMass->GetMaximumBin();
-			center   = this->hMass->GetBinCenter(bin0);
-			int bin1 = this->hMass->FindFirstBinAbove(this->hMass->GetMaximum()/2);
-			int bin2 = this->hMass->FindLastBinAbove(this->hMass->GetMaximum()/2);
-			fwhm     = this->hMass->GetBinCenter(bin2) - this->hMass->GetBinCenter(bin1);
+			//Get value and uncertain of signal by histogram
+			int bin0 = Obj->hMass->GetMaximumBin();
+			value    = Obj->hMass->GetBinCenter(bin0);
+			int bin1 = Obj->hMass->FindFirstBinAbove(Obj->hMass->GetMaximum()/2);
+			int bin2 = Obj->hMass->FindLastBinAbove(Obj->hMass->GetMaximum()/2);
+			fwhm     = Obj->hMass->GetBinCenter(bin2) - Obj->hMass->GetBinCenter(bin1);
 		}
 
 		if (*this->method == 2)
 		{
-			//Get value and uncertain of signal
-			center    = this->fs->GetMaximumX();
-			double x1 = this->fs->GetX(this->fs->GetMaximum()/2);
-			double x2 = this->fs->GetX(this->fs->GetMaximum()/2, x1+0.0001, center + x1*3);
+			//Get value and uncertain of signal by fitting
+			value     = signalFit->GetMaximumX();
+			double x1 = signalFit->GetX(signalFit->GetMaximum()/2);
+			double x2 = signalFit->GetX(signalFit->GetMaximum()/2, x1+0.0001, value + x1*3);
 			fwhm      = x2 - x1;
 		}
 
 		double sigma = fwhm/2.355;
 
-		this->M_JPSI = center;
-		this->W_JPSI = sigma;
+		//For regions of sidebande subtraction
+		Obj->M_JPSI = value;
+		Obj->W_JPSI = sigma;
 
-		*this->subtractionFactor = signalRegion/abs(sidebandRegion - signalRegion);
+		//For sideband subtraction
+		Obj->subtractionFactor = (*this->ObjPass).signalRegion/abs((*this->ObjPass).sidebandRegion - (*this->ObjPass).signalRegion);
 	}
 
-	TBox *createTBox(double Ymax, int index = 0)
+	void updateMassAll()
 	{
-		//index = -1 -> left region
-		//index = 0 -> signal region
-		//index = 1 -> right region
-
-		double dx1, dx2 = 0;
-
-		switch(index)
-		{
-			case -1:
-				dx1 = -sidebandRegion;
-				dx2 = -signalRegion;
-				break;
-			case 0:
-				dx1 = -signalRegion;
-				dx2 = +signalRegion;
-				break;
-			case 1:
-				dx1 = +sidebandRegion;
-				dx2 = +signalRegion;
-				break;
-		}
-
-		double x1 = M_JPSI + W_JPSI * dx1;
-		double x2 = M_JPSI + W_JPSI * dx2;
-
-		TBox *region = new TBox(x1, 0., x2, Ymax);
-
-		return region;
+		updateMassFor(ObjPass, fitFunctionPass);
+		updateMassFor(ObjFail, fitFunctionFail);
+		updateMassFor(ObjAll,  fitFunctionAll);
 	}
 
-	TCanvas *createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSave = false)
+	void drawCanvasQuarter(TCanvas* &canvas, bool drawRegions, int quarter, TH1D* &histo, PassingFailing* &Obj, TF1* &fit, int color = kBlue)
 	{
-		string canvasName 	= "InvariantMass_" + string(*PassingOrFailing);
-		string canvasTitle	= string(*PassingOrFailing) + " Invariant Mass";
-		string saveAs 		= "../result/InvariantMass" + string(*PassingOrFailing) + ".png";
+		float margins[4] = {0.10, 0.02, 0.09, 0.07};
 
-		if (drawRegions)
-		{
-			canvasName 	= "InvariantMass_" + string(*PassingOrFailing) + "_region";
-			canvasTitle	= string(*PassingOrFailing) + " Invariant Mass with Regions";
-			saveAs 		= "../result/InvariantMass" + string(*PassingOrFailing) + "_region" + ".png";
-		}
+		canvas->cd(quarter);
+		canvas->cd(quarter)->SetMargin(margins[0], margins[1], margins[2], margins[3]);
 
-		//Create canvas
-		gStyle->SetCanvasPreferGL(kTRUE);
-		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 600, 600);
-
-		//Set margin for canvas
-		c1->cd(1)->SetMargin(0.15, 0.05, 0.11, 0.07);
-
-		//Set title size for axis and other stuffs for histogram style
-		hMass->GetYaxis()->SetTitleSize(0.04);
-		hMass->GetXaxis()->SetTitleSize(0.05);
-		hMass->GetXaxis()->CenterTitle(true);
-		//hMassAll->SetBit(TH1::kNoTitle);		//Not show histogram title
-		hMass->SetMarkerStyle(20);				//Set markers style
-		hMass->SetMarkerColor(kBlack);			//Set markers colors
-		hMass->SetLineColor(kBlack);			//Set lines colors (for errorbars)
-
-		//Draws histogram & fit function
-		hMass->Draw("ep");
-
-		if (fitFunction != NULL)
-		{
-			fb->Draw("same");
-			fsG->Draw("same");
-			fsCB->Draw("same");
-			f->Draw("same");
-		}
+		histo->SetMarkerStyle(20);		//Set markers style
+		histo->SetMarkerColor(kBlack);	//Set markers colors
+		histo->SetLineColor(kBlack);	//Set errobars color
+		histo->Draw("ep");
 
 		//Draws information
 		TLatex *tx = new TLatex();
@@ -303,58 +315,85 @@ public:
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
 		tx->SetNDC(kTRUE);
-
-
-		if (fitFunction != NULL)
-		{
-			//Show chi-squared test
-			tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",fitResult->Chi2()/fitResult->Ndf()));
-			tx->DrawLatex(0.19,0.88,Form("#bf{CMS Open Data}"));
-			/*
-			//Show number of particles
-			tx->DrawLatex(0.61,0.48,Form("%.0f #pm %.0f J/#psi", S, dS));
-			tx->DrawLatex(0.64,0.43,"(candidates)");
-			*/
-		}
+		tx->DrawLatex(0.14,0.88,Form("#bf{CMS Open Data}"));
 
 		//Add legend
-		TLegend *l = new TLegend(0.65,0.68,0.92,0.90);
+		TLegend *l = new TLegend(0.75,0.80,0.92,0.90);
 		l->SetTextSize(0.04);
-		l->AddEntry(hMass,	"Data"	,"lp");
-		if (fitFunction != NULL)
+		l->AddEntry(histo, "Data", "lp");
+		if (fit != NULL)
 		{
-			l->AddEntry(f,		"Total Fit",	"l");
-			l->AddEntry(fsG,	"Gaussian",		"l");
-			l->AddEntry(fsCB,	"Crystal Ball",	"l");
-			l->AddEntry(fb,		"Exp + Exp",	"l");
+			l->AddEntry(fit, "Total Fit", "l");
 		}
 		l->Draw();
+
+		//Draw fit
+		if (fit != NULL)
+		{
+			fit->SetNpx(1000);
+			fit->SetLineColor(color);
+			fit->SetLineStyle(kSolid);
+			fit->Draw("same");
+		}
+
+		//Draw regions
+		if (drawRegions == true)
+		{
+			//Get Y range of draw
+			gPad->Update();
+			Double_t Ymax = gPad->GetFrame()->GetY2();
+
+			//Draw regions
+			TBox *side1  = Obj->createTBox(Ymax, -1);
+			side1->SetFillColorAlpha(kRed, 0.35);
+			side1->Draw();
+			TBox *signal = Obj->createTBox(Ymax, 0);
+			signal->SetFillColorAlpha(kGreen, 0.35);
+			signal->Draw();
+			TBox *side2  = Obj->createTBox(Ymax, 1);
+			side2->SetFillColorAlpha(kRed, 0.35);
+			side2->Draw();
+		}
+	}
+
+	TCanvas *createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSave = false)
+	{
+		string canvasName 	= "InvariantMass_" + string("Tracker");
+		string canvasTitle	= "Invariant Mass " + string("Tracker");
+		string saveAs 		= "../result/InvariantMass_" + string("Tracker") + ".png";
+
+		if (drawRegions)
+		{
+			canvasName 	= "InvariantMass_" + string("Tracker") + "_region";
+			canvasTitle	= "Invariant Mass " + string("Tracker") + " with Regions";
+			saveAs 		= "../result/InvariantMass_" + string("Tracker") + "_region" + ".png";
+		}
+
+		//Create canvas
+		gStyle->SetCanvasPreferGL(kTRUE);
+		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 800);
+		c1->Divide(2,2);
+
+		this->drawCanvasQuarter(c1, drawRegions, 1, (*this->ObjPass).hMass, ObjPass, fitFunctionPass, kGreen);
+		this->drawCanvasQuarter(c1, drawRegions, 2, (*this->ObjFail).hMass, ObjFail, fitFunctionFail, kRed);
+		this->drawCanvasQuarter(c1, drawRegions, 3, (*this->ObjAll).hMass,  ObjAll,  fitFunctionAll), kBlue;
+
+		c1->cd(4);
+
+		//Draws information
+		TLatex *tx = new TLatex();
+		//tx->SetTextSize(0.04);
+		tx->SetTextAlign(12);
+		tx->SetTextFont(42);
+		tx->SetNDC(kTRUE);
+		tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",(this->fitResult).Chi2()/(this->fitResult).Ndf()));
 
 		//Not show frame with mean, std dev
 		gStyle->SetOptStat(0);
 
-		//Get Y range of draw
-		gPad->Update();
-		Double_t Ymax = gPad->GetFrame()->GetY2();
-		
-		//Draw regions
-		if (drawRegions == true)
-		{
-			TBox *side1 = this->createTBox(Ymax, -1);
-			side1->SetFillColorAlpha(kRed, 0.35);
-			side1->Draw();
-			TBox *signal = this->createTBox(Ymax, 0);
-			signal->SetFillColorAlpha(kGreen, 0.35);
-			signal->Draw();
-			TBox *side2 = this->createTBox(Ymax, 1);
-			side2->SetFillColorAlpha(kRed, 0.35);
-			side2->Draw();
-		}
-
 		//Writes in file
 		if (shouldWrite == true)
 		{
-			//Here code crashes when it runs for the 2nd time
 			c1->Write();
 		}
 
@@ -368,23 +407,7 @@ public:
 		return c1;
 	}
 
-	void debugCout()
-	{
-		//Show chi-squared test (on prompt)
-		cout << endl;
-		cout << "Fitting overview for " << *PassingOrFailing << " " << *particleName << endl;
-		cout << "- Chi2/ndf          = " << f->GetChisquare()/f->GetNDF() << endl;
-		cout << "- Gaus(Sg) Position = " << resultParameters[1] << " +- " << resultParameters[2] << endl;
-		cout << "- CB  (Sg) Position = " << resultParameters[5] << " +- " << resultParameters[6] << endl;
-		cout << "- Position result   = " << M_JPSI << " +- " << W_JPSI << " [" << M_JPSI - W_JPSI*3 << ", " << M_JPSI + W_JPSI*3  << "]" << endl;
-		cout << "- #HistIntegral     = " << hMass->Integral(0, hMass->GetNbinsX()) << endl;
-		cout << "- #Total      (fit) = " << f ->Integral(xMin, xMax) * scale << endl;
-		cout << "- #Background (fit) = " << fb->Integral(xMin, xMax) * scale << endl;
-		cout << "- #Signal     (fit) = " << fs->Integral(xMin, xMax) * scale << endl;
-		cout << endl;
-	}
-
-	InvariantMass(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing)
-	{}
+	InvariantMass(int *method, const char **particleName, PassingFailing *Passing, PassingFailing *Failing, PassingFailing *All)
+		: method(method), particleName(particleName), ObjPass(Passing), ObjFail(Failing), ObjAll(All)
+		{}
 };

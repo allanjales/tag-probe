@@ -65,18 +65,28 @@ public:
 	{
 	public:
 		//Fit function for signal for Invariant Mass Probe
-		static Double_t Signal_InvariantMassAll(Double_t *x, Double_t *par) {
+		static Double_t Signal_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::Gaus(x,par) + FitFunctions::Primary::CrystalBall(x, &par[3]);
 		}
 
 		//Fit function for background for Invariant Mass Probe
-		static Double_t Background_InvariantMassAll(Double_t *x, Double_t *par) {
+		static Double_t Background_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::Exp(x,par) + FitFunctions::Primary::Exp(x, &par[2]);
 		}
 
-		//Fit function for signal & background for Invariant Mass Probe
-		static Double_t FFit_InvariantMassAll(Double_t *x, Double_t *par) {
-			return FitFunctions::Merged::Signal_InvariantMassAll(x,par) + FitFunctions::Merged::Background_InvariantMassAll(x, &par[8]);
+		//Fit function for signal & background for Invariant Mass (Passing)
+		static Double_t Pass_InvariantMass(Double_t *x, Double_t *par) {
+			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
+		}
+
+		//Fit function for signal & background for Invariant Mass (Failing)
+		static Double_t Fail_InvariantMass(Double_t *x, Double_t *par) {
+			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
+		}
+
+		//Fit function for signal & background for Invariant Mass (Both above)
+		static Double_t Both_InvariantMass(Double_t *x, Double_t *par) {
+			return FitFunctions::Merged::Pass_InvariantMass(x,par) + FitFunctions::Merged::Fail_InvariantMass(x, &par[12]);
 		}
 	};
 };

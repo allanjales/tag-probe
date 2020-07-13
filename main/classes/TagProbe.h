@@ -6,15 +6,14 @@ private:
 	int *method;
 	double *subtractionFactor;
 	const char **particleName;
-	const char **particleReconstruction;
 	const char **PassingOrFailing;
 
 public:
 	const char *tagOrProbe = NULL;
 
-	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->particleReconstruction, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
 
 	void defineDefaultHistogramsTexts()
 	{
@@ -124,7 +123,7 @@ public:
 		this->Phi.debugCout();
 	}
 
-	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **particleReconstruction, const char **PassingOrFailing, const char *tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), particleReconstruction(particleReconstruction), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char *tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };
