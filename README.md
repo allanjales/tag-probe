@@ -2,24 +2,30 @@
 
 > Tag &amp; probe efficiency calculus project
 
-## Note
-
-Link to our [Google Drive](https://drive.google.com/drive/folders/1KZ0OyHnHObX_z6l_ZQ3LN4n7lWHzJ9Fy).
-
 ## Necessary files and preparation
 
-Note: Some steps below are now outdate. We are working on data file.
+The analysed datas are from those files:
+* [0] [DoubleMu_data_ntuples.tar]() - obsolete (Old ntupple. Need to be merged. Current name after merge should be `data_histoall.root`)
+* [1] [Run2011AMuOnia_mergeNtuple.root]()
+* [2] [JPsiToMuMu_mergeMCNtuple.root]()
 
-The analysed datas are from this file:
-* [DoubleMu_data_ntuples.tar]() (It is not the one on Google Drive. I need to replace)
+After download one of those files, you can run the code. Don't forget to use `useNewData` (int) var in `macro.cpp` file to set which ntupple did you choose. Just set the current id above of it.
 
-After download the file, you will need to merge all `.root` files  in one `data_histoall.root` file and put it in the same diretory of downloaded code. Here follows how to merge the histogram files. Run in the same directory of hisograms:
+It is necessary to have a folder named `result` on `main` folder side.
 
-```sh
-$ hadd data_histoall.root *.root
+## Preferences
+
+You can change the method to estimate signal region by modifying `Muon.setMethod(1)` line by choosing 1 (estimate by FWHM of histograms) or 2 (estimate by FWHM of fitting):
+
+```cpp
+Muon.setMethod(1);
 ```
 
-It is necessary to have a folder named `result` on `master` folder side.
+Change this line to specify the ntupple you are analysing by choosing 0 (old ntupple), 1 (run 2011 ntupple) or 2 (monte carlo ntupple):
+
+```cpp
+int useNewData = 1;
+```
 
 ## Development setting
 
@@ -30,28 +36,9 @@ Go on your folder where the file code is downloaded and run:
 ```sh
 $ cd main
 $ root -l -n
-root[0] .L macro.cc
+root[0] .L macro.cpp+
 root[1] macro()
 ```
 
-## Generated files and images
-
-![](result/InvariantMassPassing.png)
-
-
-![](result/PtPassingProbe.png)
-
-![](result/EtaPassingProbe.png)
-
-![](result/PhiPassingProbe.png)
-
-
-![](result/PtPassingProbe_Efficiency.png)
-
-![](result/EtaPassingProbe_Efficiency.png)
-
-![](result/PhiPassingProbe_Efficiency.png)
-
-
 ## Output
-In addition a .root file is generated named `generated_hist.root` with all canvas above and histograms inside.
+Images are created in `result` folder. In addition a .root file is generated named `generated_hist.root` with all canvas and histograms.
