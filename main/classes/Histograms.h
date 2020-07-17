@@ -54,9 +54,6 @@ public:
 	Double_t 	xMin;
 	Double_t	xMax;
 
-	double signalRegionEnd 		= 0;
-	double sidebandRegionEnd	= 0;
-
 	TH1D *hSigBack 		= NULL;
 	TH1D *hSig 			= NULL;
 	TH1D *hBack 		= NULL;

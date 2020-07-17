@@ -88,14 +88,14 @@ private:
 	const char **particleName;
 
 	//Pointer to objects
-	PassingFailing* ObjPass = NULL;
-	PassingFailing* ObjFail = NULL;
-	PassingFailing* ObjAll = NULL;
+	PassingFailing* ObjPass;
+	PassingFailing* ObjFail;
+	PassingFailing* ObjAll;
 
 	//Self fit functions
-	TF1* fitFunctionPass 	= NULL;
-	TF1* fitFunctionFail 	= NULL;
-	TF1* fitFunctionAll		= NULL;
+	TF1* fitFunctionPass;
+	TF1* fitFunctionFail;
+	TF1* fitFunctionAll;
 
 	ROOT::Fit::FitResult fitResult;
 
@@ -152,16 +152,16 @@ public:
 
 	ROOT::Fit::FitResult doFit()
 	{
-		TH1D* &hPass = (*this->ObjPass).hMass;
-		TH1D* &hFail = (*this->ObjFail).hMass;
+		TH1D* &hPass 	 = (*this->ObjPass).hMass;
+		TH1D* &hFail 	 = (*this->ObjFail).hMass;
 		TH1D* &hPassFail = (*this->ObjAll).hMass;
+
+		//Get size of parNames
+		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 
 		//Passing Fitting
 		TF1* &fPass = this->fitFunctionPass;
 		fPass = new TF1("FitFunction_Pass", FitFunctions::Merged::Pass_InvariantMass, xMin, xMax, 12);
-		
-		//Rename parameters
-		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 		for (int i = 0; i < arraySize; i++)
 		{
 			fPass->SetParName(i, this->fittingParName[i]);
@@ -170,8 +170,6 @@ public:
 		//Failing Fitting
 		TF1* &fFail = this->fitFunctionFail;
 		fFail = new TF1("FitFunction_Fail", FitFunctions::Merged::Fail_InvariantMass, xMin, xMax, 12);
-		
-		//Rename parameters
 		for (int i = 0; i < arraySize; i++)
 		{
 			fFail->SetParName(i, this->fittingParName[i]);
@@ -180,8 +178,6 @@ public:
 		//Both Fitting
 		TF1* &fPassFail = this->fitFunctionAll;
 		fPassFail = new TF1("FitFunction_Both", FitFunctions::Merged::Both_InvariantMass, xMin, xMax, 24);
-		
-		//Rename parameters
 		for (int i = 0; i < arraySize*2; i++)
 		{
 			fPassFail->SetParName(i, this->fittingParName[i%arraySize]);
@@ -239,6 +235,15 @@ public:
 		//Create before the parameter settings in order to fix or set range on them
 		fitter.Config().SetParamsSettings(24, par0);
 
+		//Rename global parameters
+		for (int i = 0; i < arraySize*2; i++)
+		{
+			fitter.Config().ParSettings(i).SetName(this->fittingParName[i%arraySize]);
+		}
+
+		//Set limits for failing
+		fitter.Config().ParSettings(13).SetLimits(3.08, 3.10);	//Gauss position
+
 		//Fit FCN function directly
 		//(specify optionally data size and flag to indicate that is a chi2 fit)
 		fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
@@ -248,7 +253,7 @@ public:
 		//Update Failing fit
 		double resultParameters[24];
 		fPassFail->GetParameters(resultParameters);
-		fFail->SetParameters(&resultParameters[12]);	//Get only failing part
+		fFail->SetParameters(&resultParameters[12]);
 
 		//Update result
 		this->fitResult = result;
@@ -299,6 +304,7 @@ public:
 
 	void drawCanvasQuarter(TCanvas* &canvas, bool drawRegions, int quarter, TH1D* &histo, PassingFailing* &Obj, TF1* &fit, int color = kBlue)
 	{
+		bool shouldDrawAllFitFunctions = true;
 		float margins[4] = {0.10, 0.02, 0.09, 0.07};
 
 		canvas->cd(quarter);
@@ -318,14 +324,10 @@ public:
 		tx->DrawLatex(0.14,0.88,Form("#bf{CMS Open Data}"));
 
 		//Add legend
-		TLegend *l = new TLegend(0.75,0.80,0.92,0.90);
-		l->SetTextSize(0.04);
-		l->AddEntry(histo, "Data", "lp");
-		if (fit != NULL)
-		{
-			l->AddEntry(fit, "Total Fit", "l");
-		}
-		l->Draw();
+		TLegend *tl = new TLegend(0.75,0.80,0.92,0.92);
+		tl->SetTextSize(0.04);
+		tl->AddEntry(histo, "Data", "lp");
+		tl->Draw();
 
 		//Draw fit
 		if (fit != NULL)
@@ -334,6 +336,54 @@ public:
 			fit->SetLineColor(color);
 			fit->SetLineStyle(kSolid);
 			fit->Draw("same");
+			tl->AddEntry(fit, "Total Fit", "l");
+
+			//If is showing pass and fail fit
+			if (quarter < 3 && shouldDrawAllFitFunctions == true)
+			{
+				//Change the size of TLegend
+				tl->SetY1(tl->GetX1() - 0.02*3);
+
+				//Get parameters of fit
+				double fitParameters[12];
+				fit->GetParameters(fitParameters);
+
+				//Signal Gaus Fitting
+				TF1* fitGaus = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
+				fitGaus->SetNpx(1000);						//Resolution of signal fit function
+				fitGaus->SetParameters(fitParameters);		//Get only signal part
+				fitGaus->SetLineColor(kMagenta); 			//Fit Color
+				fitGaus->SetLineStyle(kDashed);				//Fit Style
+				fitGaus->SetLineWidth(3);					//Fit width
+				fitGaus->Draw("same");
+				for (int i = 0; i < 12; i++)
+					fitGaus->SetParName(i, this->fittingParName[i]);
+				tl->AddEntry(fitGaus, "Gaussian",    "l");
+				
+				//Signal CB Fitting
+				TF1* fitCB = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
+				fitCB->SetNpx(1000);						//Resolution of signal fit function
+				fitCB->SetParameters(&fitParameters[3]);	//Get only signal part
+				fitCB->SetLineColor(kOrange); 				//Fit Color
+				fitCB->SetLineStyle(kDotted);				//Fit Style
+				fitCB->SetLineWidth(3);						//Fit width
+				fitCB->Draw("same");
+				for (int i = 0; i < 12; i++)
+					fitCB->SetParName(i, this->fittingParName[i+3]);
+				tl->AddEntry(fitCB,	 "Crystal Ball", "l");
+
+				//Background Fitting
+				TF1* fitExp = new TF1("FitFunction_Background", FitFunctions::Merged::Background_InvariantMass, xMin, xMax, 4);
+				fitExp->SetNpx(1000);						//Resolution of background fit function
+				fitExp->SetParameters(&fitParameters[8]);	//Get only background part
+				fitExp->SetLineColor(kBlue); 				//Fit Color
+				fitExp->SetLineStyle(kDashDotted);			//Fit style
+				fitExp->SetLineWidth(3);					//Fit width
+				fitExp->Draw("same");
+				for (int i = 0; i < 12; i++)
+					fitExp->SetParName(i, this->fittingParName[i+8]);
+				tl->AddEntry(fitExp, "Exp + Exp",	 "l");
+			}
 		}
 
 		//Draw regions

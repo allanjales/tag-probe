@@ -23,7 +23,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 							"Run2011AMuOnia_mergeNtuple.root",
 							"JPsiToMuMu_mergeMCNtuple.root"};
 
-	int useFile = 1;
+	int useFile = 0;
 
 	//Compatibility adjusts on file read
 	string folderName = "tagandprobe/";

@@ -6,8 +6,6 @@ private:
 	int *method;
 	const char **particleName;
 
-	double scale = 1.;
-
 public:
 	const char *PassingOrFailing = NULL;
 

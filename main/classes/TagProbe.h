@@ -43,13 +43,6 @@ public:
 		this->Phi.hBack->Fill(PhiValue);
 	}
 
-	void fillSigHistograms(Double_t PtValue, Double_t EtaValue, Double_t PhiValue)
-	{
-		this->Pt .hSig->Fill(PtValue);
-		this->Eta.hSig->Fill(EtaValue);
-		this->Phi.hSig->Fill(PhiValue);
-	}
-
 	void createSigBackHistograms()
 	{
 		this->Pt .createSigBackHistogram();
