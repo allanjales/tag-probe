@@ -19,28 +19,23 @@ using namespace std;
 //Select particles, draws and save histograms
 void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDrawInvariantMassCanvasRegion = true, bool shouldDrawQuantitiesCanvas = true, bool shouldDrawEfficiencyCanvas = true)
 {
-	TFile *file0 = TFile::Open("../data_histoall.root");		//Opens the file
-	TTree *TreePC = (TTree*)file0->Get("demo/PlotControl");		//Opens TTree of file
-	TTree *TreeAT = (TTree*)file0->Get("demo/AnalysisTree");	//Opens TTree of file
+	const char *files[3] = {"data_histoall.root",
+							"Run2011AMuOnia_mergeNtuple.root",
+							"JPsiToMuMu_mergeMCNtuple.root"};
 
-	//Temporary var for test
-	int useNewData = 2;
-	//0 -> Raphael Ntupple
-	//1 -> New 2011 Run Ntupple
-	//2 -> New MC Ntupple
-	int  limitData 	= 0; //0 -> do not limit
+	int useFile = 0;
 
-	if (useNewData != 0)
-	{
-		file0 = TFile::Open("../Run2011AMuOnia_mergeNtuple.root");	//Opens the file
-		
-		//If is MC
-		if (useNewData == 2)
-			file0 = TFile::Open("../JPsiToMuMu_mergeMCNtuple.root");
+	//Compatibility adjusts on file read
+	string folderName = "tagandprobe/";
+	if (useFile == 0)
+		folderName = "demo/";
 
-		TreePC = (TTree*)file0->Get("tagandprobe/PlotControl");		//Opens TTree of file
-		TreeAT = (TTree*)file0->Get("tagandprobe/AnalysisTree");	//Opens TTree of file
-	}
+	//Open and read files
+	TFile *file0  = TFile::Open(("../" + string(files[useFile])).data());
+	TTree *TreePC = (TTree*)file0->Get((folderName + "PlotControl").data());
+	TTree *TreeAT = (TTree*)file0->Get((folderName + "AnalysisTree").data());
+
+	int limitData = 0; //0 -> do not limit
 	
 	//Create variables
 	double ProbeMuon_Pt;
@@ -61,7 +56,7 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	TreePC->SetBranchAddress("TagMuon_Pt",					&TagMuon_Pt);
 	TreePC->SetBranchAddress("TagMuon_Eta",					&TagMuon_Eta);
 	TreePC->SetBranchAddress("TagMuon_Phi",					&TagMuon_Phi);
-	if (useNewData == 0)
+	if (useFile == 0)
 	TreePC->SetBranchAddress("InvariantMass",				&InvariantMass);
 	else
 	TreeAT->SetBranchAddress("InvariantMass",				&InvariantMass);
@@ -194,9 +189,13 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 	generatedFile->cd("efficiency/plots/");
 
 	//Creates efficiency plots
-	Muon.Pass.createEfficiencyPlot();
-	Muon.Fail.createEfficiencyPlot();
-	Muon.Both.createEfficiencyPlot();
+	{
+		bool shouldWrite 	= true;
+
+		Muon.Pass.createEfficiencyPlot(shouldWrite);
+		Muon.Fail.createEfficiencyPlot(shouldWrite);
+		Muon.Both.createEfficiencyPlot(shouldWrite);
+	}
 
 
 	//Saves new histograms and canvas in file
@@ -205,9 +204,12 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 
 	if (shouldDrawEfficiencyCanvas)
 	{
-		Muon.Pass.createEfficiencyCanvas();
-		Muon.Fail.createEfficiencyCanvas();
-		Muon.Both.createEfficiencyCanvas();
+		bool shouldWrite 	= true;
+		bool shouldSave 	= true;
+
+		Muon.Pass.createEfficiencyCanvas(shouldWrite, shouldSave);
+		Muon.Fail.createEfficiencyCanvas(shouldWrite, shouldSave);
+		Muon.Both.createEfficiencyCanvas(shouldWrite, shouldSave);
 	}
 
 	//Close files
@@ -217,10 +219,10 @@ void generateHistograms(bool shouldDrawInvariantMassCanvas = true, bool shouldDr
 //Call functions
 void macro()
 {
-	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
 	generateHistograms(shouldDrawInvariantMassCanvas, shouldDrawInvariantMassCanvasRegion, shouldDrawQuantitiesCanvas, shouldDrawEfficiencyCanvas);
 }
