@@ -11,8 +11,6 @@ The analysed datas are from those files:
 
 After download one of those files, you can run the code. Don't forget to use `useNewData` (int) var in `macro.cpp` file to set which ntupple did you choose. Just set the current id above of it.
 
-It is necessary to have a folder named `result` on `main` folder side.
-
 ## Preferences
 
 You can change the method to estimate signal region by modifying `Muon.setMethod(1)` line by choosing 1 (estimate by FWHM of histograms) or 2 (estimate by FWHM of fitting):
@@ -41,4 +39,4 @@ root[1] macro()
 ```
 
 ## Output
-Images are created in `result` folder. In addition a .root file is generated named `generated_hist.root` with all canvas and histograms.
+Images are created in `result` folder. In addition, a .root file is generated named `generated_hist.root` with all canvas and histograms.

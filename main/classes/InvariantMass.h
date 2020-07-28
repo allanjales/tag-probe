@@ -84,7 +84,6 @@ struct GlobalChi2 {
 class InvariantMass{
 private:
 	int *method;
-	double *subtractionFactor;
 	const char **particleName;
 
 	//Pointer to objects
