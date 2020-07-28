@@ -206,6 +206,8 @@ public:
 
 		ROOT::Fit::Fitter fitter;
 
+/*
+ORIGINAL
 		double par0[24] = {340.2,
 							3.09,
 							0.037,
@@ -231,6 +233,37 @@ public:
 							263.185,
 							0.061
 						};
+*/
+
+		double par0[24] = {340.2,
+							3.09,
+							0.037,
+							1.824,
+							1.034,
+							3.093,
+							0.022,
+							8322.27,
+							-0.217,
+							1.915,
+							263.185,
+							0.061,
+
+
+							97.9,
+							3.094,
+							0.21,
+
+							1.35,
+							148.,
+							3.093,
+							0.027,
+							836.63,
+
+							-1.217,
+							1.915,
+							1.185,
+							2.061
+						};
 
 		//Create before the parameter settings in order to fix or set range on them
 		fitter.Config().SetParamsSettings(24, par0);
@@ -242,7 +275,8 @@ public:
 		}
 
 		//Set limits for failing
-		fitter.Config().ParSettings(13).SetLimits(3.08, 3.10);	//Gauss position
+		//fitter.Config().ParSettings(13).SetLimits(3.06, 3.16);	//Gauss position
+		//fitter.Config().ParSettings(17).SetLimits(3.06, 3.11);	//Crystallball position
 
 		//Fit FCN function directly
 		//(specify optionally data size and flag to indicate that is a chi2 fit)
