@@ -88,7 +88,6 @@ private:
 
 	//Pointer to objects
 	PassingFailing* ObjPass;
-	PassingFailing* ObjFail;
 	PassingFailing* ObjAll;
 
 	//Self fit functions
@@ -145,14 +144,12 @@ public:
 	void createAllMassHistograms()
 	{
 		createMassHistogram((*this->ObjPass).hMass, "Passing tracker");
-		createMassHistogram((*this->ObjFail).hMass, "Failing tracker");
 		createMassHistogram((*this->ObjAll).hMass,  "All");
 	}
 
 	ROOT::Fit::FitResult doFit()
 	{
 		TH1D* &hPass 	 = (*this->ObjPass).hMass;
-		TH1D* &hFail 	 = (*this->ObjFail).hMass;
 		TH1D* &hPassFail = (*this->ObjAll).hMass;
 
 		//Get size of parNames
@@ -296,8 +293,8 @@ ORIGINAL
 
 	void updateMassFor(PassingFailing* &Obj, TF1* &signalFit)
 	{
-		double value;
-		double fwhm;
+		double value = 0;
+		double fwhm = 0;
 
 		if (*this->method == 1)
 		{
@@ -331,14 +328,13 @@ ORIGINAL
 	void updateMassAll()
 	{
 		updateMassFor(ObjPass, fitFunctionPass);
-		updateMassFor(ObjFail, fitFunctionFail);
 		updateMassFor(ObjAll,  fitFunctionAll);
 	}
 
 	void drawCanvasQuarter(TCanvas* &canvas, bool drawRegions, int quarter, TH1D* &histo, PassingFailing* &Obj, TF1* &fit, int color = kBlue)
 	{
 		bool shouldDrawAllFitFunctions = true;
-		float margins[4] = {0.10, 0.02, 0.09, 0.07};
+		float margins[4] = {0.13, 0.02, 0.09, 0.07};
 
 		canvas->cd(quarter);
 		canvas->cd(quarter)->SetMargin(margins[0], margins[1], margins[2], margins[3]);
@@ -354,10 +350,10 @@ ORIGINAL
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
 		tx->SetNDC(kTRUE);
-		tx->DrawLatex(0.14,0.88,Form("#bf{CMS Open Data}"));
+		tx->DrawLatex(0.16,0.88,Form("#bf{CMS Open Data}"));
 
 		//Add legend
-		TLegend *tl = new TLegend(0.75,0.80,0.92,0.92);
+		TLegend *tl = new TLegend(0.70,0.80,0.96,0.92);
 		tl->SetTextSize(0.04);
 		tl->AddEntry(histo, "Data", "lp");
 		tl->Draw();
@@ -372,7 +368,7 @@ ORIGINAL
 			tl->AddEntry(fit, "Total Fit", "l");
 
 			//If is showing pass and fail fit
-			if (quarter < 3 && shouldDrawAllFitFunctions == true)
+			if (quarter < 2 && shouldDrawAllFitFunctions == true)
 			{
 				//Change the size of TLegend
 				tl->SetY1(tl->GetX1() - 0.02*3);
@@ -454,14 +450,13 @@ ORIGINAL
 
 		//Create canvas
 		gStyle->SetCanvasPreferGL(kTRUE);
-		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 800);
-		c1->Divide(2,2);
+		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 600);
+		c1->Divide(2,1);
 
 		this->drawCanvasQuarter(c1, drawRegions, 1, (*this->ObjPass).hMass, ObjPass, fitFunctionPass, kGreen);
-		this->drawCanvasQuarter(c1, drawRegions, 2, (*this->ObjFail).hMass, ObjFail, fitFunctionFail, kRed);
-		this->drawCanvasQuarter(c1, drawRegions, 3, (*this->ObjAll).hMass,  ObjAll,  fitFunctionAll), kBlue;
+		this->drawCanvasQuarter(c1, drawRegions, 2, (*this->ObjAll).hMass,  ObjAll,  fitFunctionAll, kBlue);
 
-		c1->cd(4);
+		c1->cd(2);
 
 		//Draws information
 		TLatex *tx = new TLatex();
@@ -490,7 +485,7 @@ ORIGINAL
 		return c1;
 	}
 
-	InvariantMass(int *method, const char **particleName, PassingFailing *Passing, PassingFailing *Failing, PassingFailing *All)
-		: method(method), particleName(particleName), ObjPass(Passing), ObjFail(Failing), ObjAll(All)
+	InvariantMass(int *method, const char **particleName, PassingFailing *Passing, PassingFailing *All)
+		: method(method), particleName(particleName), ObjPass(Passing), ObjAll(All)
 		{}
 };

@@ -13,16 +13,14 @@ public:
 	const char *particleName = "Muon";
 
 	PassingFailing TrackerPass{&this->method, &this->particleName, "Tracker Passing"};
-	PassingFailing TrackerFail{&this->method, &this->particleName, "Tracker Failing"};
 	PassingFailing All        {&this->method, &this->particleName, "Tracker All"};
 
-	InvariantMass MassTracker{&this->method, &this->particleName, &this->TrackerPass, &this->TrackerFail, &this->All};
+	InvariantMass MassTracker{&this->method, &this->particleName, &this->TrackerPass, &this->All};
 
 	void setMethod(int method)
 	{
 		this->method = method;
 		this->TrackerPass.prepareMethod();
-		this->TrackerFail.prepareMethod();
 		this->All        .prepareMethod();
 
 		this->MassTracker.defineNumbers(240, 2.8, 3.4);
@@ -42,20 +40,14 @@ public:
 	void subtractSigHistograms()
 	{
 		this->TrackerPass.subtractSigHistograms();
-		this->TrackerFail.subtractSigHistograms();
 		this->All        .subtractSigHistograms();
 	}
 
-	void writeMassHistograms(bool writehPass, bool writehFail, bool writehAll)
+	void writeMassHistograms(bool writehPass, bool writehAll)
 	{
 		if (writehPass == true)
 		{
 			TrackerPass.hMass->Write();
-		}
-		
-		if (writehFail == true)
-		{
-			TrackerFail.hMass->Write();
 		}
 		
 		if (writehAll == true)
@@ -69,7 +61,6 @@ public:
 		cout << endl;
 		cout << "Checking histograms number inconsistency (should be 0)" << endl;
 		this->TrackerPass.debugCout();
-		this->TrackerFail.debugCout();
 		this->All        .debugCout();
 	}
 };
