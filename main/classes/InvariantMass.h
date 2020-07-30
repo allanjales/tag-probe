@@ -92,7 +92,6 @@ private:
 
 	//Self fit functions
 	TF1* fitFunctionPass;
-	TF1* fitFunctionFail;
 	TF1* fitFunctionAll;
 
 	ROOT::Fit::FitResult fitResult;
@@ -161,14 +160,6 @@ public:
 		for (int i = 0; i < arraySize; i++)
 		{
 			fPass->SetParName(i, this->fittingParName[i]);
-		}
-
-		//Failing Fitting
-		TF1* &fFail = this->fitFunctionFail;
-		fFail = new TF1("FitFunction_Fail", FitFunctions::Merged::Fail_InvariantMass, xMin, xMax, 12);
-		for (int i = 0; i < arraySize; i++)
-		{
-			fFail->SetParName(i, this->fittingParName[i]);
 		}
 
 		//Both Fitting
@@ -279,11 +270,6 @@ ORIGINAL
 		fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
 		ROOT::Fit::FitResult result = fitter.Result();
 		result.Print(std::cout);
-
-		//Update Failing fit
-		double resultParameters[24];
-		fPassFail->GetParameters(resultParameters);
-		fFail->SetParameters(&resultParameters[12]);
 
 		//Update result
 		this->fitResult = result;

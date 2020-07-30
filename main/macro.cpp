@@ -30,7 +30,7 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 2;
+	int useFile = 0;
 
 	//Path where is going to save results 
 	const char* directoryToSave = "../result/";
