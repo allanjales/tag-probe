@@ -5,7 +5,7 @@
 	* Initial parameters set to pointers in all classes;
 	* Changed to standard pointer form (`const char *example` -> `const char* example`);
 	* lowercase `const char* PassingOrFailing` -> `const char* passingOrFailing`;
-	* Moved ROOT types from `Double_t`, `Int_t` and `Long64_t` for C++ types `double`, `int` and `long long long`;
+	* Moved ROOT types from `Double_t`, `Int_t` and `Long64_t` for C++ types `double`, `int` and `long long`;
 	* Changed the name of function `createAllMassHistograms()` in invariantMass.h to `createPassingAndAllMassHistograms()`;
 	* Added argument in `createMassHistogram(...)`: `bool alertIfCant = true`;
 	* Changed function `createMassHistogram(...)` and `createPassingAndAllMassHistograms()`;
