@@ -3,11 +3,11 @@
 //Holder for 2 TagProbe class
 class PassingFailing{
 private:
-	int *method;
-	const char **particleName;
+	int* method 				= NULL;
+	const char** particleName 	= NULL;
 
 public:
-	const char *PassingOrFailing = NULL;
+	const char* passingOrFailing = NULL;
 
 	TH1D* hMass = NULL;
 
@@ -20,8 +20,8 @@ public:
 	double W_JPSI = 0;
 	double subtractionFactor = 1.;
 
-	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Tag"};
-	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->PassingOrFailing, "Probe"};
+	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->passingOrFailing, "Tag"};
+	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->passingOrFailing, "Probe"};
 
 	void prepareMethod()
 	{
@@ -43,13 +43,13 @@ public:
 		this->Probe.defineDefaultHistogramsNumbers();
 	}
 
-	void fillSigBackHistograms(Double_t TagPtValue, Double_t TagEtaValue, Double_t TagPhiValue, Double_t ProbePtValue, Double_t ProbeEtaValue, Double_t ProbePhiValue)
+	void fillSigBackHistograms(double TagPtValue, double TagEtaValue, double TagPhiValue, double ProbePtValue, double ProbeEtaValue, double ProbePhiValue)
 	{
 		this->Tag  .fillSigBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
 		this->Probe.fillSigBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
 	}
 
-	void fillBackHistograms(Double_t TagPtValue, Double_t TagEtaValue, Double_t TagPhiValue, Double_t ProbePtValue, Double_t ProbeEtaValue, Double_t ProbePhiValue)
+	void fillBackHistograms(double TagPtValue, double TagEtaValue, double TagPhiValue, double ProbePtValue, double ProbeEtaValue, double ProbePhiValue)
 	{
 		this->Tag  .fillBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
 		this->Probe.fillBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
@@ -73,10 +73,10 @@ public:
 		this->Probe.subtractSigHistograms();
 	}
 
-	void createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
+	void createDividedCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
 	{
-		this->Tag  .createDividedCanvas(shouldWrite, shouldSave);
-		this->Probe.createDividedCanvas(shouldWrite, shouldSave);
+		this->Tag  .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Probe.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
 	}
 
 	void write(bool hSigBack, bool hSig, bool hBack)
@@ -91,13 +91,13 @@ public:
 		this->Probe.createEfficiencyPlot(shouldWrite);
 	}
 
-	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSave = true)
+	void createEfficiencyCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = true)
 	{
-		this->Tag  .createEfficiencyCanvas(shouldWrite, shouldSave);
-		this->Probe.createEfficiencyCanvas(shouldWrite, shouldSave);
+		this->Tag  .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Probe.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
 	}
 
-	TBox *createTBox(double Ymax, int index = 0)
+	TBox* createTBox(double Ymax, int index = 0)
 	{
 		//index = -1 -> left region
 		//index = 0 -> signal region
@@ -124,7 +124,7 @@ public:
 		double x1 = M_JPSI + W_JPSI * dx1;
 		double x2 = M_JPSI + W_JPSI * dx2;
 
-		TBox *region = new TBox(x1, 0., x2, Ymax);
+		TBox* region = new TBox(x1, 0., x2, Ymax);
 
 		return region;
 	}
@@ -166,7 +166,7 @@ public:
 		this->Probe.debugCout();
 	}
 
-	PassingFailing(int *method, const char **particleName, const char *PassingOrFailing)
-		: method(method), particleName(particleName), PassingOrFailing(PassingOrFailing)
+	PassingFailing(int* method, const char** particleName, const char* passingOrFailing)
+		: method(method), particleName(particleName), passingOrFailing(passingOrFailing)
 	{}
 };

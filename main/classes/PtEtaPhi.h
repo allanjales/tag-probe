@@ -11,20 +11,20 @@
 
 using namespace std;
 
-//Pt, Eta, Phi histograms
-class Histograms{
+//Pt, Eta, Phi histograms holder
+class PtEtaPhi{
 private:
-	int *method;
-	double *subtractionFactor;
-	const char **particleName;
-	const char **PassingOrFailing;
-	const char **tagOrProbe;
+	int* method 					= NULL;
+	double* subtractionFactor 		= NULL;
+	const char** particleName 		= NULL;
+	const char** passingOrFailing 	= NULL;
+	const char** tagOrProbe 		= NULL;
 
-	void createHistogram(TH1D* &histo, const char *histoName)
+	void createHistogram(TH1D* &histo, const char* histoName)
 	{
 		//Define parameters
-		string hName 		= string(*PassingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + string(histoName);
-		string hTitle 		= string(extendedQuantityName) + " (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string hName 		= string(*passingOrFailing) + string(*tagOrProbe) + string(*particleName) + "_" + string(quantityName) + string(histoName);
+		string hTitle 		= string(extendedQuantityName) + " (" + string(*passingOrFailing) + " " + string(*tagOrProbe) + ")";
 		string xAxisTitle 	= xAxisName;
 		string yAxisTitleForm;
 		if (strcmp(quantityUnit, "") == 0)
@@ -44,22 +44,22 @@ private:
 	}
 
 public:
-	const char *quantityName 			= NULL;
-	const char *extendedQuantityName	= NULL;
-	const char *quantityUnit			= NULL;
-	const char *xAxisName				= NULL;
+	const char* quantityName 			= NULL;
+	const char* extendedQuantityName	= NULL;
+	const char* quantityUnit			= NULL;
+	const char* xAxisName				= NULL;
 
-	Int_t 		nBins;
-	int 		decimals = 3;
-	Double_t 	xMin;
-	Double_t	xMax;
+	int 	nBins;
+	int 	decimals = 3;
+	double 	xMin;
+	double	xMax;
 
-	TH1D *hSigBack 		= NULL;
-	TH1D *hSig 			= NULL;
-	TH1D *hBack 		= NULL;
+	TH1D* hSigBack 		= NULL;
+	TH1D* hSig 			= NULL;
+	TH1D* hBack 		= NULL;
 	TEfficiency* pEff 	= NULL;
 
-	void defineTexts(const char *quantityName, const char *xAxisName, const char *quantityUnit,const char *extendedQuantityName)
+	void defineTexts(const char* quantityName, const char* xAxisName, const char* quantityUnit,const char* extendedQuantityName)
 	{
 		this->quantityName 			= quantityName;
 		this->extendedQuantityName 	= extendedQuantityName;
@@ -67,7 +67,7 @@ public:
 		this->quantityUnit			= quantityUnit;
 	}
 
-	void defineNumbers(Int_t nBins, Double_t xMin, Double_t xMax, int decimals = 3)
+	void defineNumbers(int nBins, double xMin, double xMax, int decimals = 3)
 	{
 		this->nBins 	= nBins;
 		this->xMin 		= xMin;
@@ -100,15 +100,15 @@ public:
 		}
 	}
 
-	TCanvas *createDividedCanvas(bool shouldWrite = false, bool shouldSave = true)
+	TCanvas* createDividedCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = true)
 	{
-		string canvasName 	= string(*particleName) + " " + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
-		string titleLeft 	= string(extendedQuantityName) + " (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
-		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*PassingOrFailing) + ".png";
+		string canvasName 	= string(*particleName) + " " + string(*passingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName);
+		string titleLeft 	= string(extendedQuantityName) + " (" + string(*passingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(*passingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string saveAs 		= string(directoryToSave) + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*passingOrFailing) + ".png";
 
 		//Create canvas and divide it
-		TCanvas *c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
+		TCanvas* c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
 		c1->Divide(2,1);
 
 		//Select canvas part and set margin
@@ -133,7 +133,7 @@ public:
 
 		//Get Y range of draw
 		gPad->Update();
-		Double_t Ymax = gPad->GetFrame()->GetY2();
+		double Ymax = gPad->GetFrame()->GetY2();
 
 		/*
 		//Set fill color
@@ -143,7 +143,7 @@ public:
 		*/
 
 		//Add legend
-		TLegend *l1_1 = new TLegend(0.65,0.75,0.92,0.90);
+		TLegend* l1_1 = new TLegend(0.65,0.75,0.92,0.90);
 		l1_1->SetTextSize(0.04);
 		l1_1->AddEntry(hSigBack,	"All",			"lp");
 		l1_1->AddEntry(hSig,		"Signal",		"l");
@@ -151,7 +151,7 @@ public:
 		l1_1->Draw();
 		
 		//Draws text information
-		TLatex *tx1_1 = new TLatex();
+		TLatex* tx1_1 = new TLatex();
 		tx1_1->SetTextSize(0.04);
 		tx1_1->SetTextFont(42);
 		tx1_1->SetNDC(kTRUE);
@@ -183,13 +183,13 @@ public:
 		hSig->Draw("same");
 
 		//Add legend
-		TLegend *l1_2 = new TLegend(0.65,0.85,0.92,0.90);
+		TLegend* l1_2 = new TLegend(0.65,0.85,0.92,0.90);
 		l1_2->SetTextSize(0.04);
 		l1_2->AddEntry(hSig, "Signal","l");
 		l1_2->Draw();
 
 		//Draws text information
-		TLatex *tx1_2 = new TLatex();
+		TLatex* tx1_2 = new TLatex();
 		tx1_2->SetTextSize(0.04);
 		tx1_2->SetTextFont(42);
 		tx1_2->SetNDC(kTRUE);
@@ -216,7 +216,7 @@ public:
 		}
 
 		//If should save
-		if (shouldSave == true)
+		if (shouldSavePNG == true)
 		{
 			//Saves as image
 			c1->SaveAs(saveAs.data());
@@ -226,14 +226,14 @@ public:
 	}
 
 	//Creates a efficiency plot with histograms
-	TEfficiency *createEfficiencyPlot(bool shouldWrite = false)
+	TEfficiency* createEfficiencyPlot(bool shouldWrite = false)
 	{
 		//References
 		TH1D* &hPass  = hSig;
 		TH1D* &hTotal = hSigBack;
 
-		string pName 	= string(*particleName) + " " + string(*PassingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName) + " Efficiency";
-		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string pName 	= string(*particleName) + " " + string(*passingOrFailing) + " " + string(*tagOrProbe) + " " + string(quantityName) + " Efficiency";
+		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*passingOrFailing) + " " + string(*tagOrProbe) + ")";
 
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
@@ -264,14 +264,17 @@ public:
 	}
 
 	//Creates canvas for efficiency plots
-	TCanvas *createEfficiencyCanvas(bool shouldWrite = false, bool shouldSave = false)
+	TCanvas* createEfficiencyCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
 	{
-		string canvasName 	=  string(*particleName) + " " + string(*tagOrProbe) + " " + string(quantityName) + " " + string(*PassingOrFailing) + " Efficiency" ;
-		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*PassingOrFailing) + " " + string(*tagOrProbe) + ")";
-		string saveAs 		= "../result/" + string("Efficiency_") + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*PassingOrFailing) +".png";
+		//Supress canvas
+		gROOT->SetBatch(0);
+
+		string canvasName 	=  string(*particleName) + " " + string(*tagOrProbe) + " " + string(quantityName) + " " + string(*passingOrFailing) + " Efficiency" ;
+		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*passingOrFailing) + " " + string(*tagOrProbe) + ")";
+		string saveAs 		= string(directoryToSave) + string("Efficiency_") + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*passingOrFailing) +".png";
 
 		//Draw on canvas
-		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
+		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
 		c1->SetRightMargin(0.05);
 		pEff->Draw();
 		gPad->Update();
@@ -288,13 +291,13 @@ public:
 		gPad->Update();
 
 		//Add legend
-		TLegend *l = new TLegend(0.75,0.82,0.92,0.88);
+		TLegend* l = new TLegend(0.75,0.82,0.92,0.88);
 		l->SetTextSize(0.04);
 		l->AddEntry(pEff, "Data", "lp");
 		l->Draw();
 
 		//CMS Open Data
-		TLatex *txCOD = new TLatex();
+		TLatex* txCOD = new TLatex();
 		txCOD->SetTextSize(0.04);
 		txCOD->SetTextAlign(12);
 		txCOD->SetTextFont(42);
@@ -314,7 +317,7 @@ public:
 		}
 
 		//If should save
-		if (shouldSave == true)
+		if (shouldSavePNG == true)
 		{
 			//Saves as image
 			c1->SaveAs(saveAs.data());
@@ -343,7 +346,7 @@ public:
 
 		//Set information what are shown
 		string legend = "- #";
-		legend += fillAfter(string(*PassingOrFailing) + " " + string(*tagOrProbe), ' ', 15);
+		legend += fillAfter(string(*passingOrFailing) + " " + string(*tagOrProbe), ' ', 15);
 		legend += fillAfter(string(quantityName), 		' ', 4);
 		legend += "= ";
 
@@ -351,7 +354,7 @@ public:
 		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
 	}
 
-	Histograms(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char **tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	PtEtaPhi(int* method, double* subtractionFactor, const char** particleName, const char** passingOrFailing, const char** tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), passingOrFailing(passingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

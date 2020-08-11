@@ -1,19 +1,19 @@
-#include "Histograms.h"
+#include "PtEtaPhi.h"
 
-//Holder for 3 Histograms Quantities
+//Holder for 3 set of histograms for each quantity
 class TagProbe{
 private:
-	int *method;
-	double *subtractionFactor;
-	const char **particleName;
-	const char **PassingOrFailing;
+	int* method					  = NULL;
+	double* subtractionFactor	  = NULL;
+	const char** particleName	  = NULL;
+	const char** passingOrFailing = NULL;
 
 public:
-	const char *tagOrProbe = NULL;
+	const char* tagOrProbe = NULL;
 
-	Histograms Pt {this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Eta{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
-	Histograms Phi{this->method, this->subtractionFactor, this->particleName, this->PassingOrFailing, &this->tagOrProbe};
+	PtEtaPhi Pt {this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
+	PtEtaPhi Eta{this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
+	PtEtaPhi Phi{this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
 
 	void defineDefaultHistogramsTexts()
 	{
@@ -29,14 +29,14 @@ public:
 		this->Phi.defineNumbers(79, 	-3.15, 	3.15);
 	}
 
-	void fillSigBackHistograms(Double_t PtValue, Double_t EtaValue, Double_t PhiValue)
+	void fillSigBackHistograms(double PtValue, double EtaValue, double PhiValue)
 	{
 		this->Pt .hSigBack->Fill(PtValue);
 		this->Eta.hSigBack->Fill(EtaValue);
 		this->Phi.hSigBack->Fill(PhiValue);
 	}
 
-	void fillBackHistograms(Double_t PtValue, Double_t EtaValue, Double_t PhiValue)
+	void fillBackHistograms(double PtValue, double EtaValue, double PhiValue)
 	{
 		this->Pt .hBack->Fill(PtValue);
 		this->Eta.hBack->Fill(EtaValue);
@@ -64,11 +64,11 @@ public:
 		this->Phi.subtractSigHistogram();
 	}
 
-	void createDividedCanvas(bool shouldWrite = false, bool shouldSave = false)
+	void createDividedCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
 	{
-		this->Pt .createDividedCanvas(shouldWrite, shouldSave);
-		this->Eta.createDividedCanvas(shouldWrite, shouldSave);
-		this->Phi.createDividedCanvas(shouldWrite, shouldSave);
+		this->Pt .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Eta.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Phi.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
 	}
 
 	void write(bool hSigBack, bool hSig, bool hBack)
@@ -102,11 +102,11 @@ public:
 		this->Phi.createEfficiencyPlot(shouldWrite);
 	}
 
-	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSave = false)
+	void createEfficiencyCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
 	{
-		this->Pt .createEfficiencyCanvas(shouldWrite, shouldSave);
-		this->Eta.createEfficiencyCanvas(shouldWrite, shouldSave);
-		this->Phi.createEfficiencyCanvas(shouldWrite, shouldSave);
+		this->Pt .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Eta.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Phi.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
 	}
 
 	void debugCout()
@@ -116,7 +116,7 @@ public:
 		this->Phi.debugCout();
 	}
 
-	TagProbe(int *method, double *subtractionFactor, const char **particleName, const char **PassingOrFailing, const char *tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), PassingOrFailing(PassingOrFailing), tagOrProbe(tagOrProbe)
+	TagProbe(int* method, double* subtractionFactor, const char** particleName, const char** passingOrFailing, const char* tagOrProbe)
+		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), passingOrFailing(passingOrFailing), tagOrProbe(tagOrProbe)
 	{}
 };

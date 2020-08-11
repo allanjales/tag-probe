@@ -21,8 +21,8 @@ using namespace std;
 
 //GLoal Chi2 operator for simutaneous fit
 struct GlobalChi2 {
-   const  ROOT::Math::IMultiGenFunction * fChi2_1;
-   const  ROOT::Math::IMultiGenFunction * fChi2_2;
+   const  ROOT::Math::IMultiGenFunction* fChi2_1;
+   const  ROOT::Math::IMultiGenFunction* fChi2_2;
 
 
 	int iparPass[12] = {0,
@@ -65,7 +65,7 @@ struct GlobalChi2 {
 						23,
 					};
 
-   double operator() (const double *par) const {
+   double operator() (const double* par) const {
       double p1[12];
       for (int i = 0; i < 12; ++i) p1[i] = par[iparPass[i]];
 
@@ -83,16 +83,16 @@ struct GlobalChi2 {
 //Store invariant mass class
 class InvariantMass{
 private:
-	int *method;
-	const char **particleName;
+	int* method 			  = NULL;
+	const char** particleName = NULL;
 
 	//Pointer to objects
-	PassingFailing* ObjPass;
-	PassingFailing* ObjAll;
+	PassingFailing* ObjPass = NULL;
+	PassingFailing* ObjAll  = NULL;
 
 	//Self fit functions
-	TF1* fitFunctionPass;
-	TF1* fitFunctionAll;
+	TF1* fitFunctionPass = NULL;
+	TF1* fitFunctionAll  = NULL;
 
 	ROOT::Fit::FitResult fitResult;
 
@@ -128,22 +128,34 @@ public:
 		this->decimals 	= decimals;
 	}
 
-	void createMassHistogram(TH1D* &hMass, const char* PassingOrFailing)
+	void createMassHistogram(TH1D* &hMass, const char* passingOrFailing, bool alertIfCant = true)
 	{
-		string hName 			= string(PassingOrFailing) + string(*particleName) + "InvariantMass";
-		string hTitle 			= "Invariant Mass (" + string(PassingOrFailing) + ")";
+		string hName 			= string(passingOrFailing) + string(*particleName) + "InvariantMass";
+		string hTitle 			= "Invariant Mass (" + string(passingOrFailing) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
-		//Create histogram
-		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
-		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
-		hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
+		//If was not created
+		if (!gDirectory->FindObject(hName.data()))
+		{
+			//Create histogram
+			hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
+			hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
+			hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
+		}
+		else
+		{
+			//Already exists
+			if (alertIfCant)
+			{
+				cout << "Could not create \"" << hName << "\" histogram. It already exists" << endl;
+			}
+		}
 	}
 
-	void createAllMassHistograms()
+	void createPassingAndAllMassHistograms()
 	{
-		createMassHistogram((*this->ObjPass).hMass, "Passing tracker");
-		createMassHistogram((*this->ObjAll).hMass,  "All");
+		createMassHistogram((*this->ObjPass).hMass, (*this->ObjPass).passingOrFailing);
+		createMassHistogram((*this->ObjAll).hMass,  (*this->ObjAll).passingOrFailing, false);
 	}
 
 	ROOT::Fit::FitResult doFit()
@@ -193,8 +205,7 @@ public:
 
 		ROOT::Fit::Fitter fitter;
 
-/*
-ORIGINAL
+		//Set initial parameters
 		double par0[24] = {340.2,
 							3.09,
 							0.037,
@@ -219,37 +230,6 @@ ORIGINAL
 							1.915,
 							263.185,
 							0.061
-						};
-*/
-
-		double par0[24] = {340.2,
-							3.09,
-							0.037,
-							1.824,
-							1.034,
-							3.093,
-							0.022,
-							8322.27,
-							-0.217,
-							1.915,
-							263.185,
-							0.061,
-
-
-							97.9,
-							3.094,
-							0.21,
-
-							1.35,
-							148.,
-							3.093,
-							0.027,
-							836.63,
-
-							-1.217,
-							1.915,
-							1.185,
-							2.061
 						};
 
 		//Create before the parameter settings in order to fix or set range on them
@@ -331,7 +311,7 @@ ORIGINAL
 		histo->Draw("ep");
 
 		//Draws information
-		TLatex *tx = new TLatex();
+		TLatex* tx = new TLatex();
 		tx->SetTextSize(0.04);
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
@@ -339,7 +319,7 @@ ORIGINAL
 		tx->DrawLatex(0.16,0.88,Form("#bf{CMS Open Data}"));
 
 		//Add legend
-		TLegend *tl = new TLegend(0.70,0.80,0.96,0.92);
+		TLegend* tl = new TLegend(0.70,0.80,0.96,0.92);
 		tl->SetTextSize(0.04);
 		tl->AddEntry(histo, "Data", "lp");
 		tl->Draw();
@@ -406,37 +386,39 @@ ORIGINAL
 		{
 			//Get Y range of draw
 			gPad->Update();
-			Double_t Ymax = gPad->GetFrame()->GetY2();
+			double Ymax = gPad->GetFrame()->GetY2();
 
 			//Draw regions
-			TBox *side1  = Obj->createTBox(Ymax, -1);
+			TBox* side1  = Obj->createTBox(Ymax, -1);
 			side1->SetFillColorAlpha(kRed, 0.35);
 			side1->Draw();
-			TBox *signal = Obj->createTBox(Ymax, 0);
+			TBox* signal = Obj->createTBox(Ymax, 0);
 			signal->SetFillColorAlpha(kGreen, 0.35);
 			signal->Draw();
-			TBox *side2  = Obj->createTBox(Ymax, 1);
+			TBox* side2  = Obj->createTBox(Ymax, 1);
 			side2->SetFillColorAlpha(kRed, 0.35);
 			side2->Draw();
 		}
 	}
 
-	TCanvas *createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSave = false)
+	TCanvas* createCanvas(bool drawRegions = false, bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
 	{
-		string canvasName 	= "InvariantMass_" + string("Tracker");
-		string canvasTitle	= "Invariant Mass " + string("Tracker");
-		string saveAs 		= "../result/InvariantMass_" + string("Tracker") + ".png";
+		const char** passingOrFailing = &(*this->ObjPass).passingOrFailing;
+
+		string canvasName 	= "InvariantMass_" + string(*passingOrFailing);
+		string canvasTitle	= "Invariant Mass " + string(*passingOrFailing);
+		string saveAs 		= string(directoryToSave) + "InvariantMass_" + string(*passingOrFailing) + ".png";
 
 		if (drawRegions)
 		{
-			canvasName 	= "InvariantMass_" + string("Tracker") + "_region";
-			canvasTitle	= "Invariant Mass " + string("Tracker") + " with Regions";
-			saveAs 		= "../result/InvariantMass_" + string("Tracker") + "_region" + ".png";
+			canvasName 	= "InvariantMass_" + string(*passingOrFailing) + "_region";
+			canvasTitle	= "Invariant Mass " + string(*passingOrFailing) + " with Regions";
+			saveAs 		= string(directoryToSave) + "InvariantMass_" + string(*passingOrFailing) + "_region" + ".png";
 		}
 
 		//Create canvas
 		gStyle->SetCanvasPreferGL(kTRUE);
-		TCanvas *c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 600);
+		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 600);
 		c1->Divide(2,1);
 
 		this->drawCanvasQuarter(c1, drawRegions, 1, (*this->ObjPass).hMass, ObjPass, fitFunctionPass, kGreen);
@@ -445,12 +427,12 @@ ORIGINAL
 		c1->cd(2);
 
 		//Draws information
-		TLatex *tx = new TLatex();
+		TLatex* tx = new TLatex();
 		//tx->SetTextSize(0.04);
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
 		tx->SetNDC(kTRUE);
-		tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",(this->fitResult).Chi2()/(this->fitResult).Ndf()));
+		//tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",(this->fitResult).Chi2()/(this->fitResult).Ndf()));
 
 		//Not show frame with mean, std dev
 		gStyle->SetOptStat(0);
@@ -462,7 +444,7 @@ ORIGINAL
 		}
 
 		//If should save
-		if (shouldSave == true)
+		if (shouldSavePNG == true)
 		{
 			//Saves as image
 			c1->SaveAs(saveAs.data());
@@ -471,7 +453,7 @@ ORIGINAL
 		return c1;
 	}
 
-	InvariantMass(int *method, const char **particleName, PassingFailing *Passing, PassingFailing *All)
+	InvariantMass(int* method, const char** particleName, PassingFailing* Passing, PassingFailing* All)
 		: method(method), particleName(particleName), ObjPass(Passing), ObjAll(All)
 		{}
 };
