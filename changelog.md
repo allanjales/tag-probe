@@ -25,5 +25,5 @@
 	* Added function `applyCuts(...)` in cutsAndFill.h;
 	* Added function `fillMassHistograms(..)` in cutsAndFill.h;
 	* Added function `fillQuantitiesHistograms(..)` in cutsAndFill.h;
-	* Changed both loops on macro.cpp to use news functions;
+	* Changed both loops on macro.cpp to use new functions;
 	* Changed fatal errors in macroc.cpp to output with `cerr`, not `cout`. 
