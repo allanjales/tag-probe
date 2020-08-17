@@ -14,8 +14,8 @@
 #include <chrono>
 #include <TSystem.h>
 
-#include "classes/Particle.h"
-#include "config/cutsAndFill.h"
+#include "classes/TagAndProbe.h"
+#include "config/cuts.h"
 
 using namespace std;
 
@@ -33,7 +33,7 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 0;
+	int useFile = 2;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -47,9 +47,9 @@ void generateHistograms()
 
 	//Canvas drawing
 	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
 
 
@@ -58,7 +58,7 @@ void generateHistograms()
 	//Check if the name of dir is ok
 	if (string(directoryToSave).back() != string("/"))
 	{
-		cerr << "To avoid errors, please, end the result directory with a \"/\"" << endl;
+		cerr << "To avoid errors, please end the result directory with a \"/\"" << endl;
 		abort();
 	}
 	
@@ -135,21 +135,24 @@ void generateHistograms()
 		};
 
 	//Create a object and set method
-	Particle Muon;
-	Muon.setMethod(method);
+	TagAndProbe TNP;
+	TNP.method 			= method;
+	TNP.directoryToSave = directoryToSave;
 
 	//Get data size and set data limit if has
 	long long numberEntries = TreePC->GetEntries();
 	if (limitData > 0 && limitData < numberEntries)
 		numberEntries = limitData;
-	printf("Data size analysed = %lld of %lld\n", numberEntries, TreePC->GetEntries());
-	cout << endl;
+	printf("Datas analysed = %lld of %lld\n", numberEntries, TreePC->GetEntries());
 
 
 
 	//Prepare for showing progress
 	string progressFormat = "%d/%d progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"lld/%lld\r";
 	auto lastTime = std::chrono::high_resolution_clock::now();
+
+	cout << endl;
+	cout << "Filling Invariant Mass Histograms....." << endl;
 
 	//Loop between the components
 	for (long long i = 0; i < numberEntries; i++)
@@ -168,16 +171,17 @@ void generateHistograms()
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{
-			fillMassHistograms(&Muon, quantities, types);
+			TNP.fillMassHistograms(quantities, types);
 		}
 	}
-	cout << endl;
+	cout << endl << endl;
 
+	//Do function fit ober the histogram
+	TNP.doFit();
+	
+	//Get values for invariant mass and sigma from plot
+	TNP.updateMassValuesAll();
 
-
-	Muon.doFit();
-
-	Muon.updateSelectionParameters();
 
 
 	//-------------------------------------
@@ -198,9 +202,7 @@ void generateHistograms()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		Muon.MassTracker   .createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.MassStandalone.createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.MassGlobal    .createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
+		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 	if (shouldDrawInvariantMassCanvasRegion)
@@ -209,12 +211,16 @@ void generateHistograms()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		Muon.MassTracker   .createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.MassStandalone.createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.MassGlobal    .createCanvas(drawRegions, shouldWrite, directoryToSave, shouldSavePNG);
+		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 
+	
+	//Prepare for showing progress
+	lastTime = std::chrono::high_resolution_clock::now();
+
+	cout << endl;
+	cout << "Filling Quantities Histograms....." << endl;
 
 	//Loop between the components again
 	for (long long i = 0; i < numberEntries; i++)
@@ -226,35 +232,33 @@ void generateHistograms()
 		//Show progress on screen
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
 		{
-			printf(progressFormat.data(), 1, 2, (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
+			printf(progressFormat.data(), 2, 2, (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
 			lastTime = std::chrono::high_resolution_clock::now();
 		}
 
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{	
-			fillQuantitiesHistograms(&Muon, quantities, types);
+			TNP.fillQuantitiesHistograms(quantities, types);
 		}
 	}
 	cout << endl;
 
+	//For sideband subtraction
+	TNP.subtractSigHistograms();
 
 
-	Muon.subtractSigHistograms();
 
 	if (shouldDrawQuantitiesCanvas)
 	{
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		Muon.Tracker   .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.Standalone.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.Global    .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.All       .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		TNP.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Debug consistency for histograms
-	Muon.consistencyDebugCout();
+	TNP.consistencyDebugCout();
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
@@ -262,15 +266,11 @@ void generateHistograms()
 
 	//Write histograms on file
 	{
-		//Write histograms on file
 		bool writehSigBack 	= true;
 		bool writehSig 		= true;
 		bool writehBack 	= true;
 	
-		Muon.Tracker   .write(writehSigBack, writehSig, writehBack);
-		Muon.Standalone.write(writehSigBack, writehSig, writehBack);
-		Muon.Global    .write(writehSigBack, writehSig, writehBack);
-		Muon.All       .write(writehSigBack, writehSig, writehBack);
+		TNP.writeQuantitiesHistogramsOnFile(writehSigBack, writehSig, writehBack);
 	}
 
 	//Write mass histograms on file
@@ -278,7 +278,7 @@ void generateHistograms()
 		bool writehPass = true;
 		bool writehAll 	= true;
 
-		Muon.writeMassHistograms(writehPass, writehAll);
+		TNP.writeMassHistogramsOnFile(writehPass, writehAll);
 	}
 
 	//Save plots
@@ -289,10 +289,7 @@ void generateHistograms()
 	{
 		bool shouldWrite 	= true;
 
-		Muon.Tracker   .createEfficiencyPlot(shouldWrite);
-		Muon.Standalone.createEfficiencyPlot(shouldWrite);
-		Muon.Global    .createEfficiencyPlot(shouldWrite);
-		Muon.All       .createEfficiencyPlot(shouldWrite);
+		TNP.createEfficiencyPlot(shouldWrite);
 	}
 
 
@@ -305,10 +302,7 @@ void generateHistograms()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		Muon.Tracker   .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.Standalone.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.Global    .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		Muon.All       .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		TNP.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Close files

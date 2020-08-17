@@ -3,96 +3,63 @@
 //Holder for 3 set of histograms for each quantity
 class TagProbe{
 private:
-	int* method					  = NULL;
-	double* subtractionFactor	  = NULL;
-	const char** particleName	  = NULL;
-	const char** passingOrFailing = NULL;
+	int* method 				 = NULL;
+	const char** particleName	 = NULL;
+	const char** directoryToSave = NULL;
+	const char** particleType    = NULL;
+
+	InvariantMass* ObjMass = NULL;
 
 public:
 	const char* tagOrProbe = NULL;
 
-	PtEtaPhi Pt {this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
-	PtEtaPhi Eta{this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
-	PtEtaPhi Phi{this->method, this->subtractionFactor, this->particleName, this->passingOrFailing, &this->tagOrProbe};
+	PtEtaPhi Pt  {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+		"Pt",  "p_{t}", "GeV/c", "Transversal Momentum", 100,  0.00, 100.00, 1};
+	PtEtaPhi Eta {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+		"Eta", "#eta",  "", 	 "Pseudorapidity",       200, -2.50,   2.50};
+	PtEtaPhi Phi {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+		"Phi", "#phi",  "rad",   "Azimuthal Angle",       79, -3.15,   3.15};
 
-	void defineDefaultHistogramsTexts()
-	{
-		this->Pt .defineTexts("Pt",  "p_{t}",	"GeV/c", 	"Transversal Momentum");
-		this->Eta.defineTexts("Eta", "#eta", 	"", 		"Pseudorapidity");
-		this->Phi.defineTexts("Phi", "#phi", 	"rad", 		"Azimuthal Angle");
-	}
-
-	void defineDefaultHistogramsNumbers()
-	{
-		this->Pt .defineNumbers(100,	 0., 	100., 1);
-		this->Eta.defineNumbers(200, 	-2.5, 	2.5);
-		this->Phi.defineNumbers(79, 	-3.15, 	3.15);
-	}
-
-	void fillSigBackHistograms(double PtValue, double EtaValue, double PhiValue)
-	{
-		this->Pt .hSigBack->Fill(PtValue);
-		this->Eta.hSigBack->Fill(EtaValue);
-		this->Phi.hSigBack->Fill(PhiValue);
-	}
-
-	void fillBackHistograms(double PtValue, double EtaValue, double PhiValue)
-	{
-		this->Pt .hBack->Fill(PtValue);
-		this->Eta.hBack->Fill(EtaValue);
-		this->Phi.hBack->Fill(PhiValue);
-	}
-
-	void createSigBackHistograms()
-	{
-		this->Pt .createSigBackHistogram();
-		this->Eta.createSigBackHistogram();
-		this->Phi.createSigBackHistogram();
-	}
-
-	void createBackHistograms()
-	{
-		this->Pt .createBackHistogram();
-		this->Eta.createBackHistogram();
-		this->Phi.createBackHistogram();
-	}
-	
 	void subtractSigHistograms()
 	{
-		this->Pt .subtractSigHistogram();
-		this->Eta.subtractSigHistogram();
-		this->Phi.subtractSigHistogram();
+		this->Pt .subtractSigHistograms();
+		this->Eta.subtractSigHistograms();
+		this->Phi.subtractSigHistograms();
 	}
 
-	void createDividedCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
+	void fillQuantitiesHistograms(double** quantities, double* InvariantMass, int* isPassing)
 	{
-		this->Pt .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Eta.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Phi.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		/*
+		//Assign variables for easy visualization
+		double &pt  = *quantities[0];
+		double &eta = *quantities[1];
+		double &phi = *quantities[2];
+		*/
+
+		this->Pt .fillQuantitiesHistograms(quantities[0], InvariantMass, isPassing);
+		this->Eta.fillQuantitiesHistograms(quantities[1], InvariantMass, isPassing);
+		this->Phi.fillQuantitiesHistograms(quantities[2], InvariantMass, isPassing);
 	}
 
-	void write(bool hSigBack, bool hSig, bool hBack)
+	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		if (hSigBack == true)
-		{
-			this->Pt .hSigBack->Write();
-			this->Eta.hSigBack->Write();
-			this->Phi.hSigBack->Write();
-		}
+		this->Pt .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		this->Eta.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		this->Phi.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+	}
 
-		if (hSig == true)
-		{
-			this->Pt .hSig->Write();
-			this->Eta.hSig->Write();
-			this->Phi.hSig->Write();
-		}
+	void consistencyDebugCout()
+	{
+		this->Pt .consistencyDebugCout();
+		this->Eta.consistencyDebugCout();
+		this->Phi.consistencyDebugCout();
+	}
 
-		if (hBack == true)
-		{
-			this->Pt .hBack->Write();
-			this->Eta.hBack->Write();
-			this->Phi.hBack->Write();
-		}
+	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
+	{
+		this->Pt .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		this->Eta.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		this->Phi.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 	void createEfficiencyPlot(bool shouldWrite = false)
@@ -102,21 +69,26 @@ public:
 		this->Phi.createEfficiencyPlot(shouldWrite);
 	}
 
-	void createEfficiencyCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
+	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Pt .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Eta.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Phi.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
+		this->Pt .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		this->Eta.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		this->Phi.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
-	void debugCout()
-	{
-		this->Pt .debugCout();
-		this->Eta.debugCout();
-		this->Phi.debugCout();
-	}
 
-	TagProbe(int* method, double* subtractionFactor, const char** particleName, const char** passingOrFailing, const char* tagOrProbe)
-		: method(method), subtractionFactor(subtractionFactor), particleName(particleName), passingOrFailing(passingOrFailing), tagOrProbe(tagOrProbe)
+
+	TagProbe(int* method,
+		const char** particleName,
+		const char** directoryToSave,
+	 	const char** particleType,
+	 	InvariantMass* ObjMass,
+	 	const char*  tagOrProbe)
+		  : method(method),
+		    particleName(particleName),
+		    directoryToSave(directoryToSave),
+		    particleType(particleType),
+		    ObjMass(ObjMass),
+		    tagOrProbe(tagOrProbe)
 	{}
 };

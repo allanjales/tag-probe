@@ -1,172 +1,295 @@
-#include "TagProbe.h"
+#include "TH1.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TLegend.h"
+#include "TLatex.h"
 
-//Holder for 2 TagProbe class
+#include <iostream>
+
+using namespace std;
+
+//Holder signal, background and signal+background histograms
 class PassingFailing{
 private:
-	int* method 				= NULL;
-	const char** particleName 	= NULL;
+
+	int* method 			     = NULL;
+	const char** particleName    = NULL;
+	const char** directoryToSave = NULL;
+	const char** particleType    = NULL;
+	const char** tagOrProbe      = NULL;
+
+	InvariantMass* ObjMass = NULL;
+
+	//About histograms
+	const char** quantityName 		  = NULL;
+	const char** xAxisName			  = NULL;
+	const char** quantityUnit		  = NULL;
+	const char** extendedQuantityName = NULL;
+
+	int* 	nBins	 = NULL;
+	int* 	decimals = NULL;
+	double* xMin	 = NULL;
+	double*	xMax	 = NULL;
+
+	void createHistogram(TH1D* &histo, const char* histoName)
+	{
+		//Set parameters
+		string hName 		= string(*particleType) + string(passingOrFailing) + string(*this->tagOrProbe) + string(*this->particleName) + "_" + string(*this->quantityName) + string(histoName);
+		string hTitle 		= string(*this->extendedQuantityName) + " (" + string(*particleType) + " " + string(passingOrFailing) + " " + string(*this->tagOrProbe) + ")";
+		string xAxisTitle 	= *this->xAxisName;
+		string yAxisTitleForm;
+		if (strcmp(*quantityUnit, "") == 0)
+		{
+			yAxisTitleForm 	= "Events / (%1." + to_string(*decimals) + "f)";
+		}
+		else
+		{
+			xAxisTitle += " (" + string(*quantityUnit) + ")";
+			yAxisTitleForm 	= "Events / (%1." + to_string(*decimals) + "f " + string(*quantityUnit) + ")";
+		}
+
+		//Create histogram
+		histo = new TH1D(hName.data(), hTitle.data(), *nBins, *xMin, *xMax);
+		histo->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), histo->GetBinWidth(0)));
+		histo->GetXaxis()->SetTitle(xAxisTitle.data());
+	}
+
+	MassValues* PassFailObj()
+	{
+		if (strcmp(passingOrFailing, "Passing") == 0)
+			return &(*this->ObjMass).Pass;
+
+		if (strcmp(passingOrFailing, "All") == 0)
+			return &(*this->ObjMass).All;
+
+		return NULL;
+	}
+
+	//For consistencyDebugCout()
+	string fillAfter(string text, char fillWith, int targetLength)
+	{
+		//Store size of text
+		int textLength = strlen(text.data());
+
+		//Fill de text in the end
+		if(textLength < targetLength)
+		{
+			text.append(targetLength - textLength, fillWith);
+		}
+
+
+		return text;
+	}
 
 public:
 	const char* passingOrFailing = NULL;
 
-	TH1D* hMass = NULL;
+	TH1D* hSigBack  = NULL;
+	TH1D* hSig 		= NULL;
+	TH1D* hBack 	= NULL;
 
-	//In sigmas
-	double signalRegion 	= 3.0;
-	double sidebandRegion	= 6.0;
-
-	//This will be changed by InvariantMass object
-	double M_JPSI = 0;
-	double W_JPSI = 0;
-	double subtractionFactor = 1.;
-
-	TagProbe Tag  {this->method, &this->subtractionFactor, this->particleName, &this->passingOrFailing, "Tag"};
-	TagProbe Probe{this->method, &this->subtractionFactor, this->particleName, &this->passingOrFailing, "Probe"};
-
-	void prepareMethod()
+	void subtractSigHistogram()
 	{
-		this->defineDefaultHistogramsTexts();
-		this->defineDefaultHistogramsNumbers();
-		this->createSigBackHistograms();
-		this->createBackHistograms();
+		this->hSig->Add(this->hSigBack, 1.);
+		this->hSig->Add(this->hBack, -1.);
 	}
 
-	void defineDefaultHistogramsTexts()
+	//Fill histogram
+	void fillQuantitiesHistograms(double* quantity, double* InvariantMass)
 	{
-		this->Tag  .defineDefaultHistogramsTexts();
-		this->Probe.defineDefaultHistogramsTexts();
+		if ((*PassFailObj()).isInSignalRegion(*InvariantMass))
+			this->hSigBack->Fill(*quantity);
+
+		if ((*PassFailObj()).isInSidebandRegion(*InvariantMass))
+			this->hBack->Fill(*quantity);
 	}
 
-	void defineDefaultHistogramsNumbers()
+	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
 	{
-		this->Tag  .defineDefaultHistogramsNumbers();
-		this->Probe.defineDefaultHistogramsNumbers();
-	}
+		string canvasName 	= string(*particleName) + " " + string(passingOrFailing) + " for " + string(*particleType) + " " + string(*tagOrProbe) + " " + string(*quantityName);
+		string titleLeft 	= string(*extendedQuantityName) + " (" + string(passingOrFailing) + string(*particleType) + " " + string(*tagOrProbe) + ")";
+		string titleRight 	= string(*extendedQuantityName) + " of Signal (" + string(passingOrFailing) + " for " + string(*particleType) + " " + string(*tagOrProbe) + ")";
+		string saveAs 		= string(*directoryToSave) + string(*tagOrProbe) + "_" + string(*quantityName) + "_" + string(passingOrFailing) + "_" + string(*particleType) + ".png";
 
-	void fillSigBackHistograms(double TagPtValue, double TagEtaValue, double TagPhiValue, double ProbePtValue, double ProbeEtaValue, double ProbePhiValue)
-	{
-		this->Tag  .fillSigBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
-		this->Probe.fillSigBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
-	}
+		//Create canvas and divide it
+		TCanvas* c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
+		c1->Divide(2,1);
 
-	void fillBackHistograms(double TagPtValue, double TagEtaValue, double TagPhiValue, double ProbePtValue, double ProbeEtaValue, double ProbePhiValue)
-	{
-		this->Tag  .fillBackHistograms(TagPtValue, 	TagEtaValue, 	TagPhiValue);
-		this->Probe.fillBackHistograms(ProbePtValue, ProbeEtaValue, ProbePhiValue);
-	}
+		//Select canvas part and set margin
+		c1->cd(1);
+		c1->cd(1)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
-	void createSigBackHistograms()
-	{
-		this->Tag  .createSigBackHistograms();
-		this->Probe.createSigBackHistograms();
-	}
+		//Draws Main histogram
+		hSigBack->SetMinimum(0);
+		hSigBack->SetLineWidth(2);		//Line Width
+		hSigBack->Draw();
 
-	void createBackHistograms()
-	{
-		this->Tag  .createBackHistograms();
-		this->Probe.createBackHistograms();
-	}
+		//Draws Background histogram
+		hBack->SetLineColor(kBlue); 	//Line Color
+		hBack->SetLineStyle(kDashed);	//Line Style
+		hBack->SetLineWidth(2);			//Line Width
+		hBack->Draw("same");
 
-	void subtractSigHistograms()
-	{
-		this->Tag  .subtractSigHistograms();
-		this->Probe.subtractSigHistograms();
-	}
+		//Draws Signal histogram
+		hSig->SetLineColor(kMagenta); 	//Line Color
+		hSig->SetLineWidth(2);			//Line Width
+		hSig->Draw("same");
 
-	void createDividedCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = false)
-	{
-		this->Tag  .createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Probe.createDividedCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-	}
+		//Get Y range of draw
+		gPad->Update();
+		double Ymax = gPad->GetFrame()->GetY2();
 
-	void write(bool hSigBack, bool hSig, bool hBack)
-	{
-		this->Tag  .write(hSigBack, hSig, hBack);
-		this->Probe.write(hSigBack, hSig, hBack);
-	}
+		/*
+		//Set fill color
+		hSig->SetFillColor(kMagenta);
+		hSigBack->SetFillColor(kBlue);
+		hBack->SetFillColor(kYellow);
+		*/
 
-	void createEfficiencyPlot(bool shouldWrite = false)
-	{
-		this->Tag  .createEfficiencyPlot(shouldWrite);
-		this->Probe.createEfficiencyPlot(shouldWrite);
-	}
-
-	void createEfficiencyCanvas(bool shouldWrite = false, const char* directoryToSave = "../result/", bool shouldSavePNG = true)
-	{
-		this->Tag  .createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-		this->Probe.createEfficiencyCanvas(shouldWrite, directoryToSave, shouldSavePNG);
-	}
-
-	TBox* createTBox(double Ymax, int index = 0)
-	{
-		//index = -1 -> left region
-		//index = 0 -> signal region
-		//index = 1 -> right region
-
-		double dx1, dx2 = 0;
-
-		switch(index)
+		//Add legend
+		TLegend* l1_1 = new TLegend(0.65,0.75,0.92,0.90);
+		l1_1->SetTextSize(0.04);
+		l1_1->AddEntry(hSigBack,	"All",			"lp");
+		l1_1->AddEntry(hSig,		"Signal",		"l");
+		l1_1->AddEntry(hBack,		"Background",	"l");
+		l1_1->Draw();
+		
+		//Draws text information
+		TLatex* tx1_1 = new TLatex();
+		tx1_1->SetTextSize(0.04);
+		tx1_1->SetTextFont(42);
+		tx1_1->SetNDC(kTRUE);
+		if (strcmp(*quantityName, "Pt") == 0)
 		{
-			case -1:
-				dx1 = -sidebandRegion;
-				dx2 = -signalRegion;
-				break;
-			case 0:
-				dx1 = -signalRegion;
-				dx2 = +signalRegion;
-				break;
-			case 1:
-				dx1 = +sidebandRegion;
-				dx2 = +signalRegion;
-				break;
+			tx1_1->SetTextAlign(12);	//Align left, center
+			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+			tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
+		}
+		else
+		{
+			tx1_1->SetTextAlign(22);	//Align center, center
+			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
+			tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
 		}
 
-		double x1 = M_JPSI + W_JPSI * dx1;
-		double x2 = M_JPSI + W_JPSI * dx2;
+		//Select canvas part and set margin
+		c1->cd(2);
+		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
-		TBox* region = new TBox(x1, 0., x2, Ymax);
+		//Same range as comparision and Draws
+		//hSig->SetMinimum(0);
+   		//hSig->SetMaximum(Ymax);
+		hSig->SetTitle(titleRight.data());
+		hSig->Draw("same");
 
-		return region;
-	}
+		//Add legend
+		TLegend* l1_2 = new TLegend(0.65,0.85,0.92,0.90);
+		l1_2->SetTextSize(0.04);
+		l1_2->AddEntry(hSig, "Signal","l");
+		l1_2->Draw();
 
-	bool isInSignalRegion(double InvariantMass)
-	{
-		if (fabs(InvariantMass - M_JPSI) < W_JPSI * signalRegion)
-			return true;
-
-		return false;
-	}
-
-	bool isInSidebandRegion(double InvariantMass)
-	{
-		if (fabs(InvariantMass - M_JPSI) > W_JPSI * signalRegion && fabs(InvariantMass - M_JPSI) < W_JPSI * sidebandRegion)
-			return true;
-
-		return false;
-	}
-
-	void fillHistograms(double InvariantMass, double TagMuon_Pt, double TagMuon_Eta, double TagMuon_Phi, double ProbeMuon_Pt, double ProbeMuon_Eta, double ProbeMuon_Phi)
-	{
-		//If is inside signal region
-		if (this->isInSignalRegion(InvariantMass))
+		//Draws text information
+		TLatex* tx1_2 = new TLatex();
+		tx1_2->SetTextSize(0.04);
+		tx1_2->SetTextFont(42);
+		tx1_2->SetNDC(kTRUE);
+		if (strcmp(*quantityName, "Pt") == 0)
 		{
-			this->fillSigBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			tx1_2->SetTextAlign(12);	//Align left, center
+			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
+			tx1_2->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
+		}
+		else
+		{
+			tx1_2->SetTextAlign(22);	//Align center, center
+			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
+			tx1_2->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
 		}
 
-		//If is inside sideband region
-		if (this->isInSidebandRegion(InvariantMass))
+		//Not show frame with mean, std dev
+		gStyle->SetOptStat(0);
+
+		//Writes in file
+		if (shouldWrite == true)
 		{
-			this->fillBackHistograms(TagMuon_Pt, TagMuon_Eta, TagMuon_Phi, ProbeMuon_Pt, ProbeMuon_Eta, ProbeMuon_Phi);
+			c1->Write();
 		}
+
+		//If should save
+		if (shouldSavePNG == true)
+		{
+			//Saves as image
+			c1->SaveAs(saveAs.data());
+		} 
+
+		return c1;
 	}
 
-	void debugCout()
+	void consistencyDebugCout()
 	{
-		this->Tag  .debugCout();
-		this->Probe.debugCout();
+		const int minLegendSpace = 21;
+
+		//Set information what are shown
+		string legend = "- #";
+		legend += fillAfter(string(passingOrFailing) + " " + string(*tagOrProbe), ' ', 15);
+		legend += fillAfter(string(*quantityName), 		' ', 4);
+		legend += "= ";
+
+		//Show information
+		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
 	}
 
-	PassingFailing(int* method, const char** particleName, const char* passingOrFailing)
-		: method(method), particleName(particleName), passingOrFailing(passingOrFailing)
-	{}
+	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
+	{
+		if (hSigBack == true)
+			this->hSigBack->Write();
+
+		if (hSig == true)
+			this->hSig->Write();
+
+		if (hBack == true)
+			this->hBack->Write();
+	}
+
+
+
+	PassingFailing(int* method,
+		const char** particleName,
+		const char** directoryToSave,
+	 	const char** particleType,
+	 	InvariantMass* ObjMass,
+	 	const char** tagOrProbe,
+		const char*  passingOrFailing,
+		const char** quantityName,
+		const char** xAxisName,
+		const char** quantityUnit,
+		const char** extendedQuantityName,
+		int*    	 nBins,
+		double* 	 xMin,
+		double* 	 xMax,
+		int*    	 decimals)
+		  : method(method),
+			particleName(particleName),
+		    directoryToSave(directoryToSave),
+			particleType(particleType),
+		    ObjMass(ObjMass),
+			tagOrProbe(tagOrProbe),
+			passingOrFailing(passingOrFailing),
+			quantityName(quantityName),
+			xAxisName(xAxisName),
+			quantityUnit(quantityUnit),
+			extendedQuantityName(extendedQuantityName),
+			nBins(nBins),
+			xMin(xMin),
+			xMax(xMax),
+			decimals(decimals)
+	{
+		this->createHistogram(this->hSigBack, "SigBack");
+		this->createHistogram(this->hSig, 	  "Sig");
+		this->createHistogram(this->hBack, 	  "Back");
+	}
 };
