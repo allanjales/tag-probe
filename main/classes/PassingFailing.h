@@ -91,7 +91,7 @@ public:
 	void subtractSigHistogram()
 	{
 		this->hSig->Add(this->hSigBack, 1.);
-		this->hSig->Add(this->hBack, -1.);
+		this->hSig->Add(this->hBack, -(*PassFailObj()).subtractionFactor());
 	}
 
 	//Fill histogram
