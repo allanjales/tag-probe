@@ -2,10 +2,10 @@
 > This is for internal porpuse.
 
 * 2020-08-09
-	* Initial parameters set to pointers in all classes;
+	* Initial parameters set to pointers at declaration in all classes;
 	* Changed to standard pointer form (`const char *example` -> `const char* example`);
 	* lowercase `const char* PassingOrFailing` -> `const char* passingOrFailing`;
-	* Moved ROOT types from `Double_t`, `Int_t` and `Long64_t` for C++ types `double`, `int` and `long long long`;
+	* Moved ROOT types from `Double_t`, `Int_t` and `Long64_t` for C++ types `double`, `int` and `long long`;
 	* Changed the name of function `createAllMassHistograms()` in invariantMass.h to `createPassingAndAllMassHistograms()`;
 	* Added argument in `createMassHistogram(...)`: `bool alertIfCant = true`;
 	* Changed function `createMassHistogram(...)` and `createPassingAndAllMassHistograms()`;
@@ -25,5 +25,8 @@
 	* Added function `applyCuts(...)` in cutsAndFill.h;
 	* Added function `fillMassHistograms(..)` in cutsAndFill.h;
 	* Added function `fillQuantitiesHistograms(..)` in cutsAndFill.h;
-	* Changed both loops on macro.cpp to use news functions;
-	* Changed fatal errors in macroc.cpp to output with `cerr`, not `cout`. 
+	* Changed both loops on macro.cpp to use new functions;
+	* Changed fatal errors in macroc.cpp to output with `cerr`, not `cout`.
+
+* 2020-08-14
+	* Changed whole code structure
