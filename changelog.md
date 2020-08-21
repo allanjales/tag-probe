@@ -17,4 +17,4 @@ For v1
 	* Changed progress format on macro.cpp;
 	* Changed consitencyDebugCout() format and corrected it;
 	* Removed `std::` from chrono uses;
-	* Changed from `high_resolution_clock` to `steady_clock` in chrono uses on macro.cpp
+	* Changed from `high_resolution_clock` to `steady_clock` in chrono uses on macro.cpp;
