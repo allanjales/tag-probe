@@ -64,12 +64,30 @@ public:
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
 
+		/*
+		//TEST FOR EVERY SINGLE BIN
+		int nbinsx = hPass->GetXaxis()->GetNbins();
+		cout << "Bins : " << nbinsx << endl;
+		for (int i = 0; i < nbinsx; i++)
+		{
+			if (hTotal->GetBinContent(i) - hPass->GetBinContent(i) < 0)
+			{
+				cout << "Bin " << i << " with problems | " <<  hTotal->GetBinContent(i) << " - " << hPass->GetBinContent(i) << endl;
+			}
+		}
+		*/
+
 		//Check if are valid and consistent histograms
 		if(TEfficiency::CheckConsistency(*hPass, *hTotal))
 		{
 			//Fills histogram
 			this->pEff = new TEfficiency(*hPass, *hTotal);
 			this->pEff->SetName(pName.data());
+		}
+		else
+		{
+			cerr << "Consistency ERROR! Program stopped" << endl;
+			abort();
 		}
 
 		//Set plot config

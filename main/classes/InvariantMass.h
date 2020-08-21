@@ -102,6 +102,7 @@ private:
 		string hTitle 			= "Invariant Mass (" + string(passingOrFailing) + " for " + string(*particleType) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
+		//Change hTitle name
 		if (strcmp(passingOrFailing, "Passing") == 0)
 			hTitle = "Invariant Mass (" + string(*particleType) + ")";
 
@@ -135,19 +136,10 @@ private:
 		hMass->SetLineColor(kBlack);	//Set errobars color
 		hMass->Draw("ep");
 
-		//Draws information
-		TLatex* tx = new TLatex();
-		tx->SetTextSize(0.04);
-		tx->SetTextAlign(12);
-		tx->SetTextFont(42);
-		tx->SetNDC(kTRUE);
-		tx->DrawLatex(0.16,0.88,Form("#bf{CMS Open Data}"));
-
 		//Add legend
 		TLegend* tl = new TLegend(0.70,0.80,0.96,0.92);
 		tl->SetTextSize(0.04);
 		tl->AddEntry(hMass, "Data", "lp");
-		tl->Draw();
 
 		//Draw fit
 		if (fFit != NULL)
@@ -162,7 +154,7 @@ private:
 			if (quarter < 2 && shouldDrawAllFitFunctions == true)
 			{
 				//Change the size of TLegend
-				tl->SetY1(tl->GetX1() - 0.02*3);
+				tl->SetY1(tl->GetY1() - tl->GetTextSize()*3);
 
 				//Get parameters of fit
 				double fitParameters[12];
@@ -209,6 +201,9 @@ private:
 		//Draw regions
 		if (drawRegions == true)
 		{
+			//Change the size of TLegend
+			tl->SetY1(tl->GetY1() - tl->GetTextSize()*2);
+
 			//Get Y range of draw
 			gPad->Update();
 			double Ymax = gPad->GetFrame()->GetY2();
@@ -223,12 +218,32 @@ private:
 			TBox* side2  = ObjMassValues->createTBox(Ymax, 1);
 			side2->SetFillColorAlpha(kRed, 0.35);
 			side2->Draw();
+
+			//Add on TLegend
+			tl->AddEntry(signal, "Signal R.",   "f");
+			tl->AddEntry(side1,  "Sideband R.", "f");
 		}
+
+		//Draws information
+		TLatex* tx = new TLatex();
+		tx->SetTextSize(0.04);
+		tx->SetTextAlign(12);
+		tx->SetTextFont(42);
+		tx->SetNDC(kTRUE);
+		tx->DrawLatex(0.16,0.88,Form("#bf{CMS Open Data}"));
+
+		//Draws TLegend
+		tl->Draw();
 	}
 
 public:
 	MassValues Pass;
 	MassValues All;
+
+	int 	nBins;
+	double 	xMin;
+	double	xMax;
+	int 	decimals = 3;
 
 	const char* const fittingParName[12] = {
 			"Gaus(Sg) Height  ",
@@ -246,11 +261,6 @@ public:
 			"Exp2(Bg) Height  ",
 			"Exp2(Bg) Width   "
 		};
-
-	int 	nBins;
-	double 	xMin;
-	double	xMax;
-	int 	decimals = 3;
 
 	void fillMassHistograms(double* InvariantMass, int* isPassing)
 	{
@@ -306,7 +316,7 @@ public:
 
 		ROOT::Fit::Fitter fitter;
 
-		//Set initial parameters
+		//Set initial parameters (Monte Carlo)
 		double par0[24] = {340.2,
 							3.09,
 							0.037,
@@ -352,7 +362,7 @@ public:
 		cout << endl;
 	}
 
-	void updateMassValuesFor(MassValues* ObjMassValues)
+	void updateMassValuesFor(MassValues* ObjMassValues, bool isAll = false)
 	{
 		double value = 0.;
 		double fwhm  = 0.;
@@ -370,12 +380,23 @@ public:
 
 		if (*this->method == 2)
 		{
+			//Get parameters of fit for signal only
+			double fitParameters[24];
+			ObjMassValues->fitFunction->GetParameters(fitParameters);
+			TF1* signalFit;
+			if (!isAll)
+				signalFit = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
+			else
+				signalFit = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
+			signalFit->SetParameters(fitParameters);
+
 			//Get value and uncertain of signal by fitting
-			TF1* &signalFit = ObjMassValues->fitFunction;
 			value     = signalFit->GetMaximumX();
 			double x1 = signalFit->GetX(signalFit->GetMaximum()/2);
 			double x2 = signalFit->GetX(signalFit->GetMaximum()/2, x1+0.0001, value + x1*3);
 			fwhm      = x2 - x1;
+
+			delete signalFit;
 		}
 
 		double sigma = fwhm/2.355;

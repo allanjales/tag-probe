@@ -235,8 +235,9 @@ public:
 
 		//Set information what are shown
 		string legend = "- #";
-		legend += fillAfter(string(passingOrFailing) + " " + string(*tagOrProbe), ' ', 15);
-		legend += fillAfter(string(*quantityName), 		' ', 4);
+		legend += fillAfter(string(passingOrFailing), ' ', 8);
+		legend += fillAfter(string(*tagOrProbe),      ' ', 6);
+		legend += fillAfter(string(*quantityName), 	  ' ', 4);
 		legend += "= ";
 
 		//Show information

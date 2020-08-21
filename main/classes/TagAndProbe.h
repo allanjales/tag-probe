@@ -49,9 +49,12 @@ public:
 
 	void consistencyDebugCout()
 	{
+		cout << "Checking histograms number inconsistency (should be 0)" << endl;
+		cout << "* total - (background + signal)" << endl;
 		this->Tracker   .consistencyDebugCout();
 		this->Standalone.consistencyDebugCout();
 		this->Global    .consistencyDebugCout();
+		cout << endl;
 	}
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)
@@ -124,6 +127,7 @@ public:
 		this->Standalone.fillQuantitiesHistograms(quantities, types[1]);
 		this->Global    .fillQuantitiesHistograms(quantities, types[2]);
 	}
+	
 
 
 	TagAndProbe()

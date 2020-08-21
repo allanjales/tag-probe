@@ -1,32 +1,20 @@
 # Changelog
 > This is for internal porpuse.
 
-* 2020-08-09
-	* Initial parameters set to pointers at declaration in all classes;
-	* Changed to standard pointer form (`const char *example` -> `const char* example`);
-	* lowercase `const char* PassingOrFailing` -> `const char* passingOrFailing`;
-	* Moved ROOT types from `Double_t`, `Int_t` and `Long64_t` for C++ types `double`, `int` and `long long`;
-	* Changed the name of function `createAllMassHistograms()` in invariantMass.h to `createPassingAndAllMassHistograms()`;
-	* Added argument in `createMassHistogram(...)`: `bool alertIfCant = true`;
-	* Changed function `createMassHistogram(...)` and `createPassingAndAllMassHistograms()`;
-	* Changed inital parameters on `doFit()` in invariantMass.h;
-	* Changed macro.cpp to show progress based on time.
+For v1
 
-* 2020-08-10
-	* Changed `Histogram` class to `PtEtaPhi` class. Also Histogram.h -> PtEtaPhi.h;
-	* Added `int method` variable on macro.cpp;
-	* Changed argument in `createCanvas(...)` function in InvariantMass class and PtEtaPhi class: `shouldSave` -> `shouldSavePNG`;
-	* Added argument in `createCanvas(...)` in InvariantMass class and PtEtaPhi class: `const char* directoryToSave`;
-	* Added `abort()` function in macro.cpp if could not find or create the directory;
-	* Changed text on failed creating directory output;
-	* Added a function to check if the directory on macro.cpp was set right;
-	* Added list of pointers to variables from readed file on macro.cpp: `double* quantities[7]` and `int* types[3]`;
-	* Added file cutsAndFill.h and included in macro.cpp;
-	* Added function `applyCuts(...)` in cutsAndFill.h;
-	* Added function `fillMassHistograms(..)` in cutsAndFill.h;
-	* Added function `fillQuantitiesHistograms(..)` in cutsAndFill.h;
-	* Changed both loops on macro.cpp to use new functions;
-	* Changed fatal errors in macroc.cpp to output with `cerr`, not `cout`.
+* 2020-08-19
+	* Added signal and sideband region on invariant mass canvas;
+	* Changed legends on invariant mass canvas;
 
-* 2020-08-14
-	* Changed whole code structure
+* 2020-08-20
+	* Legend now shows above result histogram on InvariantMass class;
+	* Now macro.cpp shows method as output;
+	* Fixed method 2 bug;
+	* Changed to user input full path in const char \*files[] on macro.cpp;
+
+* 2020-08-21
+	* Changed progress format on macro.cpp;
+	* Changed consitencyDebugCout() format and corrected it;
+	* Removed `std::` from chrono uses;
+	* Changed from `high_resolution_clock` to `steady_clock` in chrono uses on macro.cpp

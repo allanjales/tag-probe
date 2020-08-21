@@ -23,9 +23,9 @@ using namespace std;
 void generateHistograms()
 {
 	//List of files
-	const char *files[3] = {"data_histoall.root",
-							"Run2011AMuOnia_mergeNtuple.root",
-							"JPsiToMuMu_mergeMCNtuple.root"};
+	const char *files[3] = {"../data_histoall.root",
+							"../Run2011AMuOnia_mergeNtuple.root",
+							"../JPsiToMuMu_mergeMCNtuple.root"};
 
 
 
@@ -33,7 +33,7 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 2;
+	int useFile = 1;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -88,7 +88,7 @@ void generateHistograms()
 		folderName = "demo/";
 
 	//Open and read files
-	TFile *file0  = TFile::Open(("../" + string(files[useFile])).data());
+	TFile *file0  = TFile::Open(files[useFile]);
 	TTree *TreePC = (TTree*)file0->Get((folderName + "PlotControl").data());
 	TTree *TreeAT = (TTree*)file0->Get((folderName + "AnalysisTree").data());
 	cout << "Using \"" << files[useFile] << "\" ntupple" << endl;
@@ -139,6 +139,8 @@ void generateHistograms()
 	TNP.method 			= method;
 	TNP.directoryToSave = directoryToSave;
 
+	cout << "Using method " << TNP.method << endl;
+
 	//Get data size and set data limit if has
 	long long numberEntries = TreePC->GetEntries();
 	if (limitData > 0 && limitData < numberEntries)
@@ -148,11 +150,11 @@ void generateHistograms()
 
 
 	//Prepare for showing progress
-	string progressFormat = "%d/%d progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"lld/%lld\r";
-	auto lastTime = std::chrono::high_resolution_clock::now();
+	string progressFormat = "Progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"lld/%lld\r";
+	auto lastTime = std::chrono::steady_clock::now();
 
 	cout << endl;
-	cout << "Filling Invariant Mass Histograms....." << endl;
+	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
 
 	//Loop between the components
 	for (long long i = 0; i < numberEntries; i++)
@@ -162,10 +164,10 @@ void generateHistograms()
 		TreeAT->GetEntry(i);
 
 		//Show progress on screen
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
+		if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
 		{
-			printf(progressFormat.data(), 1, 2, (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
-			lastTime = std::chrono::high_resolution_clock::now();
+			printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
+			lastTime = chrono::steady_clock::now();
 		}
 
 		//Fill histograms
@@ -217,10 +219,10 @@ void generateHistograms()
 
 	
 	//Prepare for showing progress
-	lastTime = std::chrono::high_resolution_clock::now();
+	lastTime = chrono::steady_clock::now();
 
 	cout << endl;
-	cout << "Filling Quantities Histograms....." << endl;
+	cout << "Filling Quantities Histograms..... (2/2)" << endl;
 
 	//Loop between the components again
 	for (long long i = 0; i < numberEntries; i++)
@@ -230,10 +232,10 @@ void generateHistograms()
 		TreeAT->GetEntry(i);
 
 		//Show progress on screen
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
+		if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
 		{
-			printf(progressFormat.data(), 2, 2, (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
-			lastTime = std::chrono::high_resolution_clock::now();
+			printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
+			lastTime = chrono::steady_clock::now();
 		}
 
 		//Fill histograms
@@ -242,7 +244,7 @@ void generateHistograms()
 			TNP.fillQuantitiesHistograms(quantities, types);
 		}
 	}
-	cout << endl;
+	cout << endl << endl;
 
 	//For sideband subtraction
 	TNP.subtractSigHistograms();
@@ -264,7 +266,7 @@ void generateHistograms()
 	generatedFile->mkdir("histograms/");
 	generatedFile->   cd("histograms/");
 
-	//Write histograms on file
+	//Write quantities histograms on file
 	{
 		bool writehSigBack 	= true;
 		bool writehSig 		= true;
