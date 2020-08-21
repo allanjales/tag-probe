@@ -9,23 +9,28 @@ The analysed datas are from those files:
 * [1] [Run2011AMuOnia_mergeNtuple.root](https://drive.google.com/drive/u/0/folders/1Nu9Al7SV1F60TMFxKZVBIMvgEWAdzida)
 * [2] [JPsiToMuMu_mergeMCNtuple.root](https://drive.google.com/drive/u/0/folders/1Nu9Al7SV1F60TMFxKZVBIMvgEWAdzida)
 
-After download one of those files, you can run the code. Don't forget to use `useNewData` (int) var in `macro.cpp` file to set which ntupple did you choose. Just set the current id above of it.
+After download one of those files, you can run the code. Don't forget to use `int useFile` in `macro.cpp` file to set which ntupple will you analyse. Just set the current index in `const char *files[]`.
 
-## Preferences
+## Preferences and setup
 
-You can change the method to estimate signal region by modifying `Muon.setMethod(1)` line by choosing 1 (estimate by FWHM of histograms) or 2 (estimate by FWHM of fitting):
+You can change the method to estimate signal region by modifying `int method` by choosing 1 (estimate by FWHM using histograms) or 2 (estimate by FWHM using fitting):
 
 ```cpp
-Muon.setMethod(1);
+int method = 1;
 ```
 
 Change this line to specify the ntupple you are analysing by choosing 0 (old ntupple), 1 (run 2011 ntupple) or 2 (monte carlo ntupple):
 
 ```cpp
-int useNewData = 1;
+int useFile = 1;
 ```
 
-## Development setting
+More options are below the line
+```cpp
+//Options to change
+```
+
+## Development setting and run
 
 It is necessary to have [ROOT](https://root.cern.ch/root/html534/guides/users-guide/InstallandBuild.html), CERN's software, installed on your machine.
 
@@ -34,9 +39,8 @@ Go on your folder where the file code is downloaded and run:
 ```sh
 $ cd main
 $ root -l -n
-root[0] .L macro.cpp+
-root[1] macro()
+root[1] .x macro()
 ```
 
 ## Output
-Images are created in `result` folder. In addition, a .root file is generated named `generated_hist.root` with all canvas and histograms.
+Images are created in `../result` folder by default. User can choose where to save it in options. In addition, a .root file is generated named `generated_hist.root` with all canvas and histograms.
