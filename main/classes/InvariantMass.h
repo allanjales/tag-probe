@@ -25,6 +25,8 @@ struct MassValues
 	//Histogram and fit function
 	TH1D* hMass 	  = NULL;
 	TF1*  fitFunction = NULL;
+	TF1*  fitSignal   = NULL;
+	TF1*  fitBack     = NULL;
 
 	//Value and sigma of invariant mass
 	double M_JPSI = 0.;
@@ -356,7 +358,16 @@ public:
 		//(specify optionally data size and flag to indicate that is a chi2 fit)
 		fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
 		ROOT::Fit::FitResult result = fitter.Result();
-		
+
+		//Save signal fit
+		this->Pass.fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
+		this->All .fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
+		double fitParameters[24];
+		fPass->GetParameters(fitParameters);
+		Pass.fitSignal->SetParameters(fitParameters);
+		All .fitSignal->SetParameters(fitParameters);
+
+		//Show fit result
 		cout << "For " << *particleType << "....";
 		result.Print(std::cout);
 		cout << endl;
@@ -380,17 +391,8 @@ public:
 
 		if (*this->method == 2)
 		{
-			//Get parameters of fit for signal only
-			double fitParameters[24];
-			ObjMassValues->fitFunction->GetParameters(fitParameters);
-			TF1* signalFit;
-			if (!isAll)
-				signalFit = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
-			else
-				signalFit = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
-			signalFit->SetParameters(fitParameters);
-
 			//Get value and uncertain of signal by fitting
+			TF1* &signalFit = ObjMassValues->fitSignal;
 			value     = signalFit->GetMaximumX();
 			double x1 = signalFit->GetX(signalFit->GetMaximum()/2);
 			double x2 = signalFit->GetX(signalFit->GetMaximum()/2, x1+0.0001, value + x1*3);

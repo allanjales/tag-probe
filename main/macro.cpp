@@ -23,33 +23,34 @@ using namespace std;
 void generateHistograms()
 {
 	//List of files
-	const char *files[3] = {"../data_histoall.root",
+	const char *files[] = {"../data_histoall.root",
 							"../Run2011AMuOnia_mergeNtuple.root",
-							"../JPsiToMuMu_mergeMCNtuple.root"};
-
+							"../JPsiToMuMu_mergeMCNtuple.root",
+							"../data_histoall.root",
+							"../Upsilon1SToMuMu_MC_full.root"};
 
 
 
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 1;
+	int useFile = 2;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 1;
+	int method = 2;
 
 	//Path where is going to save results 
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 100000; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
 
 
@@ -134,7 +135,7 @@ void generateHistograms()
 					&PassingProbeGlobalMuon
 		};
 
-	//Create a object and set method
+	//Create a object and set configs
 	TagAndProbe TNP;
 	TNP.method 			= method;
 	TNP.directoryToSave = directoryToSave;
@@ -145,7 +146,7 @@ void generateHistograms()
 	long long numberEntries = TreePC->GetEntries();
 	if (limitData > 0 && limitData < numberEntries)
 		numberEntries = limitData;
-	printf("Datas analysed = %lld of %lld\n", numberEntries, TreePC->GetEntries());
+	printf("Data analysed = %lld of %lld\n", numberEntries, TreePC->GetEntries());
 
 
 

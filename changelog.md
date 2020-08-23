@@ -18,4 +18,11 @@ For v1
 	* Changed consitencyDebugCout() format and corrected it;
 	* Removed `std::` from chrono uses;
 	* Changed from `high_resolution_clock` to `steady_clock` in chrono uses on macro.cpp;
-	* Updated README.md
+	* Updated README.md;
+	* Changed data analysed cout form;
+
+* 2020-08-21
+	* Added Upsilon files names on macro.cpp;
+	* Now MassValues stores signal function;
+	* Changed `updateMassValuesFor(...)`. Now do not need create a function for signal, just read;
+	* Changed `doFit()` to store signal fit in MassValue structure;
