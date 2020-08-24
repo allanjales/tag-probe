@@ -3,13 +3,12 @@
 //Holder for 3 set of histograms for each quantity
 class PtEtaPhi{
 private:
-	int* method 			     = NULL;
-	const char** particleName    = NULL;
-	const char** directoryToSave = NULL;
-	const char** particleType    = NULL;
-	const char** tagOrProbe      = NULL;
-
-	InvariantMass* ObjMass = NULL;
+	int& method;
+	const char*& particleName;
+	const char*& directoryToSave;
+	const char*& particleType;
+	const char*& tagOrProbe;
+	InvariantMass& ObjMass;
 
 public:
 	//About histograms
@@ -18,19 +17,19 @@ public:
 	const char* quantityUnit		 = NULL;
 	const char* extendedQuantityName = NULL;
 
-	int 	nBins;
-	double 	xMin;
-	double	xMax;
+	double 	xMin = 0.;
+	double	xMax = 0.;
+	int 	nBins = 0;
 	int 	decimals = 3;
 
 	TEfficiency* pEff 	= NULL;
 
 	PassingFailing Pass {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"Passing", &this->quantityName, &this->xAxisName, &this->quantityUnit, &this->extendedQuantityName,
-		&this->nBins, &this->xMin, &this->xMax, &this->decimals};
+		"Passing", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
+		this->xMin, this->xMax, this->nBins, this->decimals};
 	PassingFailing All  {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"All", &this->quantityName, &this->xAxisName, &this->quantityUnit, &this->extendedQuantityName,
-		&this->nBins, &this->xMin, &this->xMax, &this->decimals};
+		"All", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
+		this->xMin, this->xMax, this->nBins, this->decimals};
 
 	void subtractSigHistograms()
 	{
@@ -58,8 +57,8 @@ public:
 		TH1D* &hPass  = this->Pass.hSigBack;
 		TH1D* &hTotal = this->All .hSigBack;
 
-		string pName 	= string(*particleName) + " " + string(*particleType) + " " + string(*tagOrProbe) + " " + string(quantityName) + " Efficiency";
-		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*particleType) + " " + string(*tagOrProbe) + ")";
+		string pName 	= string(particleName) + " " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName) + " Efficiency";
+		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
 
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
@@ -113,9 +112,9 @@ public:
 		//Supress canvas
 		gROOT->SetBatch(0);
 
-		string canvasName 	= string(*particleName) + " " + string(*tagOrProbe) + " " + string(quantityName) + " " + string(*particleType) + " Efficiency" ;
-		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(*particleType) + " " + string(*tagOrProbe) + ")";
-		string saveAs 		= string(*directoryToSave) + string("Efficiency_") + string(*tagOrProbe) + "_" + string(quantityName) + "_" + string(*particleType) +".png";
+		string canvasName 	= string(particleName) + " " + string(tagOrProbe) + " " + string(quantityName) + " " + string(particleType) + " Efficiency" ;
+		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
+		string saveAs 		= string(directoryToSave) + string("Efficiency_") + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(particleType) +".png";
 
 		//Draw on canvas
 		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
@@ -179,12 +178,12 @@ public:
 
 
 
-	PtEtaPhi(int* method,
-		const char** particleName,
-		const char** directoryToSave,
-	 	const char** particleType,
-	 	InvariantMass* ObjMass,
-	 	const char** tagOrProbe,
+	PtEtaPhi(int& method,
+		const char*& particleName,
+		const char*& directoryToSave,
+	 	const char*& particleType,
+	 	InvariantMass& ObjMass,
+	 	const char*& tagOrProbe,
 		const char*  quantityName,
 		const char*  xAxisName,
 		const char*  quantityUnit,

@@ -9,9 +9,9 @@ public:
 	const char* particleName = "Muon";
 	const char* directoryToSave = "../result/";
 
-	Type Tracker    {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Tracker"};
-	Type Standalone {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Standalone"};
-	Type Global     {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Global"};
+	Type Tracker    {this->method, this->ressonance, this->particleName, this->directoryToSave, "Tracker"};
+	Type Standalone {this->method, this->ressonance, this->particleName, this->directoryToSave, "Standalone"};
+	Type Global     {this->method, this->ressonance, this->particleName, this->directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
@@ -57,12 +57,11 @@ public:
 
 	void consistencyDebugCout()
 	{
-		cout << "Checking histograms number inconsistency (should be 0)" << endl;
+		cout << "\nChecking histograms number inconsistency (should be 0)" << endl;
 		cout << "* total - (background + signal)" << endl;
 		this->Tracker   .consistencyDebugCout();
 		this->Standalone.consistencyDebugCout();
 		this->Global    .consistencyDebugCout();
-		cout << endl;
 	}
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)

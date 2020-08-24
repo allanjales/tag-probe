@@ -105,24 +105,24 @@ struct MassValues
 
 class InvariantMass{
 private:
-	int* method 			  	 = NULL;
-	const char** ressonance      = NULL;
-	const char** particleName 	 = NULL;
-	const char** directoryToSave = NULL;
-	const char** particleType    = NULL;
+	int& method;
+	const char*& ressonance;
+	const char*& particleName;
+	const char*& directoryToSave;
+	const char*& particleType;
 
 	void createMassHistogram(TH1D* &hMass, const char* passingOrFailing)
 	{
-		string hName 			= string(passingOrFailing) + "_" + string(*particleType) + "_" + string(*particleName) + "_InvariantMass";
-		string hTitle 			= "Invariant Mass (" + string(passingOrFailing) + " for " + string(*particleType) + ")";
+		string hName 			= string(passingOrFailing) + "_" + string(particleType) + "_" + string(particleName) + "_InvariantMass";
+		string hTitle 			= "Invariant Mass (" + string(passingOrFailing) + " for " + string(particleType) + ")";
 		string yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f GeV/c^{2})";
 
 		//Change hTitle name
 		if (strcmp(passingOrFailing, "Passing") == 0)
-			hTitle = "Invariant Mass (" + string(*particleType) + ")";
+			hTitle = "Invariant Mass (" + string(particleType) + ")";
 
 		if (strcmp(passingOrFailing, "Failing") == 0)
-			hTitle = "Invariant Mass (non-" + string(*particleType) + ")";
+			hTitle = "Invariant Mass (non-" + string(particleType) + ")";
 
 		if (strcmp(passingOrFailing, "All") == 0)
 			hTitle = "Invariant Mass (All)";
@@ -300,7 +300,7 @@ public:
 
 	void doFit()
 	{
-		if (strcmp(*ressonance, "Jpsi") == 0)
+		if (strcmp(ressonance, "Jpsi") == 0)
 		{
 			TH1D* &hPass 	 = this->Pass.hMass;
 			TH1D* &hPassFail = this->All .hMass;
@@ -402,7 +402,7 @@ public:
 			cout << endl;
 		}
 
-		if (strcmp(*ressonance, "Upsilon") == 0)
+		if (strcmp(ressonance, "Upsilon") == 0)
 		{
 			/*
 			double mass_peak1 = 9.46030;
@@ -486,7 +486,7 @@ public:
 		double value = 0.;
 		double fwhm  = 0.;
 
-		if (*this->method == 1)
+		if (this->method == 1)
 		{
 			//Get value and uncertain of signal by histogram
 			TH1D* &hMass = ObjMassValues->hMass;
@@ -497,7 +497,7 @@ public:
 			fwhm     = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
 		}
 
-		if (*this->method == 2)
+		if (this->method == 2)
 		{
 			//Get value and uncertain of signal by fitting
 			TF1* &signalFit = ObjMassValues->fitSignal;
@@ -524,15 +524,15 @@ public:
 
 	TCanvas* createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		string canvasName 	= "InvariantMass_" + string(*particleType);
-		string canvasTitle	= "Invariant Mass " + string(*particleType);
-		string saveAs 		= string(*directoryToSave) + "InvariantMass_" + string(*particleType) + ".png";
+		string canvasName 	= "InvariantMass_" + string(particleType);
+		string canvasTitle	= "Invariant Mass " + string(particleType);
+		string saveAs 		= string(directoryToSave) + "InvariantMass_" + string(particleType) + ".png";
 
 		if (drawRegions)
 		{
-			canvasName 	= "InvariantMass_" + string(*particleType) + "_region";
-			canvasTitle	= "Invariant Mass " + string(*particleType) + " with Regions";
-			saveAs 		= string(*directoryToSave) + "InvariantMass_" + string(*particleType) + "_region" + ".png";
+			canvasName 	= "InvariantMass_" + string(particleType) + "_region";
+			canvasTitle	= "Invariant Mass " + string(particleType) + " with Regions";
+			saveAs 		= string(directoryToSave) + "InvariantMass_" + string(particleType) + "_region" + ".png";
 		}
 
 		//Create canvas
@@ -580,25 +580,25 @@ public:
 	
 
 
-	InvariantMass(int* method,
-		const char** ressonance,
-		const char** particleName,
-		const char** directoryToSave,
-	 	const char** particleType)
+	InvariantMass(int& method,
+		const char*& ressonance,
+		const char*& particleName,
+		const char*& directoryToSave,
+	 	const char*& particleType)
 		  : method(method),
 		    ressonance(ressonance),
 		    particleName(particleName),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)
 	{
-		if (strcmp(*ressonance, "Jpsi") == 0)
+		if (strcmp(ressonance, "Jpsi") == 0)
 		{
 			this->xMin  = 2.8;
 			this->xMax  = 3.4;
 			this->nBins = 240;
 		}
 
-		if (strcmp(*ressonance, "Upsilon") == 0)
+		if (strcmp(ressonance, "Upsilon") == 0)
 		{
 			this->xMin  = 8.5;
 			this->xMax  = 11.4;

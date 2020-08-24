@@ -44,13 +44,13 @@ void generateHistograms()
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 50000; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
 
 
@@ -158,6 +158,7 @@ void generateHistograms()
 	//Prepare for showing progress
 	string progressFormat = "Progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"lld/%lld\r";
 	auto lastTime = std::chrono::steady_clock::now();
+	auto start = std::chrono::steady_clock::now();
 
 	cout << endl;
 	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
@@ -182,7 +183,7 @@ void generateHistograms()
 			TNP.fillMassHistograms(quantities, types);
 		}
 	}
-	cout << endl << endl;
+	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//Do function fit ober the histogram
 	TNP.doFit();
@@ -227,6 +228,7 @@ void generateHistograms()
 	
 	//Prepare for showing progress
 	lastTime = chrono::steady_clock::now();
+	start = std::chrono::steady_clock::now();
 
 	cout << endl;
 	cout << "Filling Quantities Histograms..... (2/2)" << endl;
@@ -251,7 +253,7 @@ void generateHistograms()
 			TNP.fillQuantitiesHistograms(quantities, types);
 		}
 	}
-	cout << endl << endl;
+	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//For sideband subtraction
 	TNP.subtractSigHistograms();

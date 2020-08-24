@@ -3,21 +3,20 @@
 //Holder for 3 set of histograms for each quantity
 class TagProbe{
 private:
-	int* method 				 = NULL;
-	const char** particleName	 = NULL;
-	const char** directoryToSave = NULL;
-	const char** particleType    = NULL;
-
-	InvariantMass* ObjMass = NULL;
+	int& method;
+	const char*& particleName;
+	const char*& directoryToSave;
+	const char*& particleType;
+	InvariantMass& ObjMass;
 
 public:
 	const char* tagOrProbe = NULL;
 
-	PtEtaPhi Pt  {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+	PtEtaPhi Pt  {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Pt",  "p_{t}", "GeV/c", "Transversal Momentum", 100,  0.00, 100.00, 1};
-	PtEtaPhi Eta {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+	PtEtaPhi Eta {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",       100, -2.50,   2.50};
-	PtEtaPhi Phi {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, &this->tagOrProbe,
+	PtEtaPhi Phi {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",       79, -3.15,   3.15};
 
 	void subtractSigHistograms()
@@ -78,11 +77,11 @@ public:
 
 
 
-	TagProbe(int* method,
-		const char** particleName,
-		const char** directoryToSave,
-	 	const char** particleType,
-	 	InvariantMass* ObjMass,
+	TagProbe(int& method,
+		const char*& particleName,
+		const char*& directoryToSave,
+	 	const char*& particleType,
+	 	InvariantMass& ObjMass,
 	 	const char*  tagOrProbe)
 		  : method(method),
 		    particleName(particleName),
