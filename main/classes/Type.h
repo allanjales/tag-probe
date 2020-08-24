@@ -5,15 +5,21 @@
 class Type{
 private:
 	int* method 			  	 = NULL;
+	const char** ressonance	     = NULL;
 	const char** particleName 	 = NULL;
 	const char** directoryToSave = NULL;
 
 public:
 	const char* particleType = NULL;
 
-	InvariantMass Mass  {this->method, this->particleName, this->directoryToSave, &this->particleType};
+	InvariantMass Mass  {this->method, this->ressonance, this->particleName, this->directoryToSave, &this->particleType};
 	TagProbe      Tag   {this->method, this->particleName, this->directoryToSave, &this->particleType, &this->Mass, "Tag"};
 	TagProbe      Probe {this->method, this->particleName, this->directoryToSave, &this->particleType, &this->Mass, "Probe"};
+
+	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
+	{
+		Mass.defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+	}
 	
 	void doFit()
 	{
@@ -96,10 +102,12 @@ public:
 
 
 	Type(int* method,
+		const char** ressonance,
 		const char** particleName,
 		const char** directoryToSave,
 	 	const char*  particleType)
 		  : method(method),
+		    ressonance(ressonance),
 		    particleName(particleName),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)

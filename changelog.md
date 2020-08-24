@@ -26,3 +26,10 @@ For v1
 	* Now MassValues stores signal function;
 	* Changed `updateMassValuesFor(...)`. Now do not need create a function for signal, just read;
 	* Changed `doFit()` to store signal fit in MassValue structure;
+
+* 2020-08-21 (upsilon)
+	* Added function `defineMassHistogramNumbers(...)` in TagAndProbe, Type and InvariantMass class;
+	* Changed macro.cpp to call `defineMassHistogramNumbers(...)` to set upsilon histograms
+	* Added varaible `const char* ressonance` in TagAndProbe class
+	* Added pointer to `ressonance` in Type and InvariantMass class
+	* Changed constructor of InvariantMass class

@@ -26,7 +26,7 @@ void generateHistograms()
 	const char *files[] = {"../data_histoall.root",
 							"../Run2011AMuOnia_mergeNtuple.root",
 							"../JPsiToMuMu_mergeMCNtuple.root",
-							"../data_histoall.root",
+							"../Run2011A_MuOnia_Upsilon.root",
 							"../Upsilon1SToMuMu_MC_full.root"};
 
 
@@ -34,23 +34,23 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 2;
+	int useFile = 3;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 2;
+	int method = 1;
 
 	//Path where is going to save results 
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 100000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
 
 
@@ -140,6 +140,11 @@ void generateHistograms()
 	TNP.method 			= method;
 	TNP.directoryToSave = directoryToSave;
 
+	//Prepare for Upsilon
+	TNP.ressonance = "Upsilon";
+	TNP.defineMassHistogramNumbers(8.5, 11.4, 60);
+
+	cout << "Ressonance: " << TNP.ressonance << endl;
 	cout << "Using method " << TNP.method << endl;
 
 	//Get data size and set data limit if has
@@ -181,7 +186,7 @@ void generateHistograms()
 
 	//Do function fit ober the histogram
 	TNP.doFit();
-	
+
 	//Get values for invariant mass and sigma from plot
 	TNP.updateMassValuesAll();
 
@@ -216,6 +221,7 @@ void generateHistograms()
 
 		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
+
 
 
 	

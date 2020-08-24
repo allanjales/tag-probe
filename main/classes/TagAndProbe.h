@@ -5,13 +5,21 @@ class TagAndProbe
 {
 public:
 	int method = 1;
+	const char* ressonance = "Jpsi";
 	const char* particleName = "Muon";
 	const char* directoryToSave = "../result/";
 
-	Type Tracker    {&this->method, &this->particleName, &this->directoryToSave, "Tracker"};
-	Type Standalone {&this->method, &this->particleName, &this->directoryToSave, "Standalone"};
-	Type Global     {&this->method, &this->particleName, &this->directoryToSave, "Global"};
+	Type Tracker    {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Tracker"};
+	Type Standalone {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Standalone"};
+	Type Global     {&this->method, &this->ressonance, &this->particleName, &this->directoryToSave, "Global"};
 	
+	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
+	{
+		this->Tracker   .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+		this->Standalone.defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+		this->Global    .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+	}
+
 	void doFit()
 	{
 		this->Tracker   .doFit();
@@ -131,5 +139,9 @@ public:
 
 
 	TagAndProbe()
+	{}
+
+	TagAndProbe(const char* ressonance)
+			: ressonance(ressonance)
 	{}
 };

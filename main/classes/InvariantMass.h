@@ -13,6 +13,8 @@
 #include "Math/WrappedMultiTF1.h"
 #include "HFitInterface.h"
 
+#include "RooFitResult.h"
+
 #include <iostream>
 
 using namespace std;
@@ -20,13 +22,13 @@ using namespace std;
 #include "FitFunctions.h"
 #include "GlobalChi2.h"
 
+
 struct MassValues
 {
 	//Histogram and fit function
 	TH1D* hMass 	  = NULL;
 	TF1*  fitFunction = NULL;
 	TF1*  fitSignal   = NULL;
-	TF1*  fitBack     = NULL;
 
 	//Value and sigma of invariant mass
 	double M_JPSI = 0.;
@@ -36,11 +38,21 @@ struct MassValues
 	double signalRegion 	= 3.0;
 	double sidebandRegion	= 6.0;
 
+
+	//Regions
+	double sidebandRegion1_x1  = 8.50;
+	double sidebandRegion1_x2  = 9.19;
+	double signalRegion_x1     = 9.19;
+	double signalRegion_x2     = 9.70;
+	double sidebandRegion2_x1  = 10.6;
+	//double sidebandRegion2_x1  = 9.70;
+	double sidebandRegion2_x2  = 11.2;
+
 	//--- For sideband subtraction ---
 
 	bool isInSignalRegion(double InvariantMass)
 	{
-		if (fabs(InvariantMass - this->M_JPSI) < this->W_JPSI * this->signalRegion)
+		if (InvariantMass > this->signalRegion_x1 && InvariantMass < this->signalRegion_x2)
 			return true;
 
 		return false;
@@ -48,8 +60,8 @@ struct MassValues
 
 	bool isInSidebandRegion(double InvariantMass)
 	{
-		if (fabs(InvariantMass - this->M_JPSI) > this->W_JPSI * this->signalRegion &&
-			fabs(InvariantMass - this->M_JPSI) < this->W_JPSI * this->sidebandRegion)
+		if ((InvariantMass > this->sidebandRegion1_x1 && InvariantMass < this->sidebandRegion1_x2) ||
+			(InvariantMass > this->sidebandRegion2_x1 && InvariantMass < this->sidebandRegion2_x2))
 			return true;
 
 		return false;
@@ -57,7 +69,10 @@ struct MassValues
 
 	int subtractionFactor()
 	{
-		return this->signalRegion/abs(this->sidebandRegion - this->signalRegion);
+		double signalRegion = abs(signalRegion_x2 - signalRegion_x1);
+		double sidebandRegion = abs(sidebandRegion1_x2 - sidebandRegion1_x1) + abs(sidebandRegion2_x2 - sidebandRegion2_x1);
+
+		return signalRegion/abs(sidebandRegion - signalRegion);
 	}
 
 	TBox* createTBox(double Ymax, int index = 0)
@@ -66,26 +81,23 @@ struct MassValues
 		//index = 0 -> signal region
 		//index = 1 -> right region
 
-		double dx1, dx2 = 0;
+		double x1, x2 = 0;
 
 		switch(index)
 		{
 			case -1:
-				dx1 = -sidebandRegion;
-				dx2 = -signalRegion;
+				x1 = sidebandRegion1_x1;
+				x2 = sidebandRegion1_x2;
 				break;
 			case 0:
-				dx1 = -signalRegion;
-				dx2 = +signalRegion;
+				x1 = signalRegion_x1;
+				x2 = signalRegion_x2;
 				break;
 			case 1:
-				dx1 = +sidebandRegion;
-				dx2 = +signalRegion;
+				x1 = sidebandRegion2_x1;
+				x2 = sidebandRegion2_x2;
 				break;
 		}
-
-		double x1 = M_JPSI + W_JPSI * dx1;
-		double x2 = M_JPSI + W_JPSI * dx2;
 
 		return new TBox(x1, 0., x2, Ymax);;
 	}
@@ -94,6 +106,7 @@ struct MassValues
 class InvariantMass{
 private:
 	int* method 			  	 = NULL;
+	const char** ressonance      = NULL;
 	const char** particleName 	 = NULL;
 	const char** directoryToSave = NULL;
 	const char** particleType    = NULL;
@@ -242,9 +255,9 @@ public:
 	MassValues Pass;
 	MassValues All;
 
-	int 	nBins;
 	double 	xMin;
 	double	xMax;
+	int 	nBins;
 	int 	decimals = 3;
 
 	const char* const fittingParName[12] = {
@@ -264,6 +277,20 @@ public:
 			"Exp2(Bg) Width   "
 		};
 
+	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
+	{
+		this->xMin     = xMin;
+		this->xMax     = xMax;
+		this->nBins    = nBins;
+		this->decimals = decimals;
+
+		delete this->Pass.hMass;
+		delete this->All. hMass;
+
+		this->createMassHistogram(Pass.hMass, "Passing");
+		this->createMassHistogram(All. hMass, "All");
+	}
+
 	void fillMassHistograms(double* InvariantMass, int* isPassing)
 	{
 		if (*isPassing)
@@ -273,104 +300,185 @@ public:
 
 	void doFit()
 	{
-		TH1D* &hPass 	 = this->Pass.hMass;
-		TH1D* &hPassFail = this->All .hMass;
-
-		//Get size of parNames
-		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
-
-		//Passing Fitting
-		TF1* &fPass = this->Pass.fitFunction;
-		fPass = new TF1("FitFunction_Pass", FitFunctions::Merged::Pass_InvariantMass, xMin, xMax, 12);
-		for (int i = 0; i < arraySize; i++)
+		if (strcmp(*ressonance, "Jpsi") == 0)
 		{
-			fPass->SetParName(i, this->fittingParName[i]);
+			TH1D* &hPass 	 = this->Pass.hMass;
+			TH1D* &hPassFail = this->All .hMass;
+
+			//Get size of parNames
+			int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
+
+			//Passing Fitting
+			TF1* &fPass = this->Pass.fitFunction;
+			fPass = new TF1("FitFunction_Pass", FitFunctions::Merged::Pass_InvariantMass, xMin, xMax, 12);
+			for (int i = 0; i < arraySize; i++)
+			{
+				fPass->SetParName(i, this->fittingParName[i]);
+			}
+
+			//Both Fitting
+			TF1* &fPassFail = this->All.fitFunction;
+			fPassFail = new TF1("FitFunction_Both", FitFunctions::Merged::Both_InvariantMass, xMin, xMax, 24);
+			for (int i = 0; i < arraySize*2; i++)
+			{
+				fPassFail->SetParName(i, this->fittingParName[i%arraySize]);
+			}
+
+			//Simultaneuos fit
+			ROOT::Math::WrappedMultiTF1 wfPass(*fPass, 1);
+			ROOT::Math::WrappedMultiTF1 wfPassFail(*fPassFail, 1);
+
+			ROOT::Fit::DataOptions opt;
+
+			ROOT::Fit::DataRange rangePass;
+			rangePass.SetRange(xMin, xMax);
+			ROOT::Fit::BinData dataPass(opt, rangePass);
+			ROOT::Fit::FillData(dataPass, hPass);
+
+			ROOT::Fit::DataRange rangePassFail;
+			rangePassFail.SetRange(xMin, xMax);
+			ROOT::Fit::BinData dataPassFail(opt, rangePassFail);
+			ROOT::Fit::FillData(dataPassFail, hPassFail);
+
+			ROOT::Fit::Chi2Function chi2_Pass(dataPass, wfPass);
+			ROOT::Fit::Chi2Function chi2_PassFail(dataPassFail, wfPassFail);
+
+			GlobalChi2 globalChi2(chi2_Pass, chi2_PassFail);
+
+			ROOT::Fit::Fitter fitter;
+
+			//Set initial parameters (Monte Carlo)
+			double par0[24] = {340.2,
+								3.09,
+								0.037,
+								1.824,
+								1.034,
+								3.093,
+								0.022,
+								8322.27,
+								-0.217,
+								1.915,
+								263.185,
+								0.061,
+								340.2,
+								3.09,
+								0.037,
+								1.824,
+								1.034,
+								3.093,
+								0.022,
+								8322.27,
+								-0.217,
+								1.915,
+								263.185,
+								0.061
+							};
+
+			//Create before the parameter settings in order to fix or set range on them
+			fitter.Config().SetParamsSettings(24, par0);
+
+			//Rename global parameters
+			for (int i = 0; i < arraySize*2; i++)
+			{
+				fitter.Config().ParSettings(i).SetName(this->fittingParName[i%arraySize]);
+			}
+
+			//Fit FCN function directly
+			//(specify optionally data size and flag to indicate that is a chi2 fit)
+			fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
+			ROOT::Fit::FitResult result = fitter.Result();
+
+			//Save signal fit
+			this->Pass.fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
+			this->All .fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
+			double fitParameters[24];
+			fPass->GetParameters(fitParameters);
+			Pass.fitSignal->SetParameters(fitParameters);
+			All .fitSignal->SetParameters(fitParameters);
+
+			//Show fit result
+			cout << "For " << *particleType << "....";
+			result.Print(std::cout);
+			cout << endl;
 		}
 
-		//Both Fitting
-		TF1* &fPassFail = this->All.fitFunction;
-		fPassFail = new TF1("FitFunction_Both", FitFunctions::Merged::Both_InvariantMass, xMin, xMax, 24);
-		for (int i = 0; i < arraySize*2; i++)
+		if (strcmp(*ressonance, "Upsilon") == 0)
 		{
-			fPassFail->SetParName(i, this->fittingParName[i%arraySize]);
+			/*
+			double mass_peak1 = 9.46030;
+			double mass_peak2 = 10.02326;
+			double mass_peak3 = 10.3552;
+
+			TCanvas* c_all  = new TCanvas;
+			TCanvas* c_pass = new TCanvas;
+
+			//DECLARE OBSERVABLE X - INVARIANT MASS BETWEEN _mmin AND _mmax
+			RooRealVar mass_all("mass_all","mass_all", xMin, xMax);
+
+			// Create a binned dataset that imports contents of TH1 and associates itscontents to observable 'mass'
+			RooDataHist dh("dh","dh",mass_all,RooFit::Import(*this->All.hMass));
+			RooDataHist dh_pass("dh_pass","dh_pass",mass_all,RooFit::Import(*this->Pass.hMass));
+
+
+			RooRealVar lambda("lambda","lambda",-1.3,-10.,10.);
+			RooExponential background("background", "background", mass_all, lambda);
+
+			RooRealVar sigma("sigma","sigma",0.05*(xMax - xMin),0.,0.5*(xMax - xMin));
+
+			RooRealVar mean1("mean1","mean1",xMin,(mass_peak1+mass_peak2)/2.);
+			RooRealVar mean2("mean2","mean2",(mass_peak1+mass_peak2)/2.,(mass_peak3+mass_peak2)/2.);
+			RooRealVar mean3("mean3","mean3",(mass_peak3+mass_peak2)/2.,xMax);
+			//FIT FUNCTIONS
+
+			// --Gaussian as the signal pdf
+			RooGaussian gaussian1("signal1","signal1",mass_all,mean1,sigma);
+			RooGaussian gaussian2("signal2","signal2",mass_all,mean2,sigma);
+			RooGaussian gaussian3("signal3","signal3",mass_all,mean3,sigma);
+
+			double n_signal_initial1 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak1)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak1,mass_peak1))) / dh.sumEntries();
+			double n_signal_initial2 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak2)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak2,mass_peak2))) / dh.sumEntries();
+			double n_signal_initial3 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak3)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak3,mass_peak3))) / dh.sumEntries();
+
+			double n_signal_initial_total = n_signal_initial1 + n_signal_initial2 + n_signal_initial3;
+
+			//signal = gaussian1*frac1 + gaussian2*frac2 + gaussian3*(1-(frac1 + frac2))
+			//S(signal)d mass = 1
+			RooRealVar frac1("frac1","frac1",0.333,0.,1.);
+			RooRealVar frac2("frac2","frac2",0.333,0.,1.);
+			//para RooArgList N-1, assume como frações
+			RooAddPdf* signal;
+			signal = new RooAddPdf("signal", "signal", RooArgList(gaussian1, gaussian2,gaussian3), RooArgList(frac1, frac2));
+
+			double n_back_initial = 1. - n_signal_initial1 - n_signal_initial2 -n_signal_initial3;
+
+			RooRealVar n_signal_total("n_signal_total","n_signal_total",n_signal_initial_total,0.,dh.sumEntries());
+
+			RooRealVar n_back("n_back","n_back",n_back_initial,0.,dh.sumEntries());
+			//para RooArgList N, assume como normalizações
+			//modelo_total = n_signal_total*signal + n_back*background
+			RooAddPdf* model;
+			model = new RooAddPdf("model","model", RooArgList(*signal, background),RooArgList(n_signal_total, n_back));
+
+			RooPlot *frame = mass_all.frame(RooFit::Title("Invariant Mass"));
+			RooPlot *frame_new = mass_all.frame(RooFit::Title("Invariant Mass"));
+
+			RooFitResult* fitres = new RooFitResult; //saves fit result
+			fitres = model->fitTo(dh, RooFit::Save());
+
+			// collecting fit results in order to differentiate between signal and background
+			RooRealVar* pass_mean1 = (RooRealVar*) fitres->floatParsFinal().find("mean1");
+			RooRealVar* pass_mean2 = (RooRealVar*) fitres->floatParsFinal().find("mean2");
+			RooRealVar* pass_mean3 = (RooRealVar*) fitres->floatParsFinal().find("mean3");
+
+			RooRealVar* pass_sigma = (RooRealVar*) fitres->floatParsFinal().find("sigma");
+
+			double mean1_value = pass_mean1->getVal();
+			double mean2_value = pass_mean2->getVal();
+			double mean3_value = pass_mean3->getVal();
+
+			double sigma_value = pass_sigma->getVal();
+			*/
 		}
-
-		//Simultaneuos fit
-		ROOT::Math::WrappedMultiTF1 wfPass(*fPass, 1);
-		ROOT::Math::WrappedMultiTF1 wfPassFail(*fPassFail, 1);
-
-		ROOT::Fit::DataOptions opt;
-
-		ROOT::Fit::DataRange rangePass;
-		rangePass.SetRange(xMin, xMax);
-		ROOT::Fit::BinData dataPass(opt, rangePass);
-		ROOT::Fit::FillData(dataPass, hPass);
-
-		ROOT::Fit::DataRange rangePassFail;
-		rangePassFail.SetRange(xMin, xMax);
-		ROOT::Fit::BinData dataPassFail(opt, rangePassFail);
-		ROOT::Fit::FillData(dataPassFail, hPassFail);
-
-		ROOT::Fit::Chi2Function chi2_Pass(dataPass, wfPass);
-		ROOT::Fit::Chi2Function chi2_PassFail(dataPassFail, wfPassFail);
-
-		GlobalChi2 globalChi2(chi2_Pass, chi2_PassFail);
-
-		ROOT::Fit::Fitter fitter;
-
-		//Set initial parameters (Monte Carlo)
-		double par0[24] = {340.2,
-							3.09,
-							0.037,
-							1.824,
-							1.034,
-							3.093,
-							0.022,
-							8322.27,
-							-0.217,
-							1.915,
-							263.185,
-							0.061,
-							340.2,
-							3.09,
-							0.037,
-							1.824,
-							1.034,
-							3.093,
-							0.022,
-							8322.27,
-							-0.217,
-							1.915,
-							263.185,
-							0.061
-						};
-
-		//Create before the parameter settings in order to fix or set range on them
-		fitter.Config().SetParamsSettings(24, par0);
-
-		//Rename global parameters
-		for (int i = 0; i < arraySize*2; i++)
-		{
-			fitter.Config().ParSettings(i).SetName(this->fittingParName[i%arraySize]);
-		}
-
-		//Fit FCN function directly
-		//(specify optionally data size and flag to indicate that is a chi2 fit)
-		fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
-		ROOT::Fit::FitResult result = fitter.Result();
-
-		//Save signal fit
-		this->Pass.fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
-		this->All .fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
-		double fitParameters[24];
-		fPass->GetParameters(fitParameters);
-		Pass.fitSignal->SetParameters(fitParameters);
-		All .fitSignal->SetParameters(fitParameters);
-
-		//Show fit result
-		cout << "For " << *particleType << "....";
-		result.Print(std::cout);
-		cout << endl;
 	}
 
 	void updateMassValuesFor(MassValues* ObjMassValues, bool isAll = false)
@@ -473,18 +581,29 @@ public:
 
 
 	InvariantMass(int* method,
+		const char** ressonance,
 		const char** particleName,
 		const char** directoryToSave,
 	 	const char** particleType)
 		  : method(method),
+		    ressonance(ressonance),
 		    particleName(particleName),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)
 	{
-		//Numbers for Jpsi
-		this->nBins = 240;
-		this->xMin  = 2.8;
-		this->xMax  = 3.4;
+		if (strcmp(*ressonance, "Jpsi") == 0)
+		{
+			this->xMin  = 2.8;
+			this->xMax  = 3.4;
+			this->nBins = 240;
+		}
+
+		if (strcmp(*ressonance, "Upsilon") == 0)
+		{
+			this->xMin  = 8.5;
+			this->xMax  = 11.4;
+			this->nBins = 60;
+		}
 
 		this->createMassHistogram(Pass.hMass, "Passing");
 		this->createMassHistogram(All. hMass, "All");
