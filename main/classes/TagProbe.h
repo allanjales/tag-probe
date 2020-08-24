@@ -26,20 +26,6 @@ public:
 		this->Phi.subtractSigHistograms();
 	}
 
-	void fillQuantitiesHistograms(double** quantities, double* InvariantMass, int* isPassing)
-	{
-		/*
-		//Assign variables for easy visualization
-		double &pt  = *quantities[0];
-		double &eta = *quantities[1];
-		double &phi = *quantities[2];
-		*/
-
-		this->Pt .fillQuantitiesHistograms(quantities[0], InvariantMass, isPassing);
-		this->Eta.fillQuantitiesHistograms(quantities[1], InvariantMass, isPassing);
-		this->Phi.fillQuantitiesHistograms(quantities[2], InvariantMass, isPassing);
-	}
-
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
 		this->Pt .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
@@ -73,6 +59,21 @@ public:
 		this->Pt .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 		this->Eta.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 		this->Phi.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+	}
+
+
+	void fillQuantitiesHistograms(double** quantities, double& InvariantMass, int& isPassing)
+	{
+		/*
+		//Assign variables for easy visualization
+		double &pt  = *quantities[0];
+		double &eta = *quantities[1];
+		double &phi = *quantities[2];
+		*/
+
+		this->Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing);
+		this->Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing);
+		this->Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing);
 	}
 
 

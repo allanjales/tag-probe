@@ -93,13 +93,13 @@ public:
 	}
 
 	//Fill histogram
-	void fillQuantitiesHistograms(double* quantity, double* InvariantMass)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass)
 	{
-		if ((*PassFailObj()).isInSignalRegion(*InvariantMass))
-			this->hSigBack->Fill(*quantity);
+		if ((*PassFailObj()).isInSignalRegion(InvariantMass))
+			this->hSigBack->Fill(quantity);
 
-		if ((*PassFailObj()).isInSidebandRegion(*InvariantMass))
-			this->hBack->Fill(*quantity);
+		if ((*PassFailObj()).isInSidebandRegion(InvariantMass))
+			this->hBack->Fill(quantity);
 	}
 
 	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)

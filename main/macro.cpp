@@ -121,7 +121,7 @@ void generateHistograms()
 	TreeAT->SetBranchAddress("PassingProbeStandAloneMuon",	&PassingProbeStandAloneMuon);
 	TreeAT->SetBranchAddress("PassingProbeGlobalMuon",		&PassingProbeGlobalMuon);
 
-	double* quantities[7] = {&ProbeMuon_Pt,
+	double* quantities[] = {&ProbeMuon_Pt,
 							&ProbeMuon_Eta,
 							&ProbeMuon_Phi,
 							&TagMuon_Pt,
@@ -130,7 +130,7 @@ void generateHistograms()
 							&InvariantMass,
 		};
 	
-	int* types[3] = {&PassingProbeTrackingMuon,
+	int* types[] = {&PassingProbeTrackingMuon,
 					&PassingProbeStandAloneMuon,
 					&PassingProbeGlobalMuon
 		};

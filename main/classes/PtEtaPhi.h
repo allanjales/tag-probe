@@ -37,9 +37,9 @@ public:
 		this->All .subtractSigHistogram();
 	}
 
-	void fillQuantitiesHistograms(double* quantity, double* InvariantMass, int* isPassing)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing)
 	{
-		if (*isPassing)
+		if (isPassing)
 			this->Pass.fillQuantitiesHistograms(quantity, InvariantMass);
 		this->All.fillQuantitiesHistograms(quantity, InvariantMass);
 	}

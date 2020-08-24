@@ -30,22 +30,13 @@ struct MassValues
 	TF1*  fitFunction = NULL;
 	TF1*  fitSignal   = NULL;
 
-	//Value and sigma of invariant mass
-	double M_JPSI = 0.;
-	double W_JPSI = 0.;
-
-	//Times sigma
-	double signalRegion 	= 3.0;
-	double sidebandRegion	= 6.0;
-
-
 	//Regions
 	double sidebandRegion1_x1  = 8.50;
 	double sidebandRegion1_x2  = 9.19;
 	double signalRegion_x1     = 9.19;
 	double signalRegion_x2     = 9.70;
-	double sidebandRegion2_x1  = 10.6;
-	//double sidebandRegion2_x1  = 9.70;
+	double sidebandRegion2_x1  = 10.6;		//Run2011
+	//double sidebandRegion2_x1  = 9.70;	//MC
 	double sidebandRegion2_x2  = 11.2;
 
 	//--- For sideband subtraction ---
@@ -291,11 +282,11 @@ public:
 		this->createMassHistogram(All. hMass, "All");
 	}
 
-	void fillMassHistograms(double* InvariantMass, int* isPassing)
+	void fillMassHistograms(double& InvariantMass, int& isPassing)
 	{
-		if (*isPassing)
-			this->Pass.hMass->Fill(*InvariantMass);
-		this->All.hMass->Fill(*InvariantMass);
+		if (isPassing)
+			this->Pass.hMass->Fill(InvariantMass);
+		this->All.hMass->Fill(InvariantMass);
 	}
 
 	void doFit()
@@ -511,9 +502,29 @@ public:
 
 		double sigma = fwhm/2.355;
 
-		//For regions of sideband subtraction
-		ObjMassValues->M_JPSI = value;
-		ObjMassValues->W_JPSI = sigma;
+		if (strcmp(ressonance, "Jpsi") == 0)
+		{
+			//Signal region = mass +- 3*sigma
+			ObjMassValues->signalRegion_x1 = value - 3*sigma;
+			ObjMassValues->signalRegion_x2 = value + 3*sigma;
+
+			//Sideband regions
+			ObjMassValues->sidebandRegion1_x1 = value - 6*sigma;
+			ObjMassValues->sidebandRegion1_x2 = value - 3*sigma;
+			ObjMassValues->sidebandRegion2_x1 = value + 3*sigma;
+			ObjMassValues->sidebandRegion2_x2 = value + 6*sigma;
+		}
+
+		if (strcmp(ressonance, "Upsilon") == 0)
+		{
+			ObjMassValues->sidebandRegion1_x1  = 8.50;
+			ObjMassValues->sidebandRegion1_x2  = 9.19;
+			ObjMassValues->signalRegion_x1     = 9.19;
+			ObjMassValues->signalRegion_x2     = 9.70;
+			ObjMassValues->sidebandRegion2_x1  = 10.6;		//Run2011
+			//ObjMassValues->sidebandRegion2_x1  = 9.70;	//MC
+			ObjMassValues->sidebandRegion2_x2  = 11.2;
+		}
 	}
 
 	void updateMassValuesAll()
