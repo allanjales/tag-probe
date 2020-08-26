@@ -26,13 +26,14 @@ using namespace std;
 struct MassValues
 {
 	//Histogram and fit function
-	TH1D* hMass 	  = NULL;
-	TF1*  fitFunction = NULL;
-	TF1*  fitSignal   = NULL;
+	TH1D* hMass 	    = NULL;
+	TF1*  fitFunction   = NULL;
+	TF1*  fitSignal     = NULL;
+	TF1*  fitBackground = NULL;
 
 	//Regions
 	double sidebandRegion1_x1  = 8.50;
-	double sidebandRegion1_x2  = 9.19;
+	double sidebandRegion1_x2  = 9.00;
 	double signalRegion_x1     = 9.19;
 	double signalRegion_x2     = 9.70;
 	double sidebandRegion2_x1  = 10.6;		//Run2011
@@ -58,15 +59,30 @@ struct MassValues
 		return false;
 	}
 
-	int subtractionFactor()
+	double subtractionFactor()
 	{
+		//Simple method (for linear background)
 		double signalRegion = abs(signalRegion_x2 - signalRegion_x1);
 		double sidebandRegion = abs(sidebandRegion1_x2 - sidebandRegion1_x1) + abs(sidebandRegion2_x2 - sidebandRegion2_x1);
 
-		return signalRegion/abs(sidebandRegion - signalRegion);
+		/*
+		//Using yield (advanced method)
+		if (fitFunction != NULL)
+		{		
+			signalRegion    = fitBackground->Integral(signalRegion_x1,    signalRegion_x2)   /hMass->GetBinWidth(0);
+			sidebandRegion  = fitBackground->Integral(sidebandRegion1_x1, sidebandRegion1_x2)/hMass->GetBinWidth(0);
+			sidebandRegion += fitBackground->Integral(sidebandRegion2_x1, sidebandRegion2_x2)/hMass->GetBinWidth(0);
+		}
+		else
+		{
+			cerr << "WARNING: not using advanced method for subtraction factor calculation. Using method for linear background." << endl;
+		}
+		*/
+
+		return signalRegion/abs(sidebandRegion);
 	}
 
-	TBox* createTBox(double Ymax, int index = 0)
+	TBox* createTBox(double Ymax, int index = 0, double Ymin = 0.)
 	{
 		//index = -1 -> left region
 		//index = 0 -> signal region
@@ -90,7 +106,7 @@ struct MassValues
 				break;
 		}
 
-		return new TBox(x1, 0., x2, Ymax);;
+		return new TBox(x1, Ymin, x2, Ymax);
 	}
 };
 
@@ -143,13 +159,16 @@ private:
 		hMass->Draw("ep");
 
 		//Add legend
-		TLegend* tl = new TLegend(0.70,0.80,0.96,0.92);
+		TLegend* tl = new TLegend(0.70,0.86,0.96,0.92);
 		tl->SetTextSize(0.04);
 		tl->AddEntry(hMass, "Data", "lp");
 
 		//Draw fit
 		if (fFit != NULL)
 		{
+			//Change the size of TLegend
+			tl->SetY1(tl->GetY1() - tl->GetTextSize()*1);
+
 			fFit->SetNpx(1000);
 			fFit->SetLineColor(color);
 			fFit->SetLineStyle(kSolid);
@@ -202,6 +221,21 @@ private:
 					fitExp->SetParName(i, this->fittingParName[i+8]);
 				tl->AddEntry(fitExp, "Exp + Exp",	 "l");
 			}
+
+			/*
+			if (quarter >= 2 && shouldDrawAllFitFunctions == true)
+			{
+				//Change the size of TLegend
+				tl->SetY1(tl->GetY1() - tl->GetTextSize()*1);
+
+				ObjMassValues->fitBackground->SetNpx(1000);
+				ObjMassValues->fitBackground->SetLineColor(kBlue);
+				ObjMassValues->fitBackground->SetLineStyle(kDashDotted);
+				ObjMassValues->fitBackground->SetLineWidth(3);
+				ObjMassValues->fitBackground->Draw("same");
+				tl->AddEntry(ObjMassValues->fitBackground, "Background",	 "l");
+			}
+			*/
 		}
 
 		//Draw regions
@@ -213,15 +247,16 @@ private:
 			//Get Y range of draw
 			gPad->Update();
 			double Ymax = gPad->GetFrame()->GetY2();
+			double Ymin = gPad->GetFrame()->GetY1();
 
 			//Draw regions
-			TBox* side1  = ObjMassValues->createTBox(Ymax, -1);
+			TBox* side1  = ObjMassValues->createTBox(Ymax, -1, Ymin);
 			side1->SetFillColorAlpha(kRed, 0.35);
 			side1->Draw();
-			TBox* signal = ObjMassValues->createTBox(Ymax, 0);
+			TBox* signal = ObjMassValues->createTBox(Ymax, 0,  Ymin);
 			signal->SetFillColorAlpha(kGreen, 0.35);
 			signal->Draw();
-			TBox* side2  = ObjMassValues->createTBox(Ymax, 1);
+			TBox* side2  = ObjMassValues->createTBox(Ymax, 1,  Ymin);
 			side2->SetFillColorAlpha(kRed, 0.35);
 			side2->Draw();
 
@@ -379,18 +414,33 @@ public:
 			fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
 			ROOT::Fit::FitResult result = fitter.Result();
 
-			//Save signal fit
-			this->Pass.fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
-			this->All .fitSignal = new TF1("Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
+			//Get parameters to save fits
 			double fitParameters[24];
 			fPass->GetParameters(fitParameters);
+
+			//Save fits for pass
+			this->Pass.fitSignal = new TF1("Pass_Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
+			this->Pass.fitBackground = new TF1("Pass_Background_InvariantMass", FitFunctions::Merged::Background_InvariantMass, xMin, xMax, 4);
 			Pass.fitSignal->SetParameters(fitParameters);
-			All .fitSignal->SetParameters(fitParameters);
+			Pass.fitBackground->SetParameters(&fitParameters[8]);
+
+			//Save fits for total
+			this->All.fitSignal = new TF1("All_Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
+			this->All.fitBackground = new TF1("Pass_Background_InvariantMass", FitFunctions::Merged::Both_Background_InvariantMass, xMin, xMax, 8);
+			All.fitSignal->SetParameters(fitParameters);
+			All.fitBackground->SetParameters(&fitParameters[16]);
 
 			//Show fit result
-			cout << "For " << *particleType << "....";
+			cout << "\nFor " << particleType << "....";
 			result.Print(std::cout);
 			cout << endl;
+
+			/*
+			//TEST
+			cout << "Entries  (TH1): " << hPass->GetEntries() << endl;
+			cout << "Integral (TH1): " << hPass->Integral(0, hPass->GetNbinsX()+1) << endl;
+			cout << "Integral (TF1): " << fPass->Integral(xMin, xMax)/hPass->GetBinWidth(0) << endl;
+			*/
 		}
 
 		if (strcmp(ressonance, "Upsilon") == 0)
@@ -509,10 +559,10 @@ public:
 			ObjMassValues->signalRegion_x2 = value + 3*sigma;
 
 			//Sideband regions
-			ObjMassValues->sidebandRegion1_x1 = value - 6*sigma;
-			ObjMassValues->sidebandRegion1_x2 = value - 3*sigma;
-			ObjMassValues->sidebandRegion2_x1 = value + 3*sigma;
-			ObjMassValues->sidebandRegion2_x2 = value + 6*sigma;
+			ObjMassValues->sidebandRegion1_x1 = value - 7*sigma;
+			ObjMassValues->sidebandRegion1_x2 = value - 4*sigma;
+			ObjMassValues->sidebandRegion2_x1 = value + 4*sigma;
+			ObjMassValues->sidebandRegion2_x2 = value + 7*sigma;
 		}
 
 		if (strcmp(ressonance, "Upsilon") == 0)

@@ -33,7 +33,7 @@ private:
 	{
 		//Set parameters
 		string hName 		= string(particleType) + string(passingOrFailing) + string(tagOrProbe) + string(particleName) + "_" + string(quantityName) + string(histoName);
-		string hTitle 		= string(extendedQuantityName) + " (" + string(particleType) + " " + string(passingOrFailing) + " " + string(tagOrProbe) + ")";
+		string hTitle 		= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
 		string xAxisTitle 	= xAxisName;
 		string yAxisTitleForm;
 		if (strcmp(quantityUnit, "") == 0)
@@ -60,6 +60,7 @@ private:
 		if (strcmp(passingOrFailing, "All") == 0)
 			return &this->ObjMass.All;
 
+		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
 		return NULL;
 	}
 
@@ -90,6 +91,7 @@ public:
 	{
 		this->hSig->Add(this->hSigBack, 1.);
 		this->hSig->Add(this->hBack, -(*PassFailObj()).subtractionFactor());
+		//this->hSig->Add(this->hBack, -0.39);
 	}
 
 	//Fill histogram
@@ -104,10 +106,10 @@ public:
 
 	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
 	{
-		string canvasName 	= string(particleName) + " " + string(passingOrFailing) + " for " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName);
-		string titleLeft 	= string(extendedQuantityName) + " (" + string(passingOrFailing) + string(particleType) + " " + string(tagOrProbe) + ")";
-		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(passingOrFailing) + " for " + string(particleType) + " " + string(tagOrProbe) + ")";
-		string saveAs 		= string(directoryToSave) + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(passingOrFailing) + "_" + string(particleType) + ".png";
+		string canvasName 	= string(particleName) + " " + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName);
+		string titleLeft 	= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
+		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
+		string saveAs 		= string(directoryToSave) + string(particleType) + "_" + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(passingOrFailing) + ".png";
 
 		//Create canvas and divide it
 		TCanvas* c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
@@ -144,10 +146,13 @@ public:
 		hBack->SetFillColor(kYellow);
 		*/
 
+		//Not show frame with mean, std dev
+		gStyle->SetOptStat(0);
+
 		//Add legend
 		TLegend* l1_1 = new TLegend(0.65,0.75,0.92,0.90);
 		l1_1->SetTextSize(0.04);
-		l1_1->AddEntry(hSigBack,	"All",			"lp");
+		l1_1->AddEntry(hSigBack,	"Total",		"l");
 		l1_1->AddEntry(hSig,		"Signal",		"l");
 		l1_1->AddEntry(hBack,		"Background",	"l");
 		l1_1->Draw();
@@ -179,7 +184,7 @@ public:
 		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
 		//Same range as comparision and Draws
-		//hSig->SetMinimum(0);
+		hSig->SetMinimum(0);
    		//hSig->SetMaximum(Ymax);
 		hSig->SetTitle(titleRight.data());
 		hSig->Draw("same");
@@ -240,7 +245,7 @@ public:
 		legend += "= ";
 
 		//Show information
-		cout << legend << hSigBack->GetEntries() - hSig->GetEntries() - hBack->GetEntries() << endl;
+		cout << legend << hSigBack->GetEntries() - (hSig->GetEntries() + (*PassFailObj()).subtractionFactor()*hBack->GetEntries()) << endl;
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)

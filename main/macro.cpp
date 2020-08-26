@@ -34,7 +34,7 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 3;
+	int useFile = 4;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -44,13 +44,13 @@ void generateHistograms()
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 50000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
 
 
@@ -140,9 +140,16 @@ void generateHistograms()
 	TNP.method 			= method;
 	TNP.directoryToSave = directoryToSave;
 
-	//Prepare for Upsilon
-	TNP.ressonance = "Upsilon";
-	TNP.defineMassHistogramNumbers(8.5, 11.4, 60);
+	TNP.doTracker    = true;
+	TNP.doStandalone = false;
+	TNP.doGlobal     = false;
+
+	if (useFile > 2)
+	{
+		//Prepare for Upsilon
+		TNP.ressonance = "Upsilon";
+		TNP.defineMassHistogramNumbers(8.5, 11.4, 60);	
+	}
 
 	cout << "Ressonance: " << TNP.ressonance << endl;
 	cout << "Using method " << TNP.method << endl;

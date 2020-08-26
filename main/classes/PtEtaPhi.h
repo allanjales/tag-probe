@@ -114,7 +114,7 @@ public:
 
 		string canvasName 	= string(particleName) + " " + string(tagOrProbe) + " " + string(quantityName) + " " + string(particleType) + " Efficiency" ;
 		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
-		string saveAs 		= string(directoryToSave) + string("Efficiency_") + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(particleType) +".png";
+		string saveAs 		= string(directoryToSave) + string("Efficiency_") + string(particleType) + "_" + string(tagOrProbe) + "_" + string(quantityName) + ".png";
 
 		//Draw on canvas
 		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);

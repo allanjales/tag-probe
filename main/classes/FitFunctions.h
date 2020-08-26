@@ -93,5 +93,10 @@ public:
 		static Double_t Both_Signal_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Signal_InvariantMass(x, &par[8]);
 		}
+
+		//Fit function for background for Invariant Mass (Both above)
+		static Double_t Both_Background_InvariantMass(Double_t *x, Double_t *par) {
+			return FitFunctions::Merged::Background_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
+		}
 	};
 };

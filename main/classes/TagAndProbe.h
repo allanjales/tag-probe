@@ -9,87 +9,125 @@ public:
 	const char* particleName = "Muon";
 	const char* directoryToSave = "../result/";
 
+	//Variables for computing each type
+	bool doTracker    = true;
+	bool doStandalone = true;
+	bool doGlobal     = true;
+
 	Type Tracker    {this->method, this->ressonance, this->particleName, this->directoryToSave, "Tracker"};
 	Type Standalone {this->method, this->ressonance, this->particleName, this->directoryToSave, "Standalone"};
 	Type Global     {this->method, this->ressonance, this->particleName, this->directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
-		this->Tracker   .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
-		this->Standalone.defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
-		this->Global    .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+		if (doTracker)
+			this->Tracker   .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+		if (doStandalone)
+			this->Standalone.defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
+		if (doGlobal)
+			this->Global    .defineMassHistogramNumbers(xMin, xMax, nBins, decimals);
 	}
 
 	void doFit()
 	{
-		this->Tracker   .doFit();
-		this->Standalone.doFit();
-		this->Global    .doFit();
+		if (doTracker)
+			this->Tracker   .doFit();
+		if (doStandalone)
+			this->Standalone.doFit();
+		if (doGlobal)
+			this->Global    .doFit();
 	}
 
 	void updateMassValuesAll()
 	{
-		this->Tracker   .updateMassValuesAll();
-		this->Standalone.updateMassValuesAll();
-		this->Global    .updateMassValuesAll();
+		if (doTracker)
+			this->Tracker   .updateMassValuesAll();
+		if (doStandalone)
+			this->Standalone.updateMassValuesAll();
+		if (doGlobal)
+			this->Global    .updateMassValuesAll();
 	}
 
 	void createMassCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Tracker   .createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
-		this->Standalone.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
-		this->Global    .createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		if (doTracker)
+			this->Tracker   .createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		if (doStandalone)
+			this->Standalone.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		if (doGlobal)
+			this->Global    .createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 	void subtractSigHistograms()
 	{
-		this->Tracker   .subtractSigHistograms();
-		this->Standalone.subtractSigHistograms();
-		this->Global    .subtractSigHistograms();
+		if (doTracker)
+			this->Tracker   .subtractSigHistograms();
+		if (doStandalone)
+			this->Standalone.subtractSigHistograms();
+		if (doGlobal)
+			this->Global    .subtractSigHistograms();
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Tracker   .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->Standalone.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->Global    .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		if (doTracker)
+			this->Tracker   .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		if (doStandalone)
+			this->Standalone.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		if (doGlobal)
+			this->Global    .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	void consistencyDebugCout()
 	{
 		cout << "\nChecking histograms number inconsistency (should be 0)" << endl;
-		cout << "* total - (background + signal)" << endl;
-		this->Tracker   .consistencyDebugCout();
-		this->Standalone.consistencyDebugCout();
-		this->Global    .consistencyDebugCout();
+		cout << "* total - (background + alpha*signal)" << endl;
+		if (doTracker)
+			this->Tracker   .consistencyDebugCout();
+		if (doStandalone)
+			this->Standalone.consistencyDebugCout();
+		if (doGlobal)
+			this->Global    .consistencyDebugCout();
 	}
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)
 	{
-		this->Tracker   .writeMassHistogramsOnFile(writehPass, writehAll);
-		this->Standalone.writeMassHistogramsOnFile(writehPass, writehAll);
-		this->Global    .writeMassHistogramsOnFile(writehPass, writehAll);
+		if (doTracker)
+			this->Tracker   .writeMassHistogramsOnFile(writehPass, writehAll);
+		if (doStandalone)
+			this->Standalone.writeMassHistogramsOnFile(writehPass, writehAll);
+		if (doGlobal)
+			this->Global    .writeMassHistogramsOnFile(writehPass, writehAll);
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
 	{
-		this->Tracker   .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->Standalone.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->Global    .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		if (doTracker)
+			this->Tracker   .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		if (doStandalone)
+			this->Standalone.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		if (doGlobal)
+			this->Global    .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 	void createEfficiencyPlot(bool shouldWrite = false)
 	{
-		this->Tracker   .createEfficiencyPlot(shouldWrite);
-		this->Standalone.createEfficiencyPlot(shouldWrite);
-		this->Global    .createEfficiencyPlot(shouldWrite);
+		if (doTracker)
+			this->Tracker   .createEfficiencyPlot(shouldWrite);
+		if (doStandalone)
+			this->Standalone.createEfficiencyPlot(shouldWrite);
+		if (doGlobal)
+			this->Global    .createEfficiencyPlot(shouldWrite);
 	}
 
 	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Tracker   .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		this->Standalone.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		this->Global    .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		if (doTracker)
+			this->Tracker   .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		if (doStandalone)
+			this->Standalone.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		if (doGlobal)
+			this->Global    .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 
@@ -110,9 +148,12 @@ public:
 		int &PassingProbeGlobalMuon     = *types[2];
 		*/
 
-		this->Tracker   .fillMassHistograms(*quantities[6], *types[0]);
-		this->Standalone.fillMassHistograms(*quantities[6], *types[1]);
-		this->Global    .fillMassHistograms(*quantities[6], *types[2]);
+		if (doTracker)
+			this->Tracker   .fillMassHistograms(*quantities[6], *types[0]);
+		if (doStandalone)
+			this->Standalone.fillMassHistograms(*quantities[6], *types[1]);
+		if (doGlobal)
+			this->Global    .fillMassHistograms(*quantities[6], *types[2]);
 	}
 
 	void fillQuantitiesHistograms(double** quantities, int** types)
@@ -131,9 +172,12 @@ public:
 		int &PassingProbeGlobalMuon     = *types[2];
 		*/
 
-		this->Tracker   .fillQuantitiesHistograms(quantities, *types[0]);
-		this->Standalone.fillQuantitiesHistograms(quantities, *types[1]);
-		this->Global    .fillQuantitiesHistograms(quantities, *types[2]);
+		if (doTracker)
+			this->Tracker   .fillQuantitiesHistograms(quantities, *types[0]);
+		if (doStandalone)
+			this->Standalone.fillQuantitiesHistograms(quantities, *types[1]);
+		if (doGlobal)
+			this->Global    .fillQuantitiesHistograms(quantities, *types[2]);
 	}
 	
 
