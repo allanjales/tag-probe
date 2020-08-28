@@ -95,3 +95,5 @@ For v1
 	* Removed `gROOT->SetBatch(0);` at `createEfficiencyCanvas(...)` in PassingFailing class;
 	* Added canvas supression in macro.cpp;
 	* Fixed error at `createEfficiencyCanvas(...)` in PtEtaPhi class with canvas supression;
+	* Changed cout of macro.cpp. Added `cout << endl;` before saving canvas;
+	* Added end message in macro.cpp;

@@ -34,7 +34,7 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 0;
+	int useFile = 2;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -47,7 +47,7 @@ void generateHistograms()
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 50000; //0 -> do not limit
 
 	//Canvas drawing
 	bool shouldDrawInvariantMassCanvas 			= true;
@@ -55,7 +55,8 @@ void generateHistograms()
 	bool shouldDrawQuantitiesCanvas 			= true;
 	bool shouldDrawEfficiencyCanvas 			= true;
 
-
+    //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
+    //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
 
 
 	//Check if the name of dir is ok
@@ -305,6 +306,7 @@ void generateHistograms()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
+		cout << endl;
 		TNP.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
@@ -353,11 +355,14 @@ void generateHistograms()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
+		cout << endl;
 		TNP.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Close files
 	generatedFile->Close();
+
+	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
 }
 
 //Call functions
