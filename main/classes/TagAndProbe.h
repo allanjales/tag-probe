@@ -7,6 +7,7 @@ public:
 	int method = 1;	// 1 | 2
 	const char* ressonance = "Jpsi"; // "Jpsi" | "Upsilon"
 	const char* particleName = "Muon";
+	const char* canvasWatermark = "#bf{CMS Open Data}";
 	const char* directoryToSave = "../result/";
 
 	//Variables for computing each type
@@ -14,9 +15,9 @@ public:
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
-	Type Tracker    {this->method, this->ressonance, this->particleName, this->directoryToSave, "Tracker"};
-	Type Standalone {this->method, this->ressonance, this->particleName, this->directoryToSave, "Standalone"};
-	Type Global     {this->method, this->ressonance, this->particleName, this->directoryToSave, "Global"};
+	Type Tracker    {this->method, this->ressonance, this->particleName, this->canvasWatermark, this->directoryToSave, "Tracker"};
+	Type Standalone {this->method, this->ressonance, this->particleName, this->canvasWatermark, this->directoryToSave, "Standalone"};
+	Type Global     {this->method, this->ressonance, this->particleName, this->canvasWatermark, this->directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{

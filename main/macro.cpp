@@ -34,11 +34,14 @@ void generateHistograms()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 4;
+	int useFile = 0;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
 	int method = 1;
+
+	//Set the canvasW wtermark
+	const char* canvasWatermark = "#bf{CMS} Preliminary";
 
 	//Path where is going to save results 
 	const char* directoryToSave = "../result/";
@@ -51,7 +54,6 @@ void generateHistograms()
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
 	bool shouldDrawQuantitiesCanvas 			= true;
 	bool shouldDrawEfficiencyCanvas 			= true;
-
 
 
 
@@ -138,17 +140,31 @@ void generateHistograms()
 	//Create a object and set configs
 	TagAndProbe TNP;
 	TNP.method 			= method;
+	TNP.canvasWatermark	= canvasWatermark;
 	TNP.directoryToSave = directoryToSave;
 
 	TNP.doTracker    = true;
 	TNP.doStandalone = false;
 	TNP.doGlobal     = false;
 
+	//TEMPORARY FOR UPSILON
+	double sidebandRegion1_x1  = 8.50;
+	double sidebandRegion1_x2  = 9.00;
+	double signalRegion_x1     = 9.19;
+	double signalRegion_x2     = 9.70;
+	double sidebandRegion2_x1  = 10.6;
+	double sidebandRegion2_x2  = 11.2;
+
 	if (useFile > 2)
 	{
 		//Prepare for Upsilon
 		TNP.ressonance = "Upsilon";
-		TNP.defineMassHistogramNumbers(8.5, 11.4, 60);	
+		TNP.defineMassHistogramNumbers(8.5, 11.4, 60);
+
+		if (useFile == 4)
+		{
+			sidebandRegion2_x1  = 9.90;
+		}
 	}
 
 	cout << "Ressonance: " << TNP.ressonance << endl;
@@ -198,6 +214,23 @@ void generateHistograms()
 	//Get values for invariant mass and sigma from plot
 	TNP.updateMassValuesAll();
 
+	if (useFile > 2)
+	{
+		TNP.Tracker.Mass.Pass.sidebandRegion1_x1 = sidebandRegion1_x1;
+		TNP.Tracker.Mass.Pass.sidebandRegion1_x2 = sidebandRegion1_x2;
+		TNP.Tracker.Mass.Pass.signalRegion_x1    = signalRegion_x1;
+		TNP.Tracker.Mass.Pass.signalRegion_x2    = signalRegion_x2;
+		TNP.Tracker.Mass.Pass.sidebandRegion2_x1 = sidebandRegion2_x1;
+		TNP.Tracker.Mass.Pass.sidebandRegion2_x2 = sidebandRegion2_x2;
+
+		TNP.Tracker.Mass.All .sidebandRegion1_x1 = sidebandRegion1_x1;
+		TNP.Tracker.Mass.All .sidebandRegion1_x2 = sidebandRegion1_x2;
+		TNP.Tracker.Mass.All .signalRegion_x1    = signalRegion_x1;
+		TNP.Tracker.Mass.All .signalRegion_x2    = signalRegion_x2;
+		TNP.Tracker.Mass.All .sidebandRegion2_x1 = sidebandRegion2_x1;
+		TNP.Tracker.Mass.All .sidebandRegion2_x2 = sidebandRegion2_x2;
+	}
+
 
 
 	//-------------------------------------
@@ -205,7 +238,7 @@ void generateHistograms()
 	//-------------------------------------
 
 	//Supress canvas
-	//gROOT->SetBatch(1);
+	gROOT->SetBatch(1);
 
 	//Create file root to store generated files
 	TFile* generatedFile = TFile::Open((string(directoryToSave) + "generated_hist.root").data(),"RECREATE");

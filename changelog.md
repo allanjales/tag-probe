@@ -80,3 +80,18 @@ For v1
 	* Corrected `consistencyDebugCout()` in PassingFailing class;
 	* Corrected `consistencyDebugCout()` in TagAndProbe class;
 	* Corrected `subtractionFactor()` type in MassValues struct. int -> double;
+
+* 2020-08-27
+	* Changed hTitle at `createHistogram(...)` in PassingFailing class if is passing;
+	* Changed `createDividedCanvas(...)` to show signal only on the right plot;
+	* Changed hTitleRight at `createDividedCanvas(...)` in PassingFailing class if is passing;
+	* Added `const char* watermark` in TagnAndProbe class;
+
+* 2020-08-28
+	* Removed singal counter in left histogram of canvas in PassingFailing class;
+	* Removed `float margin[4]` at `drawCanvasQuarter(...)` in InvariantMass class;
+	* Removed background fit from canvas at `drawCanvasQuarter(...)` in InvariantMass class;
+	* Changed `const char* watermark` to `const char* canvasWatermark` in every file;
+	* Removed `gROOT->SetBatch(0);` at `createEfficiencyCanvas(...)` in PassingFailing class;
+	* Added canvas supression in macro.cpp;
+	* Fixed error at `createEfficiencyCanvas(...)` in PtEtaPhi class with canvas supression;

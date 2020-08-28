@@ -32,13 +32,12 @@ struct MassValues
 	TF1*  fitBackground = NULL;
 
 	//Regions
-	double sidebandRegion1_x1  = 8.50;
-	double sidebandRegion1_x2  = 9.00;
-	double signalRegion_x1     = 9.19;
-	double signalRegion_x2     = 9.70;
-	double sidebandRegion2_x1  = 10.6;		//Run2011
-	//double sidebandRegion2_x1  = 9.70;	//MC
-	double sidebandRegion2_x2  = 11.2;
+	double sidebandRegion1_x1  = 0.;
+	double sidebandRegion1_x2  = 0.;
+	double signalRegion_x1     = 0.;
+	double signalRegion_x2     = 0.;
+	double sidebandRegion2_x1  = 0.;
+	double sidebandRegion2_x2  = 0.;
 
 	//--- For sideband subtraction ---
 
@@ -115,6 +114,7 @@ private:
 	int& method;
 	const char*& ressonance;
 	const char*& particleName;
+	const char*& canvasWatermark;
 	const char*& directoryToSave;
 	const char*& particleType;
 
@@ -148,10 +148,8 @@ private:
 
 		bool shouldDrawAllFitFunctions = true;
 
-		float margins[4] = {0.13, 0.02, 0.09, 0.07};
-
 		canvas->cd(quarter);
-		canvas->cd(quarter)->SetMargin(margins[0], margins[1], margins[2], margins[3]);
+		canvas->cd(quarter)->SetMargin(0.13, 0.02, 0.09, 0.07);
 
 		hMass->SetMarkerStyle(20);		//Set markers style
 		hMass->SetMarkerColor(kBlack);	//Set markers colors
@@ -222,8 +220,8 @@ private:
 				tl->AddEntry(fitExp, "Exp + Exp",	 "l");
 			}
 
-			/*
-			if (quarter >= 2 && shouldDrawAllFitFunctions == true)
+			//Draw background fit for total fit
+			if (quarter >= 2 && shouldDrawAllFitFunctions == true && false)
 			{
 				//Change the size of TLegend
 				tl->SetY1(tl->GetY1() - tl->GetTextSize()*1);
@@ -235,7 +233,6 @@ private:
 				ObjMassValues->fitBackground->Draw("same");
 				tl->AddEntry(ObjMassValues->fitBackground, "Background",	 "l");
 			}
-			*/
 		}
 
 		//Draw regions
@@ -271,7 +268,7 @@ private:
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
 		tx->SetNDC(kTRUE);
-		tx->DrawLatex(0.16,0.88,Form("#bf{CMS Open Data}"));
+		tx->DrawLatex(0.16,0.88,Form(canvasWatermark, ""));
 
 		//Draws TLegend
 		tl->Draw();
@@ -445,80 +442,7 @@ public:
 
 		if (strcmp(ressonance, "Upsilon") == 0)
 		{
-			/*
-			double mass_peak1 = 9.46030;
-			double mass_peak2 = 10.02326;
-			double mass_peak3 = 10.3552;
-
-			TCanvas* c_all  = new TCanvas;
-			TCanvas* c_pass = new TCanvas;
-
-			//DECLARE OBSERVABLE X - INVARIANT MASS BETWEEN _mmin AND _mmax
-			RooRealVar mass_all("mass_all","mass_all", xMin, xMax);
-
-			// Create a binned dataset that imports contents of TH1 and associates itscontents to observable 'mass'
-			RooDataHist dh("dh","dh",mass_all,RooFit::Import(*this->All.hMass));
-			RooDataHist dh_pass("dh_pass","dh_pass",mass_all,RooFit::Import(*this->Pass.hMass));
-
-
-			RooRealVar lambda("lambda","lambda",-1.3,-10.,10.);
-			RooExponential background("background", "background", mass_all, lambda);
-
-			RooRealVar sigma("sigma","sigma",0.05*(xMax - xMin),0.,0.5*(xMax - xMin));
-
-			RooRealVar mean1("mean1","mean1",xMin,(mass_peak1+mass_peak2)/2.);
-			RooRealVar mean2("mean2","mean2",(mass_peak1+mass_peak2)/2.,(mass_peak3+mass_peak2)/2.);
-			RooRealVar mean3("mean3","mean3",(mass_peak3+mass_peak2)/2.,xMax);
-			//FIT FUNCTIONS
-
-			// --Gaussian as the signal pdf
-			RooGaussian gaussian1("signal1","signal1",mass_all,mean1,sigma);
-			RooGaussian gaussian2("signal2","signal2",mass_all,mean2,sigma);
-			RooGaussian gaussian3("signal3","signal3",mass_all,mean3,sigma);
-
-			double n_signal_initial1 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak1)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak1,mass_peak1))) / dh.sumEntries();
-			double n_signal_initial2 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak2)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak2,mass_peak2))) / dh.sumEntries();
-			double n_signal_initial3 =(dh.sumEntries(TString::Format("abs(mass_all-%g)<0.015",mass_peak3)) -dh.sumEntries(TString::Format("abs(mass_all-%g)<0.030&&abs(mass_all-%g)>.015",mass_peak3,mass_peak3))) / dh.sumEntries();
-
-			double n_signal_initial_total = n_signal_initial1 + n_signal_initial2 + n_signal_initial3;
-
-			//signal = gaussian1*frac1 + gaussian2*frac2 + gaussian3*(1-(frac1 + frac2))
-			//S(signal)d mass = 1
-			RooRealVar frac1("frac1","frac1",0.333,0.,1.);
-			RooRealVar frac2("frac2","frac2",0.333,0.,1.);
-			//para RooArgList N-1, assume como frações
-			RooAddPdf* signal;
-			signal = new RooAddPdf("signal", "signal", RooArgList(gaussian1, gaussian2,gaussian3), RooArgList(frac1, frac2));
-
-			double n_back_initial = 1. - n_signal_initial1 - n_signal_initial2 -n_signal_initial3;
-
-			RooRealVar n_signal_total("n_signal_total","n_signal_total",n_signal_initial_total,0.,dh.sumEntries());
-
-			RooRealVar n_back("n_back","n_back",n_back_initial,0.,dh.sumEntries());
-			//para RooArgList N, assume como normalizações
-			//modelo_total = n_signal_total*signal + n_back*background
-			RooAddPdf* model;
-			model = new RooAddPdf("model","model", RooArgList(*signal, background),RooArgList(n_signal_total, n_back));
-
-			RooPlot *frame = mass_all.frame(RooFit::Title("Invariant Mass"));
-			RooPlot *frame_new = mass_all.frame(RooFit::Title("Invariant Mass"));
-
-			RooFitResult* fitres = new RooFitResult; //saves fit result
-			fitres = model->fitTo(dh, RooFit::Save());
-
-			// collecting fit results in order to differentiate between signal and background
-			RooRealVar* pass_mean1 = (RooRealVar*) fitres->floatParsFinal().find("mean1");
-			RooRealVar* pass_mean2 = (RooRealVar*) fitres->floatParsFinal().find("mean2");
-			RooRealVar* pass_mean3 = (RooRealVar*) fitres->floatParsFinal().find("mean3");
-
-			RooRealVar* pass_sigma = (RooRealVar*) fitres->floatParsFinal().find("sigma");
-
-			double mean1_value = pass_mean1->getVal();
-			double mean2_value = pass_mean2->getVal();
-			double mean3_value = pass_mean3->getVal();
-
-			double sigma_value = pass_sigma->getVal();
-			*/
+			//Upsilon fit should go here
 		}
 	}
 
@@ -568,7 +492,7 @@ public:
 		if (strcmp(ressonance, "Upsilon") == 0)
 		{
 			ObjMassValues->sidebandRegion1_x1  = 8.50;
-			ObjMassValues->sidebandRegion1_x2  = 9.19;
+			ObjMassValues->sidebandRegion1_x2  = 9.00;
 			ObjMassValues->signalRegion_x1     = 9.19;
 			ObjMassValues->signalRegion_x2     = 9.70;
 			ObjMassValues->sidebandRegion2_x1  = 10.6;		//Run2011
@@ -644,11 +568,13 @@ public:
 	InvariantMass(int& method,
 		const char*& ressonance,
 		const char*& particleName,
+		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*& particleType)
 		  : method(method),
 		    ressonance(ressonance),
 		    particleName(particleName),
+		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)
 	{

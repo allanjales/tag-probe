@@ -5,6 +5,7 @@ class PtEtaPhi{
 private:
 	int& method;
 	const char*& particleName;
+	const char*& canvasWatermark;
 	const char*& directoryToSave;
 	const char*& particleType;
 	const char*& tagOrProbe;
@@ -24,10 +25,10 @@ public:
 
 	TEfficiency* pEff 	= NULL;
 
-	PassingFailing Pass {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
+	PassingFailing Pass {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Passing", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
 		this->xMin, this->xMax, this->nBins, this->decimals};
-	PassingFailing All  {this->method, this->particleName, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
+	PassingFailing All  {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"All", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
 		this->xMin, this->xMax, this->nBins, this->decimals};
 
@@ -109,21 +110,21 @@ public:
 	//Creates canvas for efficiency plots
 	TCanvas* createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		//Supress canvas
-		gROOT->SetBatch(0);
-
 		string canvasName 	= string(particleName) + " " + string(tagOrProbe) + " " + string(quantityName) + " " + string(particleType) + " Efficiency" ;
 		string canvasTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
 		string saveAs 		= string(directoryToSave) + string("Efficiency_") + string(particleType) + "_" + string(tagOrProbe) + "_" + string(quantityName) + ".png";
 
+		//To stop crashing at graph functions after gPad->Update()
+		gStyle->SetCanvasPreferGL(kFALSE);
+
 		//Draw on canvas
 		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
 		c1->SetRightMargin(0.05);
-		this->pEff->Draw();
+		pEff->Draw();
 		gPad->Update();
 
 		//Set range in y axis
-		auto graph = this->pEff->GetPaintedGraph(); 
+		auto graph = pEff->GetPaintedGraph(); 
 		graph->SetMinimum(0.0);
 		graph->SetMaximum(1.2);
 		gPad->Update();
@@ -140,12 +141,12 @@ public:
 		txCOD->SetTextAlign(12);
 		txCOD->SetTextFont(42);
 		txCOD->SetNDC(kTRUE);
-		txCOD->DrawLatex(0.14,0.85,Form("#bf{CMS Open Data}"));
+		txCOD->DrawLatex(0.14,0.85,Form(canvasWatermark, ""));
 
 		//Set x range
 		if (strcmp(quantityName, "Pt") == 0)
 		{
-			this->pEff->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
+			pEff->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
 		}
 
 		//Writes in file
@@ -159,7 +160,7 @@ public:
 		{
 			//Saves as image
 			c1->SaveAs(saveAs.data());
-		} 
+		}
 
 		return c1;
 	}
@@ -180,6 +181,7 @@ public:
 
 	PtEtaPhi(int& method,
 		const char*& particleName,
+		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*& particleType,
 	 	InvariantMass& ObjMass,
@@ -194,6 +196,7 @@ public:
 		int	    	 decimals = 3)
 		  : method(method),
 		    particleName(particleName),
+		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType),
 		    ObjMass(ObjMass),

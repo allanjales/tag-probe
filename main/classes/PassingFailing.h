@@ -13,6 +13,7 @@ class PassingFailing{
 private:
 	int& method;
 	const char*& particleName;
+	const char*& canvasWatermark;
 	const char*& directoryToSave;
 	const char*& particleType;
 	const char*& tagOrProbe;
@@ -45,6 +46,9 @@ private:
 			xAxisTitle += " (" + string(quantityUnit) + ")";
 			yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f " + string(quantityUnit) + ")";
 		}
+
+		if (strcmp(passingOrFailing, "Passing") == 0)
+			hTitle = string(extendedQuantityName) + " (" + string(particleType) + " " + string(tagOrProbe) + ")";
 
 		//Create histogram
 		histo = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
@@ -111,6 +115,9 @@ public:
 		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
 		string saveAs 		= string(directoryToSave) + string(particleType) + "_" + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(passingOrFailing) + ".png";
 
+		if (strcmp(passingOrFailing, "Passing") == 0)
+			titleRight = string(extendedQuantityName) + " of Signal (" + string(particleType) + " " + string(tagOrProbe) + ")";
+
 		//Create canvas and divide it
 		TCanvas* c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
 		c1->Divide(2,1);
@@ -130,30 +137,17 @@ public:
 		hBack->SetLineWidth(2);			//Line Width
 		hBack->Draw("same");
 
-		//Draws Signal histogram
-		hSig->SetLineColor(kMagenta); 	//Line Color
-		hSig->SetLineWidth(2);			//Line Width
-		hSig->Draw("same");
-
 		//Get Y range of draw
 		gPad->Update();
 		double Ymax = gPad->GetFrame()->GetY2();
-
-		/*
-		//Set fill color
-		hSig->SetFillColor(kMagenta);
-		hSigBack->SetFillColor(kBlue);
-		hBack->SetFillColor(kYellow);
-		*/
 
 		//Not show frame with mean, std dev
 		gStyle->SetOptStat(0);
 
 		//Add legend
-		TLegend* l1_1 = new TLegend(0.65,0.75,0.92,0.90);
+		TLegend* l1_1 = new TLegend(0.65,0.80,0.92,0.90);
 		l1_1->SetTextSize(0.04);
 		l1_1->AddEntry(hSigBack,	"Total",		"l");
-		l1_1->AddEntry(hSig,		"Signal",		"l");
 		l1_1->AddEntry(hBack,		"Background",	"l");
 		l1_1->Draw();
 		
@@ -166,17 +160,15 @@ public:
 		{
 			tx1_1->SetTextAlign(12);	//Align left, center
 			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
-			tx1_1->DrawLatex(0.48,0.40,Form("%g entries (background)",	hBack->GetEntries()));
-			tx1_1->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
+			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.25,0.87,Form(canvasWatermark, ""));
 		}
 		else
 		{
 			tx1_1->SetTextAlign(22);	//Align center, center
 			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (signal)",		hSig->GetEntries()));
-			tx1_1->DrawLatex(0.55,0.40,Form("%g entries (background)",	hBack->GetEntries()));
-			tx1_1->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
+			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (background)",	hBack->GetEntries()));
+			tx1_1->DrawLatex(0.32,0.87,Form(canvasWatermark, ""));
 		}
 
 		//Select canvas part and set margin
@@ -187,6 +179,8 @@ public:
 		hSig->SetMinimum(0);
    		//hSig->SetMaximum(Ymax);
 		hSig->SetTitle(titleRight.data());
+		hSig->SetLineColor(kMagenta); 	//Line Color
+		hSig->SetLineWidth(2);			//Line Width
 		hSig->Draw("same");
 
 		//Add legend
@@ -204,13 +198,13 @@ public:
 		{
 			tx1_2->SetTextAlign(12);	//Align left, center
 			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
-			tx1_2->DrawLatex(0.25,0.87,Form("#bf{CMS Open Data}"));
+			tx1_2->DrawLatex(0.25,0.87,Form(canvasWatermark, ""));
 		}
 		else
 		{
 			tx1_2->SetTextAlign(22);	//Align center, center
 			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
-			tx1_2->DrawLatex(0.32,0.87,Form("#bf{CMS Open Data}"));
+			tx1_2->DrawLatex(0.32,0.87,Form(canvasWatermark, ""));
 		}
 
 		//Not show frame with mean, std dev
@@ -227,7 +221,7 @@ public:
 		{
 			//Saves as image
 			c1->SaveAs(saveAs.data());
-		} 
+		}
 
 		return c1;
 	}
@@ -264,6 +258,7 @@ public:
 
 	PassingFailing(int& method,
 		const char*& particleName,
+		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*& particleType,
 	 	InvariantMass& ObjMass,
@@ -279,6 +274,7 @@ public:
 		int&    	 decimals)
 		  : method(method),
 			particleName(particleName),
+		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
 			particleType(particleType),
 		    ObjMass(ObjMass),
