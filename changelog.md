@@ -1,5 +1,5 @@
 # Changelog
-> This is for internal porpuse.
+> This is for internal porpuse. (In macro.cpp structure)
 
 For v1
 
@@ -97,3 +97,7 @@ For v1
 	* Fixed error at `createEfficiencyCanvas(...)` in PtEtaPhi class with canvas supression;
 	* Changed cout of macro.cpp. Added `cout << endl;` before saving canvas;
 	* Added end message in macro.cpp;
+
+* 2020-08-28
+	* Changed plot name at `createEfficiencyPlot(...)` in PtEtaPhi class;
+	* Corrected name of pT canvas: Transversal -> Transverse
