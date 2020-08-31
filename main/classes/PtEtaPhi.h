@@ -58,7 +58,7 @@ public:
 		TH1D* &hPass  = this->Pass.hSigBack;
 		TH1D* &hTotal = this->All .hSigBack;
 
-		string pName 	= string(particleName) + " " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName) + " Efficiency";
+		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
 		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
 
 		//Set Y axis title for efficiency plot
