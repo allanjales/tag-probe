@@ -100,4 +100,8 @@ For v1
 
 * 2020-08-28
 	* Changed plot name at `createEfficiencyPlot(...)` in PtEtaPhi class;
-	* Corrected name of pT canvas: Transversal -> Transverse
+	* Corrected name of pT canvas: Transversal -> Transverse;
+
+* 2020-09-01
+	* Removed `macro()` function in macro.cpp;
+	* Renamed `generateHistograms()` to `macro()`;

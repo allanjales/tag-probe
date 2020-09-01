@@ -20,7 +20,7 @@
 using namespace std;
 
 //Select particles, draws and save histograms
-void generateHistograms()
+void macro()
 {
 	//List of files
 	const char *files[] = {"../data_histoall.root",
@@ -363,10 +363,4 @@ void generateHistograms()
 	generatedFile->Close();
 
 	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
-}
-
-//Call functions
-void macro()
-{
-	generateHistograms();
 }
