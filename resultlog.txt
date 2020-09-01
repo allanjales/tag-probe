@@ -1,1 +1,0 @@
-To avoid errors, please end the result directory with a "/"

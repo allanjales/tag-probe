@@ -65,7 +65,7 @@ void macro()
 		cerr << "To avoid errors, please end the result directory with a \"/\"" << endl;
 		abort();
 	}
-	
+
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
 	{
@@ -187,6 +187,12 @@ void macro()
 	cout << endl;
 	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
 
+	//TEMPORARY FOR TEST
+	TFile *file1 = TFile::Open("../result/jpsi_run2011.root");
+	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
+	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
+	
+	/*
 	//Loop between the components
 	for (long long i = 0; i < numberEntries; i++)
 	{
@@ -207,11 +213,15 @@ void macro()
 			TNP.fillMassHistograms(quantities, types);
 		}
 	}
+	*/
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//Do function fit ober the histogram
 	TNP.doFit();
 
+	TNP.createMassCanvas();
+
+	/*
 	//Get values for invariant mass and sigma from plot
 	TNP.updateMassValuesAll();
 
@@ -363,4 +373,5 @@ void macro()
 	generatedFile->Close();
 
 	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
+	*/
 }
