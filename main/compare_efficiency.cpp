@@ -120,8 +120,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../resultJPSIRUN_hSig/generated_hist.root");
-	TFile *file1 = TFile::Open("../resultJPSIMC/generated_hist.root");
+	TFile *file0 = TFile::Open("../resultRUN/generated_hist.root");
+	TFile *file1 = TFile::Open("../resultMC/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{

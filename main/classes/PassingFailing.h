@@ -36,21 +36,16 @@ private:
 		string hName 		= string(particleType) + string(passingOrFailing) + string(tagOrProbe) + string(particleName) + "_" + string(quantityName) + string(histoName);
 		string hTitle 		= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
 		string xAxisTitle 	= xAxisName;
-		string yAxisTitleForm;
-		if (strcmp(quantityUnit, "") == 0)
-		{
-			yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f)";
-		}
-		else
-		{
-			xAxisTitle += " (" + string(quantityUnit) + ")";
-			yAxisTitleForm 	= "Events / (%1." + to_string(decimals) + "f " + string(quantityUnit) + ")";
-		}
+		string yAxisTitleForm = "Events";
 
+		//Add unit if has
+		if (strcmp(quantityUnit, "") != 0)
+			xAxisTitle += " (" + string(quantityUnit) + ")";
+
+		//Change title is passing
 		if (strcmp(passingOrFailing, "Passing") == 0)
 			hTitle = string(extendedQuantityName) + " (" + string(particleType) + " " + string(tagOrProbe) + ")";
 
-		//Define sppecial histogram with variable bin width
 
 		//Variable bin for pT
 		if (strcmp(quantityName, "Pt") == 0)
@@ -58,33 +53,78 @@ private:
 			double xbins[10000];
 			xbins[0] = .1;
 			int nbins = 0;
-			double binWidth = 0.1;
+			double binWidth = 0.3;
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
 			{
-				xbins[i] = xbins[i-1]*(1+binWidth);
+				xbins[i] = xbins[i-1] < 0.3 ? 0.3 : xbins[i-1] *(1+binWidth);
 				nbins++;
 			}
 
 			histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
 		}
 
+		//Variable bin for eta
 		else if (strcmp(quantityName, "Eta") == 0)
 		{
+			/*
+			double xbins [] = {-2.4,-2.,-1.6,-1.2,-0.8,-0.4, 0., 0.4, 0.8, 1.2, 1.6, 2., 2.4};
+			int nbins = sizeof(xbins)/sizeof(*xbins) - 1;
+			*/
+
 			double xbins[10000];
 			xbins[0] = .1;
 			int nbins = 0;
-			double binWidth = 0.1;
+			double binWidth = 0.2;
+
+			//For positive
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
 			{
-				xbins[i] = xbins[i-1]*(1+binWidth);
+				xbins[i] = xbins[i-1] < 0.2 ? 0.2 : xbins[i-1] *(1+binWidth);
 				nbins++;
 			}
+
+			//Duplicate array and create another
+			double rxbins[nbins*2+1];
+			int entry = 0;
+			for (int i = nbins; i >= 0; i--)
+			{
+				rxbins[entry] = -xbins[i];
+				entry++;
+			}
+			rxbins[entry] = 0.;
+			entry++;
+			for (int i = 0; i <= nbins; i++)
+			{
+				rxbins[entry] = xbins[i];
+				entry++;
+			}
+
+			/*
+			//DEBUG
+			cout << "---------------------------------" << endl;
+			for (int i = 0; i < entry; i++)
+			{
+				cout << "[" << i << "] = " << rxbins[i] << endl;
+			}
+			*/
+
+
 			
-			histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
+			histo = new TH1D(hName.data(), hTitle.data(), entry-1, rxbins);
 		}
 
+		//Histograms with no variable bin
 		else
 		{
+			if (strcmp(quantityUnit, "") == 0)
+			{
+				yAxisTitleForm += " / (%1." + to_string(decimals) + "f)";
+			}
+			else
+			{
+				yAxisTitleForm += " / (%1." + to_string(decimals) + "f " + string(quantityUnit) + ")";
+			}
+
 			histo = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		}
 
@@ -180,8 +220,18 @@ public:
 		c1->cd(1);
 		c1->cd(1)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
+		if (strcmp(quantityName, "Pt") == 0)
+		{
+			c1->cd(1)->SetLogy();
+			hSigBack->SetMaximum(10*hSigBack->GetMaximum());
+		}
+		else
+		{
+			hSigBack->SetMinimum(0);
+			hSigBack->SetMaximum(1.2*hSigBack->GetMaximum());
+		}
+
 		//Draws Main histogram
-		hSigBack->SetMinimum(0);
 		hSigBack->SetLineWidth(2);		//Line Width
 		hSigBack->Draw();
 
@@ -229,9 +279,18 @@ public:
 		c1->cd(2);
 		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
 
+		if (strcmp(quantityName, "Pt") == 0)
+		{
+			c1->cd(2)->SetLogy();
+			hSig->SetMaximum(10*hSig->GetMaximum());
+		}
+		else
+		{
+			hSig->SetMinimum(0);
+			hSig->SetMaximum(1.2*hSig->GetMaximum());
+		}
+
 		//Same range as comparision and Draws
-		hSig->SetMinimum(0);
-   		//hSig->SetMaximum(Ymax);
 		hSig->SetTitle(titleRight.data());
 		hSig->SetLineColor(kMagenta); 	//Line Color
 		hSig->SetLineWidth(2);			//Line Width

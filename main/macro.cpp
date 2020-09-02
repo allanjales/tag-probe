@@ -34,7 +34,7 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 1;
+	int useFile = 2;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -44,10 +44,10 @@ void macro()
 	const char* canvasWatermark = "#bf{CMS} Preliminary";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../result/";
+	const char* directoryToSave = "../resultMC/";
 
 	//Should limit data?
-	long long limitData = 100000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
 	bool shouldDrawInvariantMassCanvas 			= true;
