@@ -56,7 +56,7 @@ public:
 	{
 		//References
 		TH1D* &hPass  = this->Pass.hSig;
-		TH1D* &hTotal = this->All .hSigBack;
+		TH1D* &hTotal = this->All .hSig;
 
 		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
 		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
@@ -75,8 +75,8 @@ public:
 		if(TEfficiency::CheckConsistency(*hPass, *hTotal))
 		{
 			//Fills histogram
-			//this->pEff = new TEfficiency(*hPass, *hTotal);
-			
+			this->pEff = new TEfficiency(*hPass, *hTotal);
+			this->pEff->SetName(pName.data());
 		}
 		else
 		{
@@ -91,8 +91,8 @@ public:
 				{
 					//cout << "Bin " << i << " with problems | T:" <<  hTotal->GetBinContent(i) << " - P:" << hPass->GetBinContent(i) << endl;
 					cout << "Bin " << i << " with problems | P:" <<  hPass->GetBinContent(i) << " : T:" << hTotal->GetBinContent(i) << endl;
-					cout << "-> Pass  : " << this->Pass.hSigBack->GetBinContent(i) << " - " << this->Pass.hBack->GetBinContent(i) << "a = " << this->Pass.hSig->GetBinContent(i) << "\n";
-					cout << "-> Total : " << this->All .hSigBack->GetBinContent(i) << " - " << this->All .hBack->GetBinContent(i) << "a = " << this->All .hSig->GetBinContent(i) << "\n";
+					cout << "-> Pass  : " << this->Pass.hSigBack->GetBinContent(i) << " - " << this->Pass.hBack->GetBinContent(i) << "a = " << this->Pass.hSig->GetBinContent(i) << " (a = "<< this->Pass.PassFailObj()->subtractionFactor() << ")\n";
+					cout << "-> Total : " << this->All .hSigBack->GetBinContent(i) << " - " << this->All .hBack->GetBinContent(i) << "a = " << this->All .hSig->GetBinContent(i) << " (a = "<< this->All .PassFailObj()->subtractionFactor() << ")\n";
 				}
 			}
 			cerr << "Consistency ERROR! Program stopped" << endl;

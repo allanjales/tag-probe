@@ -14,9 +14,9 @@ public:
 	const char* tagOrProbe = NULL;
 
 	PtEtaPhi Pt  {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 100,  0.00, 40.00, 1};
+		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 10000,  0.00, 40.00};
 	PtEtaPhi Eta {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"Eta", "#eta",  "", 	 "Pseudorapidity",       100, -2.50,   2.50};
+		"Eta", "#eta",  "", 	 "Pseudorapidity",       10000, -2.50,   2.50};
 	PtEtaPhi Phi {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",       79, -3.15,   3.15};
 

@@ -56,20 +56,6 @@ private:
 		histo->GetXaxis()->SetTitle(xAxisTitle.data());
 	}
 
-	MassValues* PassFailObj()
-	{
-		if (strcmp(passingOrFailing, "Passing") == 0)
-			return &this->ObjMass.Pass;
-			//return &this->ObjMass.All;
-
-		if (strcmp(passingOrFailing, "All") == 0)
-			//return &this->ObjMass.Pass;
-			return &this->ObjMass.All;
-
-		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
-		return NULL;
-	}
-
 	//For consistencyDebugCout()
 	string fillAfter(string text, char fillWith, int targetLength)
 	{
@@ -93,10 +79,24 @@ public:
 	TH1D* hSig 		= NULL;
 	TH1D* hBack 	= NULL;
 
+	MassValues* PassFailObj()
+	{
+		if (strcmp(passingOrFailing, "Passing") == 0)
+			return &this->ObjMass.Pass;
+			//return &this->ObjMass.All;
+
+		if (strcmp(passingOrFailing, "All") == 0)
+			return &this->ObjMass.Pass;
+			//return &this->ObjMass.All;
+
+		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
+		return NULL;
+	}
+
 	void subtractSigHistogram()
 	{
 		this->hSig->Add(this->hSigBack, 1.);
-		this->hSig->Add(this->hBack, -(*PassFailObj()).subtractionFactor());
+		this->hSig->Add(this->hBack, -PassFailObj()->subtractionFactor());
 	}
 
 	//Fill histogram
@@ -104,10 +104,10 @@ public:
 	{
 		if (!storeInSignalHistogram)
 		{
-			if ((*PassFailObj()).isInSignalRegion(InvariantMass))
+			if (PassFailObj()->isInSignalRegion(InvariantMass))
 				this->hSigBack->Fill(quantity);
 
-			if ((*PassFailObj()).isInSidebandRegion(InvariantMass))
+			if (PassFailObj()->isInSidebandRegion(InvariantMass))
 				this->hBack->Fill(quantity);
 		}
 		else

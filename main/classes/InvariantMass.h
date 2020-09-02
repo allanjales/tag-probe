@@ -65,7 +65,7 @@ struct MassValues
 
 	bool isInSignalRegion(double InvariantMass)
 	{
-		if (InvariantMass > this->signalRegion_x1 && InvariantMass < this->signalRegion_x2)
+		if (InvariantMass >= this->signalRegion_x1 && InvariantMass <= this->signalRegion_x2)
 			return true;
 
 		return false;
@@ -73,8 +73,8 @@ struct MassValues
 
 	bool isInSidebandRegion(double InvariantMass)
 	{
-		if ((InvariantMass > this->sidebandRegion1_x1 && InvariantMass < this->sidebandRegion1_x2) ||
-			(InvariantMass > this->sidebandRegion2_x1 && InvariantMass < this->sidebandRegion2_x2))
+		if ((InvariantMass >= this->sidebandRegion1_x1 && InvariantMass <= this->sidebandRegion1_x2) ||
+			(InvariantMass >= this->sidebandRegion2_x1 && InvariantMass <= this->sidebandRegion2_x2))
 			return true;
 
 		return false;
@@ -98,7 +98,7 @@ struct MassValues
 			cerr << "WARNING: not using advanced method for subtraction factor calculation. Using method for linear background." << endl;
 		}
 
-		return signalRegion/abs(sidebandRegion);
+		return signalRegion/sidebandRegion;
 	}
 
 	void doFit()
