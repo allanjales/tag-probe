@@ -85,7 +85,7 @@ public:
 		this->Mass.fillMassHistograms(InvariantMass, isPassing);
 	}
 
-	void fillQuantitiesHistograms(double** quantities, int& isPassing)
+	void fillQuantitiesHistograms(double** quantities, int& isPassing, bool storeInSignalHistogram = false)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -98,8 +98,8 @@ public:
 		double &InvariantMass           = *quantities[6];
 		*/
 
-		this->Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing);
-		this->Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing);
+		this->Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing, storeInSignalHistogram);
+		this->Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing, storeInSignalHistogram);
 	}
 
 

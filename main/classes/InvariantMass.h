@@ -39,6 +39,28 @@ struct MassValues
 	double sidebandRegion2_x1  = 0.;
 	double sidebandRegion2_x2  = 0.;
 
+	//For downgrade
+	TFitResultPtr fitResult = 0;
+
+	Double_t resultParameters[12];
+
+	const char* const fittingParName[12] = {
+			"Gaus(Sg) Height  ",
+			"Gaus(Sg) Position",
+			"Gaus(Sg) Sigma   ",
+
+			"CB  (Sg) Alpha   ",
+			"CB  (Sg) N       ",
+			"CB  (Sg) Mean    ",
+			"CB  (Sg) Sigma   ",
+			"CB  (Sg) Yield   ",
+
+			"Exp1(Bg) Height  ",
+			"Exp1(Bg) Width   ",
+			"Exp2(Bg) Height  ",
+			"Exp2(Bg) Width   "
+		};
+
 	//--- For sideband subtraction ---
 
 	bool isInSignalRegion(double InvariantMass)
@@ -64,7 +86,6 @@ struct MassValues
 		double signalRegion = abs(signalRegion_x2 - signalRegion_x1);
 		double sidebandRegion = abs(sidebandRegion1_x2 - sidebandRegion1_x1) + abs(sidebandRegion2_x2 - sidebandRegion2_x1);
 
-		/*
 		//Using yield (advanced method)
 		if (fitFunction != NULL)
 		{		
@@ -76,9 +97,82 @@ struct MassValues
 		{
 			cerr << "WARNING: not using advanced method for subtraction factor calculation. Using method for linear background." << endl;
 		}
-		*/
 
 		return signalRegion/abs(sidebandRegion);
+	}
+
+	void doFit()
+	{
+		TF1* &f  	= fitFunction;
+		TF1* &fs 	= fitSignal;
+		TF1* &fb 	= fitBackground;
+
+		double xMin = hMass->GetXaxis()->GetXmin();
+		double xMax = hMass->GetXaxis()->GetXmax();
+
+		//Temporary for test
+		xMin = 2.9;
+		xMax = 3.3;
+
+		//Create fit Function
+		f = new TF1("FitFunction", FitFunctions::Merged::InvariantMass, xMin, xMax, 12);
+		f->SetNpx(1000);
+		f->SetLineStyle(kSolid);
+		f->SetLineColor(kBlue);
+		f->SetLineWidth(3);
+
+		//Rename parameters
+		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
+		for (int i = 0; i < arraySize; i++)
+		{
+			f->SetParName(i, fittingParName[i]);
+		}
+		
+		//Values Signal GS
+		f->SetParameter(0,	4098.2);
+		f->SetParameter(1,	3.09);
+		f->SetParameter(2,	0.020);
+
+		//Values Signal CB
+		f->SetParameter(3,	1.58);
+		f->SetParameter(4,	1.54);
+		f->SetParameter(5,	3.093);
+		f->SetParameter(6,	0.032);
+		f->SetParameter(7,	42022.27);
+
+		//Values Background
+		f->SetParameter(8,	-0.217);
+		f->SetParameter(9,	1.915);
+		f->SetParameter(10, 263.185);
+		f->SetParameter(11,	0.061);
+
+		//Fit function
+		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
+		f->GetParameters(resultParameters);
+		
+		//Signal Fitting
+		fs = new TF1("FitFunction_Signal", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
+		fs->SetNpx(1000);							//Resolution of signal fit function
+		fs->SetParameters(resultParameters);		//Get only signal part
+		fs->SetLineColor(kMagenta); 				//Fit Color
+		fs->SetLineStyle(kSolid);					//Fit Style
+		fs->SetLineWidth(3);						//Fit width
+
+		//Background Fitting
+		fb = new TF1("FitFunction_Background", FitFunctions::Merged::Background_InvariantMass, xMin, xMax, 4);
+		fb->SetNpx(1000);							//Resolution of background fit function
+		fb->SetParameters(&resultParameters[8]);	//Get only background part
+		fb->SetLineColor(kBlue); 					//Fit Color
+		fb->SetLineStyle(kDashDotted);				//Fit style
+		fb->SetLineWidth(3);						//Fit width
+		
+		/*
+		//TEST
+		cout << "Entries  (TH1): " << hMass->GetEntries() << endl;
+		cout << "Integral (TH1): " << hMass->Integral(0, hMass->GetNbinsX()+1) << endl;
+		cout << "Integral (TF1): " << f->Integral(xMin, xMax)/hMass->GetBinWidth(0) << endl;
+		*/
+		cout << "chi2/ndf = " << (this->fitResult)->Chi2()/(this->fitResult)->Ndf() << "\n";
 	}
 
 	TBox* createTBox(double Ymax, int index = 0, double Ymin = 0.)
@@ -118,6 +212,23 @@ private:
 	const char*& directoryToSave;
 	const char*& particleType;
 
+	const char* const fittingParName[12] = {
+			"Gaus(Sg) Height  ",
+			"Gaus(Sg) Position",
+			"Gaus(Sg) Sigma   ",
+
+			"CB  (Sg) Alpha   ",
+			"CB  (Sg) N       ",
+			"CB  (Sg) Mean    ",
+			"CB  (Sg) Sigma   ",
+			"CB  (Sg) Yield   ",
+
+			"Exp1(Bg) Height  ",
+			"Exp1(Bg) Width   ",
+			"Exp2(Bg) Height  ",
+			"Exp2(Bg) Width   "
+		};
+
 	void createMassHistogram(TH1D* &hMass, const char* passingOrFailing)
 	{
 		string hName 			= string(passingOrFailing) + "_" + string(particleType) + "_" + string(particleName) + "_InvariantMass";
@@ -149,7 +260,7 @@ private:
 		bool shouldDrawAllFitFunctions = true;
 
 		canvas->cd(quarter);
-		canvas->cd(quarter)->SetMargin(0.13, 0.02, 0.09, 0.07);
+		canvas->cd(quarter)->SetMargin(0.14, 0.02, 0.09, 0.07);
 
 		hMass->SetMarkerStyle(20);		//Set markers style
 		hMass->SetMarkerColor(kBlack);	//Set markers colors
@@ -174,7 +285,7 @@ private:
 			tl->AddEntry(fFit, "Total Fit", "l");
 
 			//If is showing pass and fail fit
-			if (quarter < 2 && shouldDrawAllFitFunctions == true)
+			if (shouldDrawAllFitFunctions == true)
 			{
 				//Change the size of TLegend
 				tl->SetY1(tl->GetY1() - tl->GetTextSize()*3);
@@ -218,20 +329,6 @@ private:
 				for (int i = 0; i < 12; i++)
 					fitExp->SetParName(i, this->fittingParName[i+8]);
 				tl->AddEntry(fitExp, "Exp + Exp",	 "l");
-			}
-
-			//Draw background fit for total fit
-			if (quarter >= 2 && shouldDrawAllFitFunctions == true && false)
-			{
-				//Change the size of TLegend
-				tl->SetY1(tl->GetY1() - tl->GetTextSize()*1);
-
-				ObjMassValues->fitBackground->SetNpx(1000);
-				ObjMassValues->fitBackground->SetLineColor(kBlue);
-				ObjMassValues->fitBackground->SetLineStyle(kDashDotted);
-				ObjMassValues->fitBackground->SetLineWidth(3);
-				ObjMassValues->fitBackground->Draw("same");
-				tl->AddEntry(ObjMassValues->fitBackground, "Background",	 "l");
 			}
 		}
 
@@ -283,23 +380,6 @@ public:
 	int 	nBins;
 	int 	decimals = 3;
 
-	const char* const fittingParName[12] = {
-			"Gaus(Sg) Height  ",
-			"Gaus(Sg) Position",
-			"Gaus(Sg) Sigma   ",
-
-			"CB  (Sg) Alpha   ",
-			"CB  (Sg) N       ",
-			"CB  (Sg) Mean    ",
-			"CB  (Sg) Sigma   ",
-			"CB  (Sg) Yield   ",
-
-			"Exp1(Bg) Height  ",
-			"Exp1(Bg) Width   ",
-			"Exp2(Bg) Height  ",
-			"Exp2(Bg) Width   "
-		};
-
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
 		this->xMin     = xMin;
@@ -325,119 +405,13 @@ public:
 	{
 		if (strcmp(ressonance, "Jpsi") == 0)
 		{
-			TH1D* &hPass 	 = this->Pass.hMass;
-			TH1D* &hPassFail = this->All .hMass;
-
-			//Get size of parNames
-			int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
-
-			//Passing Fitting
-			TF1* &fPass = this->Pass.fitFunction;
-			fPass = new TF1("FitFunction_Pass", FitFunctions::Merged::Pass_InvariantMass, xMin, xMax, 12);
-			for (int i = 0; i < arraySize; i++)
-			{
-				fPass->SetParName(i, this->fittingParName[i]);
-			}
-
-			//Both Fitting
-			TF1* &fPassFail = this->All.fitFunction;
-			fPassFail = new TF1("FitFunction_Both", FitFunctions::Merged::Both_InvariantMass, xMin, xMax, 24);
-			for (int i = 0; i < arraySize*2; i++)
-			{
-				fPassFail->SetParName(i, this->fittingParName[i%arraySize]);
-			}
-
-			//Simultaneuos fit
-			ROOT::Math::WrappedMultiTF1 wfPass(*fPass, 1);
-			ROOT::Math::WrappedMultiTF1 wfPassFail(*fPassFail, 1);
-
-			ROOT::Fit::DataOptions opt;
-
-			ROOT::Fit::DataRange rangePass;
-			rangePass.SetRange(xMin, xMax);
-			ROOT::Fit::BinData dataPass(opt, rangePass);
-			ROOT::Fit::FillData(dataPass, hPass);
-
-			ROOT::Fit::DataRange rangePassFail;
-			rangePassFail.SetRange(xMin, xMax);
-			ROOT::Fit::BinData dataPassFail(opt, rangePassFail);
-			ROOT::Fit::FillData(dataPassFail, hPassFail);
-
-			ROOT::Fit::Chi2Function chi2_Pass(dataPass, wfPass);
-			ROOT::Fit::Chi2Function chi2_PassFail(dataPassFail, wfPassFail);
-
-			GlobalChi2 globalChi2(chi2_Pass, chi2_PassFail);
-
-			ROOT::Fit::Fitter fitter;
-
-			//Set initial parameters (Monte Carlo)
-			double par0[24] = {340.2,
-								3.09,
-								0.037,
-								1.824,
-								1.034,
-								3.093,
-								0.022,
-								8322.27,
-								-0.217,
-								1.915,
-								263.185,
-								0.061,
-								340.2,
-								3.09,
-								0.037,
-								1.824,
-								1.034,
-								3.093,
-								0.022,
-								8322.27,
-								-0.217,
-								1.915,
-								263.185,
-								0.061
-							};
-
-			//Create before the parameter settings in order to fix or set range on them
-			fitter.Config().SetParamsSettings(24, par0);
-
-			//Rename global parameters
-			for (int i = 0; i < arraySize*2; i++)
-			{
-				fitter.Config().ParSettings(i).SetName(this->fittingParName[i%arraySize]);
-			}
-
-			//Fit FCN function directly
-			//(specify optionally data size and flag to indicate that is a chi2 fit)
-			fitter.FitFCN(24, globalChi2, 0, dataPass.Size() + dataPassFail.Size(), true);
-			ROOT::Fit::FitResult result = fitter.Result();
-
-			//Get parameters to save fits
-			double fitParameters[24];
-			fPass->GetParameters(fitParameters);
-
-			//Save fits for pass
-			this->Pass.fitSignal = new TF1("Pass_Signal_InvariantMass", FitFunctions::Merged::Signal_InvariantMass, xMin, xMax, 8);
-			this->Pass.fitBackground = new TF1("Pass_Background_InvariantMass", FitFunctions::Merged::Background_InvariantMass, xMin, xMax, 4);
-			Pass.fitSignal->SetParameters(fitParameters);
-			Pass.fitBackground->SetParameters(&fitParameters[8]);
-
-			//Save fits for total
-			this->All.fitSignal = new TF1("All_Signal_InvariantMass", FitFunctions::Merged::Both_Signal_InvariantMass, xMin, xMax, 16);
-			this->All.fitBackground = new TF1("Pass_Background_InvariantMass", FitFunctions::Merged::Both_Background_InvariantMass, xMin, xMax, 8);
-			All.fitSignal->SetParameters(fitParameters);
-			All.fitBackground->SetParameters(&fitParameters[16]);
-
-			//Show fit result
-			cout << "\nFor " << particleType << "....";
-			result.Print(std::cout);
 			cout << endl;
+			cout << "Fitting Passing in " << particleType << " " << particleName << " ...\n";
+			Pass.doFit();
 
-			/*
-			//TEST
-			cout << "Entries  (TH1): " << hPass->GetEntries() << endl;
-			cout << "Integral (TH1): " << hPass->Integral(0, hPass->GetNbinsX()+1) << endl;
-			cout << "Integral (TF1): " << fPass->Integral(xMin, xMax)/hPass->GetBinWidth(0) << endl;
-			*/
+			cout << endl;
+			cout << "Fitting All in " << particleType << " " << particleName << " ...\n";
+			All.doFit();
 		}
 
 		if (strcmp(ressonance, "Upsilon") == 0)
@@ -583,6 +557,11 @@ public:
 			this->xMin  = 2.8;
 			this->xMax  = 3.4;
 			this->nBins = 240;
+
+			//NEW FOR AVOID ???
+			this->xMin  = 2.9;
+			this->xMax  = 3.3;
+			this->nBins = 160;
 		}
 
 		if (strcmp(ressonance, "Upsilon") == 0)

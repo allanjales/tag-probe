@@ -105,3 +105,10 @@ For v1
 * 2020-09-01
 	* Removed `macro()` function in macro.cpp;
 	* Renamed `generateHistograms()` to `macro()`;
+	* Removed some functions in FitFunction class;
+	* Changed `doFit()` function in InvariantMass class. Added this function to MassValue too;
+	* Added some variables in MassValue class; 
+	* Changed range of pT histograms to 40 GeV max;
+	* Changed margins in invariant mass canvas;
+	* Corrected Efficiency plot created by signal histograms;
+	* Edited error messages in efficiency consistency

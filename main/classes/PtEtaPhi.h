@@ -38,11 +38,11 @@ public:
 		this->All .subtractSigHistogram();
 	}
 
-	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing, bool storeInSignalHistogram = false)
 	{
 		if (isPassing)
-			this->Pass.fillQuantitiesHistograms(quantity, InvariantMass);
-		this->All.fillQuantitiesHistograms(quantity, InvariantMass);
+			this->Pass.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
+		this->All.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
@@ -55,7 +55,7 @@ public:
 	TEfficiency* createEfficiencyPlot(bool shouldWrite = false)
 	{
 		//References
-		TH1D* &hPass  = this->Pass.hSigBack;
+		TH1D* &hPass  = this->Pass.hSig;
 		TH1D* &hTotal = this->All .hSigBack;
 
 		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
@@ -64,31 +64,41 @@ public:
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
 
-		/*
-		//TEST FOR EVERY SINGLE BIN
-		int nbinsx = hPass->GetXaxis()->GetNbins();
-		cout << "Bins : " << nbinsx << endl;
-		for (int i = 0; i < nbinsx; i++)
-		{
-			if (hTotal->GetBinContent(i) - hPass->GetBinContent(i) < 0)
-			{
-				cout << "Bin " << i << " with problems | " <<  hTotal->GetBinContent(i) << " - " << hPass->GetBinContent(i) << endl;
-			}
-		}
-		*/
+		//TEMPORARY?
+		this->pEff = new TEfficiency();
+		this->pEff->SetPassedHistogram(*hPass, "f");
+		this->pEff->SetTotalHistogram (*hTotal,"f");
+		this->pEff->SetName(pName.data());
 
+		/*
 		//Check if are valid and consistent histograms
 		if(TEfficiency::CheckConsistency(*hPass, *hTotal))
 		{
 			//Fills histogram
-			this->pEff = new TEfficiency(*hPass, *hTotal);
-			this->pEff->SetName(pName.data());
+			//this->pEff = new TEfficiency(*hPass, *hTotal);
+			
 		}
 		else
 		{
+			//TEST FOR EVERY SINGLE BIN
+			cerr << "--- Consistency error detected! Showing problematic bins of histograms ---\n";
+			cerr << "Error at: " << pTitle << "\n";
+			int nbinsx = hPass->GetXaxis()->GetNbins();
+			cout << "Bins : " << nbinsx << endl;
+			for (int i = 0; i < nbinsx; i++)
+			{
+				if (hTotal->GetBinContent(i) - hPass->GetBinContent(i) < 0)
+				{
+					//cout << "Bin " << i << " with problems | T:" <<  hTotal->GetBinContent(i) << " - P:" << hPass->GetBinContent(i) << endl;
+					cout << "Bin " << i << " with problems | P:" <<  hPass->GetBinContent(i) << " : T:" << hTotal->GetBinContent(i) << endl;
+					cout << "-> Pass  : " << this->Pass.hSigBack->GetBinContent(i) << " - " << this->Pass.hBack->GetBinContent(i) << "a = " << this->Pass.hSig->GetBinContent(i) << "\n";
+					cout << "-> Total : " << this->All .hSigBack->GetBinContent(i) << " - " << this->All .hBack->GetBinContent(i) << "a = " << this->All .hSig->GetBinContent(i) << "\n";
+				}
+			}
 			cerr << "Consistency ERROR! Program stopped" << endl;
 			abort();
 		}
+		*/
 
 		//Set plot config
 		this->pEff->SetTitle(pTitle.data());
@@ -142,12 +152,6 @@ public:
 		txCOD->SetTextFont(42);
 		txCOD->SetNDC(kTRUE);
 		txCOD->DrawLatex(0.14,0.85,Form(canvasWatermark, ""));
-
-		//Set x range
-		if (strcmp(quantityName, "Pt") == 0)
-		{
-			pEff->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
-		}
 
 		//Writes in file
 		if (shouldWrite == true)

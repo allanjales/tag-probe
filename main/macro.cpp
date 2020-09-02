@@ -34,20 +34,20 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 2;
+	int useFile = 1;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 1;
+	int method = 2;
 
 	//Set the canvasW wtermark
 	const char* canvasWatermark = "#bf{CMS} Preliminary";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../result/";
+	const char* directoryToSave = "../resultJPSIRUN_AllhSB/";
 
 	//Should limit data?
-	long long limitData = 50000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
 	bool shouldDrawInvariantMassCanvas 			= true;
@@ -57,6 +57,10 @@ void macro()
 
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
+
+	bool isMC = false;
+    if (useFile == 2 || useFile == 4)
+    	isMC = true;
 
 
 	//Check if the name of dir is ok
@@ -184,15 +188,11 @@ void macro()
 	auto lastTime = std::chrono::steady_clock::now();
 	auto start = std::chrono::steady_clock::now();
 
+	if (!isMC) //Does not need
+	{
 	cout << endl;
 	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
-
-	//TEMPORARY FOR TEST
-	TFile *file1 = TFile::Open("../result/jpsi_run2011.root");
-	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
-	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
 	
-	/*
 	//Loop between the components
 	for (long long i = 0; i < numberEntries; i++)
 	{
@@ -213,17 +213,24 @@ void macro()
 			TNP.fillMassHistograms(quantities, types);
 		}
 	}
-	*/
+
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//Do function fit ober the histogram
 	TNP.doFit();
 
-	TNP.createMassCanvas();
+/*
+	//TESTING
+	TNP.updateMassValuesAll();
 
-	/*
+	TNP.createMassCanvas(true);
+
+	cout << TNP.Tracker.Mass.Pass.subtractionFactor() << endl;
+*/
+
 	//Get values for invariant mass and sigma from plot
 	TNP.updateMassValuesAll();
+	}
 
 	if (useFile > 2)
 	{
@@ -248,8 +255,10 @@ void macro()
 	// Generate and save files
 	//-------------------------------------
 
-	//Supress canvas
-	gROOT->SetBatch(1);
+	//Supress canvas PROBLEMS BELOW:
+	//* Does not store TBox of
+	//* Does not save anything in created .root
+	//gROOT->SetBatch(1);
 
 	//Create file root to store generated files
 	TFile* generatedFile = TFile::Open((string(directoryToSave) + "generated_hist.root").data(),"RECREATE");
@@ -273,9 +282,6 @@ void macro()
 
 		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
-
-
-
 	
 	//Prepare for showing progress
 	lastTime = chrono::steady_clock::now();
@@ -301,12 +307,13 @@ void macro()
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{	
-			TNP.fillQuantitiesHistograms(quantities, types);
+			TNP.fillQuantitiesHistograms(quantities, types, isMC);
 		}
 	}
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//For sideband subtraction
+	if (!isMC)
 	TNP.subtractSigHistograms();
 
 
@@ -321,6 +328,7 @@ void macro()
 	}
 
 	//Debug consistency for histograms
+	if (!isMC)
 	TNP.consistencyDebugCout();
 
 	//Save histograms
@@ -373,5 +381,4 @@ void macro()
 	generatedFile->Close();
 
 	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
-	*/
 }

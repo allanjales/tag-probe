@@ -60,8 +60,10 @@ private:
 	{
 		if (strcmp(passingOrFailing, "Passing") == 0)
 			return &this->ObjMass.Pass;
+			//return &this->ObjMass.All;
 
 		if (strcmp(passingOrFailing, "All") == 0)
+			//return &this->ObjMass.Pass;
 			return &this->ObjMass.All;
 
 		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
@@ -95,17 +97,24 @@ public:
 	{
 		this->hSig->Add(this->hSigBack, 1.);
 		this->hSig->Add(this->hBack, -(*PassFailObj()).subtractionFactor());
-		//this->hSig->Add(this->hBack, -0.39);
 	}
 
 	//Fill histogram
-	void fillQuantitiesHistograms(double& quantity, double& InvariantMass)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, bool storeInSignalHistogram = false)
 	{
-		if ((*PassFailObj()).isInSignalRegion(InvariantMass))
-			this->hSigBack->Fill(quantity);
+		if (!storeInSignalHistogram)
+		{
+			if ((*PassFailObj()).isInSignalRegion(InvariantMass))
+				this->hSigBack->Fill(quantity);
 
-		if ((*PassFailObj()).isInSidebandRegion(InvariantMass))
-			this->hBack->Fill(quantity);
+			if ((*PassFailObj()).isInSidebandRegion(InvariantMass))
+				this->hBack->Fill(quantity);
+		}
+		else
+		{
+			this->hSig->Fill(quantity);
+		}
+
 	}
 
 	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
@@ -238,8 +247,16 @@ public:
 		legend += fillAfter(string(passingOrFailing), ' ', 8);
 		legend += "= ";
 
+		//Diference calculus
+		double diff = hSigBack->GetEntries() - (hSig->GetEntries() + (*PassFailObj()).subtractionFactor()*hBack->GetEntries());
+
+		const char* addSpace = "";
+		if (diff >= 0.)
+			addSpace = " ";
+
 		//Show information
-		cout << legend << hSigBack->GetEntries() - (hSig->GetEntries() + (*PassFailObj()).subtractionFactor()*hBack->GetEntries()) << endl;
+		cout << legend << fixed << addSpace << diff;
+		cout << " (-factor: " << (*PassFailObj()).subtractionFactor() << ")\n";
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)

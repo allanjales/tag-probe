@@ -5,8 +5,8 @@ class TagAndProbe
 {
 public:
 	int method = 1;	// 1 | 2
-	const char* ressonance = "Jpsi"; // "Jpsi" | "Upsilon"
-	const char* particleName = "Muon";
+	const char* ressonance      = "Jpsi"; // "Jpsi" | "Upsilon"
+	const char* particleName    = "Muon";
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 	const char* directoryToSave = "../result/";
 
@@ -157,7 +157,7 @@ public:
 			this->Global    .fillMassHistograms(*quantities[6], *types[2]);
 	}
 
-	void fillQuantitiesHistograms(double** quantities, int** types)
+	void fillQuantitiesHistograms(double** quantities, int** types, bool storeInSignalHistogram = false)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -174,11 +174,11 @@ public:
 		*/
 
 		if (doTracker)
-			this->Tracker   .fillQuantitiesHistograms(quantities, *types[0]);
+			this->Tracker   .fillQuantitiesHistograms(quantities, *types[0], storeInSignalHistogram);
 		if (doStandalone)
-			this->Standalone.fillQuantitiesHistograms(quantities, *types[1]);
+			this->Standalone.fillQuantitiesHistograms(quantities, *types[1], storeInSignalHistogram);
 		if (doGlobal)
-			this->Global    .fillQuantitiesHistograms(quantities, *types[2]);
+			this->Global    .fillQuantitiesHistograms(quantities, *types[2], storeInSignalHistogram);
 	}
 	
 

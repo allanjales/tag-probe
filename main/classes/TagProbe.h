@@ -14,7 +14,7 @@ public:
 	const char* tagOrProbe = NULL;
 
 	PtEtaPhi Pt  {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 100,  0.00, 100.00, 1};
+		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 100,  0.00, 40.00, 1};
 	PtEtaPhi Eta {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",       100, -2.50,   2.50};
 	PtEtaPhi Phi {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
@@ -63,7 +63,7 @@ public:
 	}
 
 
-	void fillQuantitiesHistograms(double** quantities, double& InvariantMass, int& isPassing)
+	void fillQuantitiesHistograms(double** quantities, double& InvariantMass, int& isPassing, bool storeInSignalHistogram = false)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -72,9 +72,9 @@ public:
 		double &phi = *quantities[2];
 		*/
 
-		this->Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing);
-		this->Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing);
-		this->Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing);
+		this->Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing, storeInSignalHistogram);
+		this->Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing, storeInSignalHistogram);
+		this->Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing, storeInSignalHistogram);
 	}
 
 

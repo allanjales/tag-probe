@@ -48,7 +48,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	if (regex_match(path, regex(".*Pt.*")))
 	{
 		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
-		graph->SetMinimum(0.5);
+		graph->SetMinimum(0.0);
 		graph->SetMaximum(1.1);
 	}
 	
@@ -62,8 +62,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Set range if is pT
 	if (regex_match(path, regex(".*Phi.*")))
 	{
-		graph->SetMinimum(0.96);
-		graph->SetMaximum(1.0);
+		graph->SetMinimum(0.85);
+		graph->SetMaximum(1.02);
 	}
 
 	//Legenda
@@ -85,8 +85,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../result/jpsi_run2011.root");
-	TFile *file1 = TFile::Open("../result/jpsi_mc2020.root");
+	TFile *file0 = TFile::Open("../resultJPSIRUN_AllhSB/generated_hist.root");
+	TFile *file1 = TFile::Open("../resultJPSIMC/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{
@@ -94,7 +94,7 @@ void compare_efficiency()
 		abort();
 	}
 
-	compare_plot(file0, file1, "efficiency/plots/Muon Tracker Probe Pt Efficiency");
-	compare_plot(file0, file1, "efficiency/plots/Muon Tracker Probe Eta Efficiency");
-	compare_plot(file0, file1, "efficiency/plots/Muon Tracker Probe Phi Efficiency");
+	compare_plot(file0, file1, "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency");
+	compare_plot(file0, file1, "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency");
+	compare_plot(file0, file1, "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency");;
 }

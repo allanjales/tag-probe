@@ -74,29 +74,9 @@ public:
 			return FitFunctions::Primary::Exp(x,par) + FitFunctions::Primary::Exp(x, &par[2]);
 		}
 
-		//Fit function for signal & background for Invariant Mass (Passing)
-		static Double_t Pass_InvariantMass(Double_t *x, Double_t *par) {
+		//Fit function for signal & background for Invariant Mass
+		static Double_t InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
-		}
-
-		//Fit function for signal & background for Invariant Mass (Failing)
-		static Double_t Fail_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
-		}
-
-		//Fit function for signal & background for Invariant Mass (Both above)
-		static Double_t Both_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Merged::Pass_InvariantMass(x,par) + FitFunctions::Merged::Fail_InvariantMass(x, &par[12]);
-		}
-
-		//Fit function for signal for Invariant Mass (Both above)
-		static Double_t Both_Signal_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Merged::Signal_InvariantMass(x,par) + FitFunctions::Merged::Signal_InvariantMass(x, &par[8]);
-		}
-
-		//Fit function for background for Invariant Mass (Both above)
-		static Double_t Both_Background_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Merged::Background_InvariantMass(x,par) + FitFunctions::Merged::Background_InvariantMass(x, &par[8]);
 		}
 	};
 };
