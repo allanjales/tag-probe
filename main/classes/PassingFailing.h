@@ -50,8 +50,45 @@ private:
 		if (strcmp(passingOrFailing, "Passing") == 0)
 			hTitle = string(extendedQuantityName) + " (" + string(particleType) + " " + string(tagOrProbe) + ")";
 
-		//Create histogram
-		histo = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
+		//Define sppecial histogram with variable bin width
+
+		//Variable bin for pT
+		if (strcmp(quantityName, "Pt") == 0)
+		{
+			double xbins[10000];
+			xbins[0] = .1;
+			int nbins = 0;
+			double binWidth = 0.1;
+			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
+			{
+				xbins[i] = xbins[i-1]*(1+binWidth);
+				nbins++;
+			}
+
+			histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
+		}
+
+		else if (strcmp(quantityName, "Eta") == 0)
+		{
+			double xbins[10000];
+			xbins[0] = .1;
+			int nbins = 0;
+			double binWidth = 0.1;
+			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
+			{
+				xbins[i] = xbins[i-1]*(1+binWidth);
+				nbins++;
+			}
+			
+			histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
+		}
+
+		else
+		{
+			histo = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
+		}
+
+		//Edit histogram axis
 		histo->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), histo->GetBinWidth(0)));
 		histo->GetXaxis()->SetTitle(xAxisTitle.data());
 	}
@@ -97,6 +134,14 @@ public:
 	{
 		this->hSig->Add(this->hSigBack, 1.);
 		this->hSig->Add(this->hBack, -PassFailObj()->subtractionFactor());
+
+		//Now normalize yields (to adapt variable binning)
+		for (int i = 1; i <= hSig->GetXaxis()->GetNbins(); i++)
+		{
+			hSig->SetBinContent(i, hSig->GetBinContent(i)/hSig->GetBinWidth(i));
+			hSigBack->SetBinContent(i, hSigBack->GetBinContent(i)/hSigBack->GetBinWidth(i));
+			hBack->SetBinContent(i, hBack->GetBinContent(i)/hBack->GetBinWidth(i));
+		}
 	}
 
 	//Fill histogram

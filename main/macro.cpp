@@ -314,7 +314,7 @@ void macro()
 
 	//For sideband subtraction
 	if (!isMC)
-	TNP.subtractSigHistograms();
+		TNP.subtractSigHistograms();
 
 
 
@@ -329,7 +329,7 @@ void macro()
 
 	//Debug consistency for histograms
 	if (!isMC)
-	TNP.consistencyDebugCout();
+		TNP.consistencyDebugCout();
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");
