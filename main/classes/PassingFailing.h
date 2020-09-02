@@ -241,10 +241,14 @@ public:
 
 		//Set information what are shown
 		string legend = "- #";
-		legend += fillAfter(string(particleType),     ' ', 11);
-		legend += fillAfter(string(tagOrProbe),       ' ', 6);
-		legend += fillAfter(string(quantityName), 	  ' ', 4);
-		legend += fillAfter(string(passingOrFailing), ' ', 8);
+		legend += fillAfter(string(particleType),     ' ', 10);
+		legend += " ";
+		legend += fillAfter(string(tagOrProbe),       ' ', 5);
+		legend += " ";
+		legend += fillAfter(string(quantityName), 	  ' ', 3);
+		legend += " ";
+		legend += fillAfter(string(passingOrFailing), ' ', 7);
+		legend += " ";
 		legend += "= ";
 
 		//Diference calculus

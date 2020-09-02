@@ -47,9 +47,9 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Set range if is pT
 	if (regex_match(path, regex(".*Pt.*")))
 	{
-		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
+		//pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
 		graph->SetMinimum(0.0);
-		graph->SetMaximum(1.1);
+		graph->SetMaximum(1.2);
 	}
 	
 	//Set range if is pT
@@ -80,6 +80,41 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	txCOD->SetTextFont(42);
 	txCOD->SetNDC(kTRUE);
 	txCOD->DrawLatex(0.14,0.85,Form("#bf{CMS} Preliminary"));
+
+
+
+
+
+
+
+	//Saving as png
+
+
+	//Path where is going to save results 
+	const char* directoryToSave = "../result_comparison/";
+
+	//Check if dir exists and create
+	if (gSystem->AccessPathName(directoryToSave))
+	{
+		if (gSystem->mkdir(directoryToSave))
+		{
+			cerr << "\"" << directoryToSave << "\" directory not found and could not be created ERROR" << endl;
+			abort();
+		}
+		else
+		{
+			cout << "\"" << directoryToSave << "\" directory created OK" << endl;
+		}
+	}
+	else
+	{
+		cout << "\"" << directoryToSave << "\" directory OK" << endl;
+	}
+
+	//Path of file
+	string saveAs = string(directoryToSave) + string(pEff0->GetName()) + ".png";
+
+	c1->SaveAs(saveAs.data());
 }
 
 //Compare efficiency

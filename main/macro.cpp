@@ -44,10 +44,10 @@ void macro()
 	const char* canvasWatermark = "#bf{CMS} Preliminary";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../resultJPSIRUN_AllhSB/";
+	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 200000; //0 -> do not limit
 
 	//Canvas drawing
 	bool shouldDrawInvariantMassCanvas 			= true;
