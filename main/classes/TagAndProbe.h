@@ -81,8 +81,8 @@ public:
 
 	void consistencyDebugCout()
 	{
-		cout << "\nChecking histograms number inconsistency (should be 0)" << endl;
-		cout << "* total - (background + alpha*signal)" << endl;
+		cout << "\nChecking histograms number inconsistency (should be ~ 0)" << endl;
+		cout << "* total - (signal + alpha*background)" << endl;
 		if (doTracker)
 			this->Tracker   .consistencyDebugCout();
 		if (doStandalone)

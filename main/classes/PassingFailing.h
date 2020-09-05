@@ -204,7 +204,7 @@ public:
 
 	}
 
-	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
+	TCanvas* createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
 	{
 		string canvasName 	= string(particleName) + " " + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName);
 		string canvastitle 	= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
@@ -217,18 +217,18 @@ public:
 		if (strcmp(quantityName, "Pt") == 0)
 		{
 			c1->SetLogy();
-			hSigBack->SetMaximum(10.*hSigBack->GetMaximum());
+			hSigBack->SetMaximum(10.*(hSigBack->GetMaximum() > hSig->GetMaximum() ? hSigBack->GetMaximum() : hSig->GetMaximum()));
 		}
 		else if (strcmp(quantityName, "Eta") == 0)
 		{
 			c1->SetLogy();
 			hSigBack->SetMinimum(0.1);
-			hSigBack->SetMaximum(10.*hSigBack->GetMaximum());
+			hSigBack->SetMaximum(10.*(hSigBack->GetMaximum() > hSig->GetMaximum() ? hSigBack->GetMaximum() : hSig->GetMaximum()));
 		}
 		else
 		{
 			hSigBack->SetMinimum(0.);
-			hSigBack->SetMaximum(1.3*hSigBack->GetMaximum());
+			hSigBack->SetMaximum(1.3*(hSigBack->GetMaximum() > hSig->GetMaximum() ? hSigBack->GetMaximum() : hSig->GetMaximum()));
 		}
 
 		//Draws Main histogram
@@ -318,7 +318,7 @@ public:
 		legend += "= ";
 
 		//Diference calculus
-		double diff = hSigBack->GetEntries() - (hSig->GetEntries() + (*PassFailObj()).subtractionFactor()*hBack->GetEntries());
+		double diff = hSigBack->GetEntries() - (hSig->GetEntries() + PassFailObj()->subtractionFactor()*hBack->GetEntries());
 
 		const char* addSpace = "";
 		if (diff >= 0.)
@@ -326,7 +326,7 @@ public:
 
 		//Show information
 		cout << legend << fixed << addSpace << diff;
-		cout << " (-factor: " << (*PassFailObj()).subtractionFactor() << ")\n";
+		cout << " (-factor: " << PassFailObj()->subtractionFactor() << ")\n";
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)

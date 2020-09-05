@@ -94,7 +94,7 @@ public:
 	public:
 		//Fit function for signal for Invariant Mass Probe
 		static Double_t Signal_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Primary::Gaus(x,par) + FitFunctions::Primary::Gaus(x, &par[3]) + FitFunctions::Primary::Gaus(x, &par[6]);
+			return FitFunctions::Primary::CrystalBall(x,par) + FitFunctions::Primary::Gaus(x, &par[5]) + FitFunctions::Primary::Gaus(x, &par[8]);
 		}
 
 		//Fit function for background for Invariant Mass Probe
@@ -104,7 +104,7 @@ public:
 
 		//Fit function for signal & background for Invariant Mass
 		static Double_t InvariantMass(Double_t *x, Double_t *par) {
-			return Signal_InvariantMass(x,par) + Background_InvariantMass(x, &par[9]);
+			return Signal_InvariantMass(x,par) + Background_InvariantMass(x, &par[11]);
 		}
 	};
 };

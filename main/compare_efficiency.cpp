@@ -25,8 +25,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 
 	//Create canvas
 	TCanvas* c1 = new TCanvas();
-	gStyle->SetOptTitle(0);
-	c1->SetMargin(0.10, 0.03, 0.11, 0.03);
+	//gStyle->SetOptTitle(0);
+	c1->SetMargin(0.10, 0.03, 0.11, 0.07);
 
 	//Plot
 	pEff0->SetMarkerColor(kRed);
@@ -68,7 +68,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	}
 
 	//Legenda
-	TLegend* tl = new TLegend(0.68,0.83,0.94,0.93);
+	TLegend* tl = new TLegend(0.68,0.78,0.94,0.88);
 	tl->SetTextSize(0.04);
 	tl->AddEntry(pEff0, "Real data",      "lp");
 	tl->AddEntry(pEff1, "Simulated data", "lp");
@@ -80,7 +80,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	txCOD->SetTextAlign(12);
 	txCOD->SetTextFont(42);
 	txCOD->SetNDC(kTRUE);
-	txCOD->DrawLatex(0.14,0.90,Form("#bf{CMS Open Data}"));
+	txCOD->DrawLatex(0.14,0.85,Form("#bf{CMS Open Data}"));
 
 
 
@@ -121,8 +121,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../resultRUN/generated_hist.root");
-	TFile *file1 = TFile::Open("../resultMC/generated_hist.root");
+	TFile *file0 = TFile::Open("../resultUPRUN/generated_hist.root");
+	TFile *file1 = TFile::Open("../resultUPMC/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{

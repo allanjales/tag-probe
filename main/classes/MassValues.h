@@ -88,15 +88,16 @@ struct MassValues
 				"Exp2(Bg) Width   "
 			};
 
-		//Create fit Function
-		f = new TF1("FitFunction", FitFunctions::Jpsi::InvariantMass, xMin, xMax, 12);
+		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
+
+		//Fit Function
+		f = new TF1("FitFunction", FitFunctions::Upsilon::InvariantMass, xMin, xMax, arraySize);
 		f->SetNpx(1000);
 		f->SetLineStyle(kSolid);
 		f->SetLineColor(kBlue);
 		f->SetLineWidth(3);
 
 		//Rename parameters
-		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 		double resultParameters[arraySize];
 		for (int i = 0; i < arraySize; i++)
 		{
@@ -161,9 +162,11 @@ struct MassValues
 		double xMax = hMass->GetXaxis()->GetXmax();
 
 		const char* const fittingParName[] = {
-				"Gaus(1S) Height  ",
-				"Gaus(1S) Position",
-				"Gaus(1S) Sigma   ",
+				"CB  (1S) Alpha   ",
+				"CB  (1S) N       ",
+				"CB  (1S) Mean    ",
+				"CB  (1S) Sigma   ",
+				"CB  (1S) Yield   ",
 
 				"Gaus(2S) Height  ",
 				"Gaus(2S) Position",
@@ -179,76 +182,58 @@ struct MassValues
 				"Pol3(Bg) d       "
 			};
 
+		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
+
 		//Fit Function
-		f = new TF1("FitFunction",FitFunctions::Upsilon::InvariantMass,xMin,xMax,13);
+		f = new TF1("FitFunction", FitFunctions::Upsilon::InvariantMass, xMin, xMax, arraySize);
 		f->SetNpx(1000);
 		f->SetLineStyle(kSolid);
 		f->SetLineColor(kBlue);
 		f->SetLineWidth(3);
 
 		//Rename parameters
-		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 		double resultParameters[arraySize];
 		for (int i = 0; i < arraySize; i++)
 		{
 			f->SetParName(i, fittingParName[i]);
 		}
 
-		/*
 		//Values Y(1S)
-		f->SetParameter(0, 510.0);
-		f->FixParameter(1, 9.4603);
-		f->SetParameter(2, 0.096);
+		f->SetParameter(0, -10.);
+		f->SetParameter(1,  9.4603);
+		f->SetParameter(2,  9.4);
+		f->SetParameter(3, -0.08);
+		f->SetParameter(4,  4673.);
 
 		//Values Y(2S)
-		f->SetParameter(3, 177.0);
-		f->FixParameter(4, 10.02326);
-		f->SetParameter(5, 0.109);
+		f->SetParameter(5,  374.);
+		f->SetParameter(6,  10.02326);
+		f->SetParameter(7,  0.09);
 
 		//Values Y(3S)
-		f->SetParameter(6, 60.7);
-		f->FixParameter(7, 10.3552);
-		f->SetParameter(8, 0.08);
+		f->SetParameter(8,  237.);
+		f->SetParameter(9,  10.3552);
+		f->SetParameter(10, 0.08);
 
 		//Values Background
-		f->SetParameter(9, -1205.0);
-		f->SetParameter(10, 385.7);
-		f->SetParameter(11, -36.3);
-		f->SetParameter(12, 1.1);
+		f->SetParameter(11, -193041.);
+		f->SetParameter(12,  57792.);
+		f->SetParameter(13, -5729.);
+		f->SetParameter(14,  190.);
 
-		//Limits for height
-		f->SetParLimits(0, 0., 1000.);
-		f->SetParLimits(3, 0., 1000.);
-		f->SetParLimits(6, 0., 1000.);
-		*/
+		//Set par limits
+		f->SetParLimits(1, xMin, xMax);
+		f->SetParLimits(6, xMin, xMax);
+		f->SetParLimits(7, 0., xMax-xMin);
+		f->SetParLimits(9, xMin, xMax);
+		f->SetParLimits(10, 0., xMax-xMin);
 
-		//Values Y(1S)
-		f->SetParameter(0, 950.);
-		f->SetParameter(1, 9.4603);
-		f->SetParameter(2, 0.08);
-
-		//Values Y(2S)
-		f->SetParameter(3, 365.);
-		f->SetParameter(4, 10.02326);
-		f->SetParameter(5, 0.09);
-
-		//Values Y(3S)
-		f->SetParameter(6, 244.);
-		f->SetParameter(7, 10.3552);
-		f->SetParameter(8, 0.08);
-
-		//Values Background
-		f->SetParameter(9,  -191306.);
-		f->SetParameter(10,  57638.);
-		f->SetParameter(11, -5748.);
-		f->SetParameter(12,  191.);
-
-
+		//Fit
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
 		f->GetParameters(resultParameters);
 
 		//Signal of analysis Fitting
-		fs = new TF1("FitFunction_Signal", FitFunctions::Upsilon::Signal_InvariantMass, xMin, xMax, 3);
+		fs = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
 		fs->SetNpx(1000);							//Resolution of signal fit function
 		fs->SetParameters(resultParameters);		//Get only signal part
 		fs->SetLineColor(kMagenta); 				//Fit Color
@@ -258,7 +243,7 @@ struct MassValues
 		//Background Fitting
 		fb = new TF1("FitFunction_Background", FitFunctions::Upsilon::Background_InvariantMass, xMin, xMax, 4);
 		fb->SetNpx(1000);							//Resolution of background fit function
-		fb->SetParameters(&resultParameters[9]);	//Get only background part
+		fb->SetParameters(&resultParameters[11]);	//Get only background part
 		fb->SetLineColor(kBlue); 					//Fit Color
 		fb->SetLineStyle(kDashDotted);				//Fit style
 		fb->SetLineWidth(3);						//Fit width

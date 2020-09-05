@@ -47,8 +47,8 @@ public:
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Pass.createDividedCanvas(shouldWrite, shouldSavePNG);
-		this->All .createDividedCanvas(shouldWrite, shouldSavePNG);
+		this->Pass.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		this->All .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Creates a efficiency plot with histograms

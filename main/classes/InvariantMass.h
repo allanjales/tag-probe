@@ -61,12 +61,6 @@ private:
 		hMass->SetLineColor(kBlack);	//Set errobars color
 		hMass->Draw("ep");
 
-		if (strcmp(ressonance, "Upsilon") == 0)
-		{
-			hMass->SetMinimum(0.);
-			hMass->SetMaximum(1.2*hMass->GetMaximum());
-		}
-
 		//Add legend
 		TLegend* tl = new TLegend(0.70,0.86,0.96,0.92);
 		tl->SetTextSize(0.04);
@@ -153,9 +147,11 @@ private:
 			if (strcmp(ressonance, "Upsilon") == 0)
 			{
 				const char* const fittingParName[] = {
-						"Gaus(1S) Height  ",
-						"Gaus(1S) Position",
-						"Gaus(1S) Sigma   ",
+						"CB  (1S) Alpha   ",
+						"CB  (1S) N       ",
+						"CB  (1S) Mean    ",
+						"CB  (1S) Sigma   ",
+						"CB  (1S) Yield   ",
 
 						"Gaus(2S) Height  ",
 						"Gaus(2S) Position",
@@ -178,53 +174,53 @@ private:
 				int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 				double fitParameters[arraySize];
 				fFit->GetParameters(fitParameters);
-
-				//Signal Gaus Fitting
-				TF1* fitGaus1 = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
-				fitGaus1->SetNpx(1000);
-				fitGaus1->SetParameters(fitParameters);
-				fitGaus1->SetLineColor(kMagenta);
-				fitGaus1->SetLineStyle(kDashed);
-				fitGaus1->SetLineWidth(3);
-				fitGaus1->Draw("same");
+				
+				//Signal CB Fitting
+				TF1* fitCB1 = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
+				fitCB1->SetNpx(1000);
+				fitCB1->SetParameters(fitParameters);
+				fitCB1->SetLineColor(kMagenta);
+				fitCB1->SetLineStyle(kDotted);
+				fitCB1->SetLineWidth(3);
+				fitCB1->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitGaus1->SetParName(i, fittingParName[i]);
-				tl->AddEntry(fitGaus1, "Gauss (1S)", "l");
+					fitCB1->SetParName(i, fittingParName[i]);
+				tl->AddEntry(fitCB1, "Crystal Ball", "l");
 
 				//Signal Gaus Fitting
 				TF1* fitGaus2 = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
 				fitGaus2->SetNpx(1000);
-				fitGaus2->SetParameters(&fitParameters[3]);
+				fitGaus2->SetParameters(&fitParameters[5]);
 				fitGaus2->SetLineColor(kOrange);
 				fitGaus2->SetLineStyle(kDashed);
 				fitGaus2->SetLineWidth(3);
 				fitGaus2->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitGaus2->SetParName(i, fittingParName[i+3]);
+					fitGaus2->SetParName(i, fittingParName[i+5]);
 				tl->AddEntry(fitGaus2, "Gauss (2S)", "l");
 
 				//Signal Gaus Fitting
 				TF1* fitGaus3 = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
 				fitGaus3->SetNpx(1000);
-				fitGaus3->SetParameters(&fitParameters[6]);
+				fitGaus3->SetParameters(&fitParameters[8]);
 				fitGaus3->SetLineColor(kMagenta - 5);
 				fitGaus3->SetLineStyle(kDashed);
 				fitGaus3->SetLineWidth(3);
 				fitGaus3->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitGaus3->SetParName(i, fittingParName[i+6]);
+					fitGaus3->SetParName(i, fittingParName[i+8]);
 				tl->AddEntry(fitGaus3, "Gauss (3S)", "l");
 
 				//Background Fitting
 				TF1* fitPol = new TF1("FitFunction_Background", FitFunctions::Upsilon::Background_InvariantMass, xMin, xMax, 4);
 				fitPol->SetNpx(1000);
-				fitPol->SetParameters(&fitParameters[9]);
+				fitPol->SetParameters(&fitParameters[11]);
 				fitPol->SetLineColor(kBlue);
 				fitPol->SetLineStyle(kDashDotted);
 				fitPol->SetLineWidth(3);
 				fitPol->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitPol->SetParName(i, fittingParName[i+9]);
+					fitPol->SetParName(i, fittingParName[i+11]);
 				tl->AddEntry(fitPol, "Pol 3", "l");
 			}
 		}
@@ -401,6 +397,14 @@ public:
 			canvasName 	= "InvariantMass_" + string(particleType) + "_region";
 			canvasTitle	= "Invariant Mass " + string(particleType) + " with Regions";
 			saveAs 		= string(directoryToSave) + "InvariantMass_" + string(particleType) + "_region" + ".png";
+		}
+
+		if (strcmp(ressonance, "Upsilon") == 0)
+		{
+			Pass.hMass->SetMinimum(0.);
+			Pass.hMass->SetMaximum(1.2*Pass.hMass->GetMaximum());
+			All .hMass->SetMinimum(0.);
+			All .hMass->SetMaximum(1.2*All .hMass->GetMaximum());
 		}
 
 		//Create canvas

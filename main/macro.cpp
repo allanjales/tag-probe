@@ -152,14 +152,6 @@ void macro()
 	TNP.doStandalone = false;
 	TNP.doGlobal     = false;
 
-	//TEMPORARY FOR UPSILON
-	double sidebandRegion1_x1  = 8.50;
-	double sidebandRegion1_x2  = 9.00;
-	double signalRegion_x1     = 9.19;
-	double signalRegion_x2     = 9.70;
-	double sidebandRegion2_x1  = 10.6;
-	double sidebandRegion2_x2  = 11.2;
-
 	if (useFile > 2)
 	{
 		//Prepare for Upsilon
@@ -181,14 +173,14 @@ void macro()
 	//Prepare for showing progress
 	string progressFormat = "Progress: %05.2f%% %0"+to_string(strlen(to_string(numberEntries).data()))+"lld/%lld\r";
 	auto lastTime = std::chrono::steady_clock::now();
-	auto start = std::chrono::steady_clock::now();
+	auto start    = std::chrono::steady_clock::now();
 
-
+	/*
 	//TEMPORARY FOR TEST
 	TFile *file1 = TFile::Open("../resultsForTesting/upsilon_run2011.root");
 	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
 	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
-/*
+	*/
 
 	if (!isMC) //Does not need
 	{
@@ -217,35 +209,12 @@ void macro()
 		}
 
 		cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
-		*/
 
 		//Do function fit ober the histogram
 		TNP.doFit();
 
-		//TESTING
-		TNP.updateMassValuesAll();
-
-		TNP.createMassCanvas(true);
-	/*
 		//Get values for invariant mass and sigma from plot
 		TNP.updateMassValuesAll();
-	}
-
-	if (useFile > 2)
-	{
-		TNP.Tracker.Mass.Pass.sidebandRegion1_x1 = sidebandRegion1_x1;
-		TNP.Tracker.Mass.Pass.sidebandRegion1_x2 = sidebandRegion1_x2;
-		TNP.Tracker.Mass.Pass.signalRegion_x1    = signalRegion_x1;
-		TNP.Tracker.Mass.Pass.signalRegion_x2    = signalRegion_x2;
-		TNP.Tracker.Mass.Pass.sidebandRegion2_x1 = sidebandRegion2_x1;
-		TNP.Tracker.Mass.Pass.sidebandRegion2_x2 = sidebandRegion2_x2;
-
-		TNP.Tracker.Mass.All .sidebandRegion1_x1 = sidebandRegion1_x1;
-		TNP.Tracker.Mass.All .sidebandRegion1_x2 = sidebandRegion1_x2;
-		TNP.Tracker.Mass.All .signalRegion_x1    = signalRegion_x1;
-		TNP.Tracker.Mass.All .signalRegion_x2    = signalRegion_x2;
-		TNP.Tracker.Mass.All .sidebandRegion2_x1 = sidebandRegion2_x1;
-		TNP.Tracker.Mass.All .sidebandRegion2_x2 = sidebandRegion2_x2;
 	}
 
 
@@ -283,8 +252,8 @@ void macro()
 	}
 	
 	//Prepare for showing progress
-	lastTime = chrono::steady_clock::now();
-	start = std::chrono::steady_clock::now();
+	lastTime = std::chrono::steady_clock::now();
+	start    = std::chrono::steady_clock::now();
 
 	cout << endl;
 	cout << "Filling Quantities Histograms..... (2/2)" << endl;
@@ -380,5 +349,4 @@ void macro()
 	generatedFile->Close();
 
 	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
-	*/
 }
