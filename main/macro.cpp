@@ -34,7 +34,7 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 1;
+	int useFile = 3;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -47,13 +47,13 @@ void macro()
 	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 40000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
@@ -164,12 +164,7 @@ void macro()
 	{
 		//Prepare for Upsilon
 		TNP.ressonance = "Upsilon";
-		TNP.defineMassHistogramNumbers(8.5, 11.4, 60);
-
-		if (useFile == 4)
-		{
-			sidebandRegion2_x1  = 9.90;
-		}
+		TNP.defineMassHistogramNumbers(8.7, 11., 60);
 	}
 
 	cout << "Ressonance: " << TNP.ressonance << endl;
@@ -188,48 +183,52 @@ void macro()
 	auto lastTime = std::chrono::steady_clock::now();
 	auto start = std::chrono::steady_clock::now();
 
+
+	//TEMPORARY FOR TEST
+	TFile *file1 = TFile::Open("../resultsForTesting/upsilon_run2011.root");
+	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
+	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
+/*
+
 	if (!isMC) //Does not need
 	{
-	cout << endl;
-	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
-	
-	//Loop between the components
-	for (long long i = 0; i < numberEntries; i++)
-	{
-		//Select particle pair
-		TreePC->GetEntry(i);
-		TreeAT->GetEntry(i);
+		cout << endl;
+		cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
 
-		//Show progress on screen
-		if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
+		//Loop between the components
+		for (long long i = 0; i < numberEntries; i++)
 		{
-			printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
-			lastTime = chrono::steady_clock::now();
+			//Select particle pair
+			TreePC->GetEntry(i);
+			TreeAT->GetEntry(i);
+
+			//Show progress on screen
+			if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
+			{
+				printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
+				lastTime = chrono::steady_clock::now();
+			}
+
+			//Fill histograms
+			if (applyCuts(quantities, types))
+			{
+				TNP.fillMassHistograms(quantities, types);
+			}
 		}
 
-		//Fill histograms
-		if (applyCuts(quantities, types))
-		{
-			TNP.fillMassHistograms(quantities, types);
-		}
-	}
+		cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+		*/
 
-	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+		//Do function fit ober the histogram
+		TNP.doFit();
 
-	//Do function fit ober the histogram
-	TNP.doFit();
+		//TESTING
+		TNP.updateMassValuesAll();
 
-/*
-	//TESTING
-	TNP.updateMassValuesAll();
-
-	TNP.createMassCanvas(true);
-
-	cout << TNP.Tracker.Mass.Pass.subtractionFactor() << endl;
-*/
-
-	//Get values for invariant mass and sigma from plot
-	TNP.updateMassValuesAll();
+		TNP.createMassCanvas(true);
+	/*
+		//Get values for invariant mass and sigma from plot
+		TNP.updateMassValuesAll();
 	}
 
 	if (useFile > 2)
@@ -256,8 +255,8 @@ void macro()
 	//-------------------------------------
 
 	//Supress canvas PROBLEMS BELOW:
-	//* Does not store TBox of
-	//* Does not save anything in created .root
+	//- Does not store TBox of
+	//- Does not save anything in created .root
 	//gROOT->SetBatch(1);
 
 	//Create file root to store generated files
@@ -381,4 +380,5 @@ void macro()
 	generatedFile->Close();
 
 	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
+	*/
 }
