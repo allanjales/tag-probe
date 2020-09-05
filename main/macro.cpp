@@ -34,26 +34,26 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 2;
+	int useFile = 1;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
 	int method = 2;
 
 	//Set the canvasW wtermark
-	const char* canvasWatermark = "#bf{CMS} Preliminary";
+	const char* canvasWatermark = "#bf{CMS Open Data}";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../resultMC/";
+	const char* directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 40000; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);

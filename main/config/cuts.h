@@ -16,7 +16,7 @@ bool applyCuts(double** quantities, int** types)
 	int &PassingProbeGlobalMuon     = *types[2];
 
 	//Apply cuts
-	if (TagMuon_Pt >= 7.0 && abs(TagMuon_Eta) <= 2.4)
+	if (TagMuon_Pt >= 7.0 && fabs(TagMuon_Eta) <= 2.4)
 		return true;
 
 	return false;

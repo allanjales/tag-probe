@@ -34,8 +34,8 @@ private:
 	{
 		//Set parameters
 		string hName 		= string(particleType) + string(passingOrFailing) + string(tagOrProbe) + string(particleName) + "_" + string(quantityName) + string(histoName);
-		string hTitle 		= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
-		string xAxisTitle 	= xAxisName;
+		string hTitle 		= string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe);
+		string xAxisTitle 	= "#mu " + string(xAxisName);
 		string yAxisTitleForm = "Events";
 
 		//Add unit if has
@@ -44,14 +44,17 @@ private:
 
 		//Change title is passing
 		if (strcmp(passingOrFailing, "Passing") == 0)
-			hTitle = string(extendedQuantityName) + " (" + string(particleType) + " " + string(tagOrProbe) + ")";
+			hTitle = string(particleType) + " " + string(tagOrProbe);
+
+		if (strcmp(passingOrFailing, "All") == 0)
+			hTitle = "All " + string(tagOrProbe);
 
 
 		//Variable bin for pT
 		if (strcmp(quantityName, "Pt") == 0)
 		{
 			double xbins[10000];
-			xbins[0] = .1;
+			xbins[0] = .0;
 			int nbins = 0;
 			double binWidth = 0.3;
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
@@ -145,7 +148,6 @@ private:
 			text.append(targetLength - textLength, fillWith);
 		}
 
-
 		return text;
 	}
 
@@ -205,123 +207,83 @@ public:
 	TCanvas* createDividedCanvas(bool shouldWrite = false, bool shouldSavePNG = true)
 	{
 		string canvasName 	= string(particleName) + " " + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + " " + string(quantityName);
-		string titleLeft 	= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
-		string titleRight 	= string(extendedQuantityName) + " of Signal (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
+		string canvastitle 	= string(extendedQuantityName) + " (" + string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe) + ")";
 		string saveAs 		= string(directoryToSave) + string(particleType) + "_" + string(tagOrProbe) + "_" + string(quantityName) + "_" + string(passingOrFailing) + ".png";
 
-		if (strcmp(passingOrFailing, "Passing") == 0)
-			titleRight = string(extendedQuantityName) + " of Signal (" + string(particleType) + " " + string(tagOrProbe) + ")";
-
 		//Create canvas and divide it
-		TCanvas* c1 = new TCanvas(canvasName.data(), titleLeft.data(), 1200, 600);
-		c1->Divide(2,1);
-
-		//Select canvas part and set margin
-		c1->cd(1);
-		c1->cd(1)->SetMargin(0.14, 0.03, 0.11, 0.07);
+		TCanvas* c1 = new TCanvas(canvasName.data(), canvastitle.data());
+		c1->SetMargin(0.12, 0.03, 0.11, 0.07);
 
 		if (strcmp(quantityName, "Pt") == 0)
 		{
-			c1->cd(1)->SetLogy();
-			hSigBack->SetMaximum(10*hSigBack->GetMaximum());
+			c1->SetLogy();
+			hSigBack->SetMaximum(10.*hSigBack->GetMaximum());
+		}
+		else if (strcmp(quantityName, "Eta") == 0)
+		{
+			c1->SetLogy();
+			hSigBack->SetMinimum(0.1);
+			hSigBack->SetMaximum(10.*hSigBack->GetMaximum());
 		}
 		else
 		{
-			hSigBack->SetMinimum(0);
-			hSigBack->SetMaximum(1.2*hSigBack->GetMaximum());
+			hSigBack->SetMinimum(0.);
+			hSigBack->SetMaximum(1.3*hSigBack->GetMaximum());
 		}
 
 		//Draws Main histogram
-		hSigBack->SetLineWidth(2);		//Line Width
+		hSigBack->SetLineColor(kBlue);
+		hSigBack->SetLineStyle(kSolid);
+		hSigBack->SetLineWidth(2);
 		hSigBack->Draw();
 
 		//Draws Background histogram
-		hBack->SetLineColor(kBlue); 	//Line Color
-		hBack->SetLineStyle(kDashed);	//Line Style
-		hBack->SetLineWidth(2);			//Line Width
+		hBack->SetLineColor(kBlue);
+		hBack->SetLineStyle(kDashed);
+		hBack->SetLineWidth(2);
 		hBack->Draw("same");
 
-		//Get Y range of draw
-		gPad->Update();
-		double Ymax = gPad->GetFrame()->GetY2();
-
-		//Not show frame with mean, std dev
-		gStyle->SetOptStat(0);
-
-		//Add legend
-		TLegend* l1_1 = new TLegend(0.65,0.80,0.92,0.90);
-		l1_1->SetTextSize(0.04);
-		l1_1->AddEntry(hSigBack,	"Total",		"l");
-		l1_1->AddEntry(hBack,		"Background",	"l");
-		l1_1->Draw();
-		
-		//Draws text information
-		TLatex* tx1_1 = new TLatex();
-		tx1_1->SetTextSize(0.04);
-		tx1_1->SetTextFont(42);
-		tx1_1->SetNDC(kTRUE);
-		if (strcmp(quantityName, "Pt") == 0)
-		{
-			tx1_1->SetTextAlign(12);	//Align left, center
-			tx1_1->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.48,0.45,Form("%g entries (background)",	hBack->GetEntries()));
-			tx1_1->DrawLatex(0.25,0.87,Form(canvasWatermark, ""));
-		}
-		else
-		{
-			tx1_1->SetTextAlign(22);	//Align center, center
-			tx1_1->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
-			tx1_1->DrawLatex(0.55,0.45,Form("%g entries (background)",	hBack->GetEntries()));
-			tx1_1->DrawLatex(0.32,0.87,Form(canvasWatermark, ""));
-		}
-
-		//Select canvas part and set margin
-		c1->cd(2);
-		c1->cd(2)->SetMargin(0.14, 0.03, 0.11, 0.07);
-
-		if (strcmp(quantityName, "Pt") == 0)
-		{
-			c1->cd(2)->SetLogy();
-			hSig->SetMaximum(10*hSig->GetMaximum());
-		}
-		else
-		{
-			hSig->SetMinimum(0);
-			hSig->SetMaximum(1.2*hSig->GetMaximum());
-		}
-
 		//Same range as comparision and Draws
-		hSig->SetTitle(titleRight.data());
-		hSig->SetLineColor(kMagenta); 	//Line Color
-		hSig->SetLineWidth(2);			//Line Width
+		hSig->SetLineColor(kMagenta);
+		hSig->SetLineStyle(kSolid);
+		hSig->SetLineWidth(2);
 		hSig->Draw("same");
 
-		//Add legend
-		TLegend* l1_2 = new TLegend(0.65,0.85,0.92,0.90);
-		l1_2->SetTextSize(0.04);
-		l1_2->AddEntry(hSig, "Signal","l");
-		l1_2->Draw();
+		//Not show frame with mean, std dev
+		//gStyle->SetOptTitle(0);
+		gStyle->SetOptStat(0);
 
+		//Add legend
+		TLegend* l = new TLegend(0.74,0.75,0.94,0.89);
+		l->SetTextSize(0.04);
+		l->AddEntry(hSigBack,	"Total",		"l");
+		l->AddEntry(hBack,		"Background",	"l");
+		l->AddEntry(hSig,       "Signal",       "l"); 
+		l->Draw();
+		
 		//Draws text information
-		TLatex* tx1_2 = new TLatex();
-		tx1_2->SetTextSize(0.04);
-		tx1_2->SetTextFont(42);
-		tx1_2->SetNDC(kTRUE);
+		TLatex* tx = new TLatex();
+		tx->SetTextSize(0.04);
+		tx->SetTextFont(42);
+		tx->SetNDC(kTRUE);
+		tx->DrawLatex(0.15,0.85,Form(canvasWatermark, ""));
+
+		/*
 		if (strcmp(quantityName, "Pt") == 0)
 		{
-			tx1_2->SetTextAlign(12);	//Align left, center
-			tx1_2->DrawLatex(0.48,0.50,Form("%g entries (signal)", hSig->GetEntries()));
-			tx1_2->DrawLatex(0.25,0.87,Form(canvasWatermark, ""));
+			tx->SetTextAlign(12);	//Align left, center
+			tx->DrawLatex(0.48,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx->DrawLatex(0.48,0.45,Form("%g entries (background)",	hBack->GetEntries()));
+			tx->DrawLatex(0.48,0.40,Form("%g entries (signal)",     hSig->GetEntries()));
 		}
 		else
 		{
-			tx1_2->SetTextAlign(22);	//Align center, center
-			tx1_2->DrawLatex(0.55,0.5,Form("%g entries (signal)", hSig->GetEntries()));
-			tx1_2->DrawLatex(0.32,0.87,Form(canvasWatermark, ""));
+			tx->SetTextAlign(22);	//Align center, center
+			tx->DrawLatex(0.55,0.50,Form("%g entries (total)",		hSigBack->GetEntries()));
+			tx->DrawLatex(0.55,0.45,Form("%g entries (background)",	hBack->GetEntries()));
+			tx->DrawLatex(0.55,0.40,Form("%g entries (signal)",     hSig->GetEntries()));
 		}
-
-		//Not show frame with mean, std dev
-		gStyle->SetOptStat(0);
+		*/
 
 		//Writes in file
 		if (shouldWrite == true)

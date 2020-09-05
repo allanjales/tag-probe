@@ -249,7 +249,7 @@ private:
 		//Create histogram
 		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
-		hMass->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
+		hMass->GetXaxis()->SetTitle("#mu^{+}#mu^{-} invariant mass (GeV/c^{2})");
 	}
 
 	void drawCanvasQuarter(TCanvas* &canvas, bool drawRegions, int quarter, MassValues* ObjMassValues, int color = kBlue)
@@ -406,11 +406,11 @@ public:
 		if (strcmp(ressonance, "Jpsi") == 0)
 		{
 			cout << endl;
-			cout << "Fitting Passing in " << particleType << " " << particleName << " ...\n";
+			cout << "Fitting Passing in " << particleType << " " << particleName << "...\n";
 			Pass.doFit();
 
 			cout << endl;
-			cout << "Fitting All in " << particleType << " " << particleName << " ...\n";
+			cout << "Fitting All in " << particleType << " " << particleName << "...\n";
 			All.doFit();
 		}
 

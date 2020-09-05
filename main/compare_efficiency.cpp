@@ -25,8 +25,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 
 	//Create canvas
 	TCanvas* c1 = new TCanvas();
-	c1->SetRightMargin(0.02);
-	c1->SetLeftMargin(0.11);
+	gStyle->SetOptTitle(0);
+	c1->SetMargin(0.10, 0.03, 0.11, 0.03);
 
 	//Plot
 	pEff0->SetMarkerColor(kRed);
@@ -47,27 +47,28 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Set range if is pT
 	if (regex_match(path, regex(".*Pt.*")))
 	{
-		//pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRange(0.,40.);
-		graph->SetMinimum(0.0);
-		graph->SetMaximum(1.2);
+		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(0.,80.);
+		//graph->SetMinimum(0.0);
+		graph->SetMaximum(1.4);
 	}
 	
 	//Set range if is pT
 	if (regex_match(path, regex(".*Eta.*")))
 	{
+		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(-3.,3.);
 		//graph->SetMinimum(0.8);
-		//graph->SetMaximum(1.0);
+		graph->SetMaximum(1.3);
 	}
 	
 	//Set range if is pT
 	if (regex_match(path, regex(".*Phi.*")))
 	{
-		graph->SetMinimum(0.85);
-		graph->SetMaximum(1.02);
+		graph->SetMinimum(0.40);
+		graph->SetMaximum(1.25);
 	}
 
 	//Legenda
-	TLegend* tl = new TLegend(0.68,0.78,0.92,0.88);
+	TLegend* tl = new TLegend(0.68,0.83,0.94,0.93);
 	tl->SetTextSize(0.04);
 	tl->AddEntry(pEff0, "Real data",      "lp");
 	tl->AddEntry(pEff1, "Simulated data", "lp");
@@ -79,7 +80,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	txCOD->SetTextAlign(12);
 	txCOD->SetTextFont(42);
 	txCOD->SetNDC(kTRUE);
-	txCOD->DrawLatex(0.14,0.85,Form("#bf{CMS} Preliminary"));
+	txCOD->DrawLatex(0.14,0.90,Form("#bf{CMS Open Data}"));
 
 
 

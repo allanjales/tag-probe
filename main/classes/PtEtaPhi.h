@@ -59,7 +59,7 @@ public:
 		TH1D* &hTotal = this->All .hSig;
 
 		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
-		string pTitle 	= string(extendedQuantityName) + " Efficiency (" + string(particleType) + " " + string(tagOrProbe) + ")";
+		string pTitle 	= "Efficiency of " + string(particleType) + " " + string(tagOrProbe);
 
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
@@ -128,8 +128,9 @@ public:
 		gStyle->SetCanvasPreferGL(kFALSE);
 
 		//Draw on canvas
-		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 800, 600);
-		c1->SetRightMargin(0.05);
+		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data());
+		//gStyle->SetOptTitle(0);
+		c1->SetMargin(0.12, 0.03, 0.11, 0.07);
 		pEff->Draw();
 		gPad->Update();
 
@@ -138,9 +139,14 @@ public:
 		graph->SetMinimum(0.0);
 		graph->SetMaximum(1.2);
 		gPad->Update();
+		if (strcmp(quantityName, "Phi") == 0)
+		{
+			graph->SetMinimum(0.5);
+			graph->SetMaximum(1.1);
+		}
 
 		//Add legend
-		TLegend* l = new TLegend(0.75,0.82,0.92,0.88);
+		TLegend* l = new TLegend(0.74,0.82,0.94,0.88);
 		l->SetTextSize(0.04);
 		l->AddEntry(pEff, "Data", "lp");
 		l->Draw();
@@ -151,7 +157,7 @@ public:
 		txCOD->SetTextAlign(12);
 		txCOD->SetTextFont(42);
 		txCOD->SetNDC(kTRUE);
-		txCOD->DrawLatex(0.14,0.85,Form(canvasWatermark, ""));
+		txCOD->DrawLatex(0.15,0.85,Form(canvasWatermark, ""));
 
 		//Writes in file
 		if (shouldWrite == true)
