@@ -44,13 +44,13 @@ void macro()
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../result/";
+	const char* directoryToSave = "../Upsilon Run 2011/";
 
 	//Should limit data?
-	long long limitData = 100000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
 	bool shouldDrawQuantitiesCanvas 			= true;
 	bool shouldDrawEfficiencyCanvas 			= true;

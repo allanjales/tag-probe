@@ -19,7 +19,7 @@ public:
 	PtEtaPhi Eta {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",      50, -2.50,  2.50};
 	PtEtaPhi Phi {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
-		"Phi", "#phi",  "rad",   "Azimuthal Angle",     79, -3.15,  3.15};
+		"Phi", "#phi",  "rad",   "Azimuthal Angle",     15, -3.15,  3.15};
 
 	void subtractSigHistograms()
 	{

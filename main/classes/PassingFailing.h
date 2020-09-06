@@ -57,10 +57,10 @@ private:
 			double xbins[10000];
 			xbins[0] = .0;
 			int nbins = 0;
-			double binWidth = 0.3;
+			double binWidth = 1.;
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
 			{
-				xbins[i] = xbins[i-1] < 0.3 ? 0.3 : xbins[i-1] *(1+binWidth);
+				xbins[i] = xbins[i-1] < 1. ? 1. : xbins[i-1] *(1+binWidth);
 				nbins++;
 			}
 
@@ -78,12 +78,12 @@ private:
 			double xbins[10000];
 			xbins[0] = .1;
 			int nbins = 0;
-			double binWidth = 0.2;
+			double binWidth = 0.9;
 
 			//For positive
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
 			{
-				xbins[i] = xbins[i-1] < 0.2 ? 0.2 : xbins[i-1] *(1+binWidth);
+				xbins[i] = xbins[i-1] < 1. ? 1. : xbins[i-1] *(1+binWidth);
 				nbins++;
 			}
 

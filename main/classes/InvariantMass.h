@@ -56,6 +56,12 @@ private:
 		canvas->cd(quarter);
 		canvas->cd(quarter)->SetMargin(0.14, 0.02, 0.09, 0.07);
 
+		if (strcmp(ressonance, "Upsilon") == 0)
+		{
+			hMass->SetMinimum(0.);
+			hMass->SetMaximum(1.2*hMass->GetBinContent(hMass->GetMaximumBin()));
+		}
+
 		hMass->SetMarkerStyle(20);		//Set markers style
 		hMass->SetMarkerColor(kBlack);	//Set markers colors
 		hMass->SetLineColor(kBlack);	//Set errobars color
@@ -397,14 +403,6 @@ public:
 			canvasName 	= "InvariantMass_" + string(particleType) + "_region";
 			canvasTitle	= "Invariant Mass " + string(particleType) + " with Regions";
 			saveAs 		= string(directoryToSave) + "InvariantMass_" + string(particleType) + "_region" + ".png";
-		}
-
-		if (strcmp(ressonance, "Upsilon") == 0)
-		{
-			Pass.hMass->SetMinimum(0.);
-			Pass.hMass->SetMaximum(1.2*Pass.hMass->GetMaximum());
-			All .hMass->SetMinimum(0.);
-			All .hMass->SetMaximum(1.2*All .hMass->GetMaximum());
 		}
 
 		//Create canvas
