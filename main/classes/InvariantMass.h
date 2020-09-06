@@ -280,18 +280,18 @@ public:
 		this->nBins    = nBins;
 		this->decimals = decimals;
 
-		delete this->Pass.hMass;
-		delete this->All. hMass;
+		delete Pass.hMass;
+		delete All. hMass;
 
-		this->createMassHistogram(Pass.hMass, "Passing");
-		this->createMassHistogram(All. hMass, "All");
+		createMassHistogram(Pass.hMass, "Passing");
+		createMassHistogram(All. hMass, "All");
 	}
 
 	void fillMassHistograms(double& InvariantMass, int& isPassing)
 	{
 		if (isPassing)
-			this->Pass.hMass->Fill(InvariantMass);
-		this->All.hMass->Fill(InvariantMass);
+			Pass.hMass->Fill(InvariantMass);
+		All.hMass->Fill(InvariantMass);
 	}
 
 	void doFit()
@@ -335,7 +335,7 @@ public:
 			fwhm     = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
 		}
 
-		if (this->method == 2)
+		if (method == 2)
 		{
 			//Get value and uncertain of signal by fitting
 			TF1* &signalFit = ObjMassValues->fitSignal;
@@ -382,8 +382,8 @@ public:
 
 	void updateMassValuesAll()
 	{
-		updateMassValuesFor(&this->Pass);
-		updateMassValuesFor(&this->All);
+		updateMassValuesFor(&Pass);
+		updateMassValuesFor(&All);
 	}
 
 	TCanvas* createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
@@ -412,8 +412,8 @@ public:
 		TCanvas* c1 = new TCanvas(canvasName.data(), canvasTitle.data(), 1200, 600);
 		c1->Divide(2,1);
 
-		this->drawCanvasQuarter(c1, drawRegions, 1, &this->Pass, kGreen);
-		this->drawCanvasQuarter(c1, drawRegions, 2, &this->All,  kBlue);
+		drawCanvasQuarter(c1, drawRegions, 1, &Pass, kGreen);
+		drawCanvasQuarter(c1, drawRegions, 2, &All,  kBlue);
 
 		c1->cd(2);
 
@@ -423,7 +423,7 @@ public:
 		tx->SetTextAlign(12);
 		tx->SetTextFont(42);
 		tx->SetNDC(kTRUE);
-		//tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",(this->fitResult).Chi2()/(this->fitResult).Ndf()));
+		//tx->DrawLatex(0.61,0.60,Form("#chi^{2}/ndf = %.3g",(fitResult).Chi2()/(fitResult).Ndf()));
 
 		//Not show frame with mean, std dev
 		gStyle->SetOptStat(0);
@@ -446,8 +446,8 @@ public:
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)
 	{
-		this->Pass.hMass->Write();
-		this->All .hMass->Write();
+		Pass.hMass->Write();
+		All .hMass->Write();
 	}
 	
 
@@ -467,24 +467,19 @@ public:
 	{
 		if (strcmp(ressonance, "Jpsi") == 0)
 		{
-			this->xMin  = 2.8;
-			this->xMax  = 3.4;
-			this->nBins = 240;
-
-			//NEW FOR AVOID "COULD NOT FIT"
-			this->xMin  = 2.9;
-			this->xMax  = 3.3;
-			this->nBins = 160;
+			xMin  = 2.9;
+			xMax  = 3.3;
+			nBins = 160;
 		}
 
 		if (strcmp(ressonance, "Upsilon") == 0)
 		{
-			this->xMin  = 8.7;
-			this->xMax  = 11.;
-			this->nBins = 60;
+			xMin  = 8.7;
+			xMax  = 11.;
+			nBins = 60;
 		}
 
-		this->createMassHistogram(Pass.hMass, "Passing");
-		this->createMassHistogram(All. hMass, "All");
+		createMassHistogram(Pass.hMass, "Passing");
+		createMassHistogram(All. hMass, "All");
 	}
 };

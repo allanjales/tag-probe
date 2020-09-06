@@ -22,7 +22,7 @@ struct MassValues
 
 	bool isInSignalRegion(double InvariantMass)
 	{
-		if (InvariantMass >= this->signalRegion_x1 && InvariantMass <= this->signalRegion_x2)
+		if (InvariantMass >= signalRegion_x1 && InvariantMass <= signalRegion_x2)
 			return true;
 
 		return false;
@@ -30,8 +30,8 @@ struct MassValues
 
 	bool isInSidebandRegion(double InvariantMass)
 	{
-		if ((InvariantMass >= this->sidebandRegion1_x1 && InvariantMass <= this->sidebandRegion1_x2) ||
-			(InvariantMass >= this->sidebandRegion2_x1 && InvariantMass <= this->sidebandRegion2_x2))
+		if ((InvariantMass >= sidebandRegion1_x1 && InvariantMass <= sidebandRegion1_x2) ||
+			(InvariantMass >= sidebandRegion2_x1 && InvariantMass <= sidebandRegion2_x2))
 			return true;
 
 		return false;
@@ -148,7 +148,7 @@ struct MassValues
 		cout << "Integral (TH1): " << hMass->Integral(0, hMass->GetNbinsX()+1) << endl;
 		cout << "Integral (TF1): " << f->Integral(xMin, xMax)/hMass->GetBinWidth(0) << endl;
 		*/
-		cout << "chi2/ndf = " << (this->fitResult)->Chi2()/(this->fitResult)->Ndf() << "\n";
+		cout << "chi2/ndf = " << (fitResult)->Chi2()/(fitResult)->Ndf() << "\n";
 	}
 
 	void doFitUpsilon()
@@ -245,7 +245,7 @@ struct MassValues
 		fb->SetLineStyle(kDashDotted);				//Fit style
 		fb->SetLineWidth(3);						//Fit width
 
-		cout << "chi2/ndf = " << (this->fitResult)->Chi2()/(this->fitResult)->Ndf() << "\n";
+		cout << "chi2/ndf = " << (fitResult)->Chi2()/(fitResult)->Ndf() << "\n";
 	}
 
 	TBox* createTBox(double Ymax, int index = 0, double Ymin = 0.)
