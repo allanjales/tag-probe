@@ -203,7 +203,6 @@ struct MassValues
 		f->SetParameter(1,  9.4603);
 		f->SetParameter(2,  9.4);
 		f->SetParameter(3, -0.08);
-		f->SetParameter(4,  4673.);
 
 		//Values Y(2S)
 		f->SetParameter(5,  374.);
@@ -215,18 +214,16 @@ struct MassValues
 		f->SetParameter(9,  10.3552);
 		f->SetParameter(10, 0.08);
 
-		//Values Background
-		f->SetParameter(11, -193041.);
-		f->SetParameter(12,  57792.);
-		f->SetParameter(13, -5729.);
-		f->SetParameter(14,  190.);
-
 		//Set par limits
-		f->SetParLimits(1, xMin, xMax);
-		f->SetParLimits(6, xMin, xMax);
-		f->SetParLimits(7, 0., xMax-xMin);
-		f->SetParLimits(9, xMin, xMax);
-		f->SetParLimits(10, 0., xMax-xMin);
+		f->SetParLimits(0, -20., 0.);
+		f->SetParLimits(2, 9.3, 9.6);
+		f->SetParLimits(3, -0.11, -0.05);
+
+		f->SetParLimits(6, 9.9, 10.1);
+		f->SetParLimits(7, 0.05, 0.11);
+		
+		f->SetParLimits(9, 10.25, 10.5);
+		f->SetParLimits(10, 0.05, 0.11);
 
 		//Fit
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);

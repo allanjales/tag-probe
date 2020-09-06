@@ -4,6 +4,7 @@
 class PtEtaPhi{
 private:
 	int& method;
+	const char*& ressonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -25,38 +26,36 @@ public:
 
 	TEfficiency* pEff 	= NULL;
 
-	PassingFailing Pass {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"Passing", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
-		this->xMin, this->xMax, this->nBins, this->decimals};
-	PassingFailing All  {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
-		"All", this->quantityName, this->xAxisName, this->quantityUnit, this->extendedQuantityName,
-		this->xMin, this->xMax, this->nBins, this->decimals};
+	PassingFailing Pass {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+		"Passing", quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
+	PassingFailing All  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+		"All",     quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
 
 	void subtractSigHistograms()
 	{
-		this->Pass.subtractSigHistogram();
-		this->All .subtractSigHistogram();
+		Pass.subtractSigHistogram();
+		All .subtractSigHistogram();
 	}
 
 	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing, bool storeInSignalHistogram = false)
 	{
 		if (isPassing)
-			this->Pass.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
-		this->All.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
+			Pass.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
+		All.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Pass.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->All .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Pass.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		All .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Creates a efficiency plot with histograms
 	TEfficiency* createEfficiencyPlot(bool shouldWrite = false)
 	{
 		//References
-		TH1D* &hPass  = this->Pass.hSig;
-		TH1D* &hTotal = this->All .hSig;
+		TH1D* &hPass  = Pass.hSig;
+		TH1D* &hTotal = All .hSig;
 
 		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
 		string pTitle 	= "Efficiency of " + string(particleType) + " " + string(tagOrProbe);
@@ -65,18 +64,18 @@ public:
 		hTotal->GetYaxis()->SetTitle("Efficiency");
 
 		//TEMPORARY?
-		this->pEff = new TEfficiency();
-		this->pEff->SetPassedHistogram(*hPass, "f");
-		this->pEff->SetTotalHistogram (*hTotal,"f");
-		this->pEff->SetName(pName.data());
+		pEff = new TEfficiency();
+		pEff->SetPassedHistogram(*hPass, "f");
+		pEff->SetTotalHistogram (*hTotal,"f");
+		pEff->SetName(pName.data());
 
 		/*
 		//Check if are valid and consistent histograms
 		if(TEfficiency::CheckConsistency(*hPass, *hTotal))
 		{
 			//Fills histogram
-			this->pEff = new TEfficiency(*hPass, *hTotal);
-			this->pEff->SetName(pName.data());
+			pEff = new TEfficiency(*hPass, *hTotal);
+			pEff->SetName(pName.data());
 		}
 		else
 		{
@@ -91,8 +90,8 @@ public:
 				{
 					//cout << "Bin " << i << " with problems | T:" <<  hTotal->GetBinContent(i) << " - P:" << hPass->GetBinContent(i) << endl;
 					cout << "Bin " << i << " with problems | P:" <<  hPass->GetBinContent(i) << " : T:" << hTotal->GetBinContent(i) << endl;
-					cout << "-> Pass  : " << this->Pass.hSigBack->GetBinContent(i) << " - " << this->Pass.hBack->GetBinContent(i) << "a = " << this->Pass.hSig->GetBinContent(i) << " (a = "<< this->Pass.PassFailObj()->subtractionFactor() << ")\n";
-					cout << "-> Total : " << this->All .hSigBack->GetBinContent(i) << " - " << this->All .hBack->GetBinContent(i) << "a = " << this->All .hSig->GetBinContent(i) << " (a = "<< this->All .PassFailObj()->subtractionFactor() << ")\n";
+					cout << "-> Pass  : " << Pass.hSigBack->GetBinContent(i) << " - " << Pass.hBack->GetBinContent(i) << "a = " << Pass.hSig->GetBinContent(i) << " (a = "<< Pass.PassFailObj()->subtractionFactor() << ")\n";
+					cout << "-> Total : " << All .hSigBack->GetBinContent(i) << " - " << All .hBack->GetBinContent(i) << "a = " << All .hSig->GetBinContent(i) << " (a = "<< All .PassFailObj()->subtractionFactor() << ")\n";
 				}
 			}
 			cerr << "Consistency ERROR! Program stopped" << endl;
@@ -101,17 +100,17 @@ public:
 		*/
 
 		//Set plot config
-		this->pEff->SetTitle(pTitle.data());
-		this->pEff->SetLineWidth(2);
-		this->pEff->SetLineColor(kBlack);
-		this->pEff->SetMarkerStyle(21);
-		this->pEff->SetMarkerSize(0.5);
-		this->pEff->SetMarkerColor(kBlack);
+		pEff->SetTitle(pTitle.data());
+		pEff->SetLineWidth(2);
+		pEff->SetLineColor(kBlack);
+		pEff->SetMarkerStyle(21);
+		pEff->SetMarkerSize(0.5);
+		pEff->SetMarkerColor(kBlack);
 
 		//Writes in file
 		if (shouldWrite == true)
 		{
-			this->pEff->Write("",TObject::kOverwrite);
+			pEff->Write("",TObject::kOverwrite);
 		}
 
 		return pEff;
@@ -177,19 +176,20 @@ public:
 
 	void consistencyDebugCout()
 	{
-		this->Pass.consistencyDebugCout();
-		this->All .consistencyDebugCout();
+		Pass.consistencyDebugCout();
+		All .consistencyDebugCout();
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
 	{
-		this->Pass .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->All  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Pass .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		All  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 
 
 	PtEtaPhi(int& method,
+		const char*& ressonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -205,6 +205,7 @@ public:
 		double	 	 xMax,
 		int	    	 decimals = 3)
 		  : method(method),
+		    ressonance(ressonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

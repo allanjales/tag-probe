@@ -13,9 +13,9 @@ private:
 public:
 	const char* particleType = NULL;
 
-	InvariantMass Mass  {this->method, this->ressonance, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType};
-	TagProbe      Tag   {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->Mass, "Tag"};
-	TagProbe      Probe {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->Mass, "Probe"};
+	InvariantMass Mass  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType};
+	TagProbe      Tag   {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Tag"};
+	TagProbe      Probe {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Probe"};
 
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
@@ -24,65 +24,65 @@ public:
 	
 	void doFit()
 	{
-		this->Mass.doFit();
+		Mass.doFit();
 	}
 
 	void updateMassValuesAll()
 	{
-		this->Mass.updateMassValuesAll();
+		Mass.updateMassValuesAll();
 	}
 
 	void createMassCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Mass.createCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		Mass.createCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)
 	{
-		this->Mass.writeMassHistogramsOnFile(writehPass, writehAll);
+		Mass.writeMassHistogramsOnFile(writehPass, writehAll);
 	}
 
 	void subtractSigHistograms()
 	{
-		this->Tag  .subtractSigHistograms();
-		this->Probe.subtractSigHistograms();
+		Tag  .subtractSigHistograms();
+		Probe.subtractSigHistograms();
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Tag  .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->Probe.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Tag  .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Probe.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	void consistencyDebugCout()
 	{
-		this->Tag  .consistencyDebugCout();
-		this->Probe.consistencyDebugCout();
+		Tag  .consistencyDebugCout();
+		Probe.consistencyDebugCout();
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
 	{
-		this->Tag  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->Probe.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Tag  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Probe.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 	void createEfficiencyPlot(bool shouldWrite = false)
 	{
-		this->Tag  .createEfficiencyPlot(shouldWrite);
-		this->Probe.createEfficiencyPlot(shouldWrite);
+		Tag  .createEfficiencyPlot(shouldWrite);
+		Probe.createEfficiencyPlot(shouldWrite);
 	}
 
 	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Tag  .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		this->Probe.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		Tag  .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		Probe.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 
 
 	void fillMassHistograms(double& InvariantMass, int& isPassing)
 	{
-		this->Mass.fillMassHistograms(InvariantMass, isPassing);
+		Mass.fillMassHistograms(InvariantMass, isPassing);
 	}
 
 	void fillQuantitiesHistograms(double** quantities, int& isPassing, bool storeInSignalHistogram = false)
@@ -98,8 +98,8 @@ public:
 		double &InvariantMass           = *quantities[6];
 		*/
 
-		this->Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing, storeInSignalHistogram);
-		this->Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing, storeInSignalHistogram);
+		Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing, storeInSignalHistogram);
+		Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing, storeInSignalHistogram);
 	}
 
 

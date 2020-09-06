@@ -12,6 +12,7 @@ using namespace std;
 class PassingFailing{
 private:
 	int& method;
+	const char*& ressonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -161,12 +162,12 @@ public:
 	MassValues* PassFailObj()
 	{
 		if (strcmp(passingOrFailing, "Passing") == 0)
-			return &this->ObjMass.Pass;
-			//return &this->ObjMass.All;
+			return &ObjMass.Pass;
+			//return &ObjMass.All;
 
 		if (strcmp(passingOrFailing, "All") == 0)
-			return &this->ObjMass.Pass;
-			//return &this->ObjMass.All;
+			return &ObjMass.Pass;
+			//return &ObjMass.All;
 
 		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
 		return NULL;
@@ -174,8 +175,8 @@ public:
 
 	void subtractSigHistogram()
 	{
-		this->hSig->Add(this->hSigBack, 1.);
-		this->hSig->Add(this->hBack, -PassFailObj()->subtractionFactor());
+		hSig->Add(hSigBack, 1.);
+		hSig->Add(hBack, -PassFailObj()->subtractionFactor());
 
 		//Now normalize yields (to adapt variable binning)
 		for (int i = 1; i <= hSig->GetXaxis()->GetNbins(); i++)
@@ -192,14 +193,14 @@ public:
 		if (!storeInSignalHistogram)
 		{
 			if (PassFailObj()->isInSignalRegion(InvariantMass))
-				this->hSigBack->Fill(quantity);
+				hSigBack->Fill(quantity);
 
 			if (PassFailObj()->isInSidebandRegion(InvariantMass))
-				this->hBack->Fill(quantity);
+				hBack->Fill(quantity);
 		}
 		else
 		{
-			this->hSig->Fill(quantity);
+			hSig->Fill(quantity);
 		}
 
 	}
@@ -344,6 +345,7 @@ public:
 
 
 	PassingFailing(int& method,
+		const char*& ressonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -360,6 +362,7 @@ public:
 		int&    	 nBins,
 		int&    	 decimals)
 		  : method(method),
+		    ressonance(ressonance),
 			particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
@@ -376,8 +379,8 @@ public:
 			xMax(xMax),
 			decimals(decimals)
 	{
-		this->createHistogram(this->hSigBack, "SigBack");
-		this->createHistogram(this->hSig, 	  "Sig");
-		this->createHistogram(this->hBack, 	  "Back");
+		createHistogram(hSigBack, "SigBack");
+		createHistogram(hSig, 	  "Sig");
+		createHistogram(hBack, 	  "Back");
 	}
 };

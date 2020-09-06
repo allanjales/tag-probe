@@ -4,6 +4,7 @@
 class TagProbe{
 private:
 	int& method;
+	const char*& ressonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -13,53 +14,53 @@ private:
 public:
 	const char* tagOrProbe = NULL;
 
-	PtEtaPhi Pt  {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
+	PtEtaPhi Pt  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 50,  0.00, 80.00};
-	PtEtaPhi Eta {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
+	PtEtaPhi Eta {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",      50, -2.50,  2.50};
-	PtEtaPhi Phi {this->method, this->particleName, this->canvasWatermark, this->directoryToSave, this->particleType, this->ObjMass, this->tagOrProbe,
+	PtEtaPhi Phi {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",     79, -3.15,  3.15};
 
 	void subtractSigHistograms()
 	{
-		this->Pt .subtractSigHistograms();
-		this->Eta.subtractSigHistograms();
-		this->Phi.subtractSigHistograms();
+		Pt .subtractSigHistograms();
+		Eta.subtractSigHistograms();
+		Phi.subtractSigHistograms();
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Pt .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->Eta.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		this->Phi.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Pt .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Eta.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		Phi.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	void consistencyDebugCout()
 	{
-		this->Pt .consistencyDebugCout();
-		this->Eta.consistencyDebugCout();
-		this->Phi.consistencyDebugCout();
+		Pt .consistencyDebugCout();
+		Eta.consistencyDebugCout();
+		Phi.consistencyDebugCout();
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
 	{
-		this->Pt .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->Eta.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		this->Phi.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Pt .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Eta.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		Phi.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 	void createEfficiencyPlot(bool shouldWrite = false)
 	{
-		this->Pt .createEfficiencyPlot(shouldWrite);
-		this->Eta.createEfficiencyPlot(shouldWrite);
-		this->Phi.createEfficiencyPlot(shouldWrite);
+		Pt .createEfficiencyPlot(shouldWrite);
+		Eta.createEfficiencyPlot(shouldWrite);
+		Phi.createEfficiencyPlot(shouldWrite);
 	}
 
 	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		this->Pt .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		this->Eta.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		this->Phi.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		Pt .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		Eta.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		Phi.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 
@@ -72,14 +73,15 @@ public:
 		double &phi = *quantities[2];
 		*/
 
-		this->Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing, storeInSignalHistogram);
-		this->Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing, storeInSignalHistogram);
-		this->Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing, storeInSignalHistogram);
+		Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing, storeInSignalHistogram);
+		Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing, storeInSignalHistogram);
+		Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing, storeInSignalHistogram);
 	}
 
 
 
 	TagProbe(int& method,
+		const char*& ressonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -87,6 +89,7 @@ public:
 	 	InvariantMass& ObjMass,
 	 	const char*  tagOrProbe)
 		  : method(method),
+		    ressonance(ressonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
