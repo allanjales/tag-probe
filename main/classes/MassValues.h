@@ -91,7 +91,7 @@ struct MassValues
 		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 
 		//Fit Function
-		f = new TF1("FitFunction", FitFunctions::Upsilon::InvariantMass, xMin, xMax, arraySize);
+		f = new TF1("FitFunction", FitFunctions::Jpsi::InvariantMass, xMin, xMax, arraySize);
 		f->SetNpx(1000);
 		f->SetLineStyle(kSolid);
 		f->SetLineColor(kBlue);
@@ -103,7 +103,7 @@ struct MassValues
 		{
 			f->SetParName(i, fittingParName[i]);
 		}
-		
+
 		//Values Signal GS
 		f->SetParameter(0,	4098.2);
 		f->SetParameter(1,	3.09);
@@ -114,13 +114,19 @@ struct MassValues
 		f->SetParameter(4,	1.54);
 		f->SetParameter(5,	3.093);
 		f->SetParameter(6,	0.032);
-		f->SetParameter(7,	42022.27);
 
 		//Values Background
 		f->SetParameter(8,	-0.217);
 		f->SetParameter(9,	1.915);
 		f->SetParameter(10, 263.185);
 		f->SetParameter(11,	0.061);
+
+		//Set par limits
+		f->SetParLimits(1, 3.06, 3.12);
+		f->SetParLimits(2, 0., 0.05);
+
+		f->SetParLimits(5, 3.06, 3.12);
+		f->SetParLimits(6, 0.01, 0.05);
 
 		//Fit function
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);

@@ -34,7 +34,7 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 3;
+	int useFile = 1;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -44,16 +44,16 @@ void macro()
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../Upsilon Run 2011/";
+	const char* directoryToSave = "../Jpsi Run 2011/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 10000; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
@@ -177,7 +177,7 @@ void macro()
 
 	/*
 	//TEMPORARY FOR TEST
-	TFile *file1 = TFile::Open("../resultsForTesting/upsilon_run2011.root");
+	TFile *file1 = TFile::Open("../resultsForTesting/jpsi_run2011.root");
 	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
 	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
 	*/
@@ -216,7 +216,6 @@ void macro()
 		//Get values for invariant mass and sigma from plot
 		TNP.updateMassValuesAll();
 	}
-
 
 
 	//-------------------------------------
@@ -298,6 +297,8 @@ void macro()
 	//Debug consistency for histograms
 	if (!isMC)
 		TNP.consistencyDebugCout();
+	else
+		cout << "No consistency check needed. It's MC simulations.\n";
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");

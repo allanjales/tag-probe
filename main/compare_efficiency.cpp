@@ -92,7 +92,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../result_comparison/";
+	const char* directoryToSave = "../Comparison Upsilon Run vs MC/";
 
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
@@ -121,8 +121,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../resultUPRUN/generated_hist.root");
-	TFile *file1 = TFile::Open("../resultUPMC/generated_hist.root");
+	TFile *file0 = TFile::Open("../Upsilon Run 2011/generated_hist.root");
+	TFile *file1 = TFile::Open("../Upsilon MC 2020/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{
