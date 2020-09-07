@@ -11,6 +11,23 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	TEfficiency* pEff0 = (TEfficiency*)file0->Get(path);
 	TEfficiency* pEff1 = (TEfficiency*)file1->Get(path);
 
+	int colorScheme[][2] = {
+		{kGreen - 2, kBlue},
+		{kBlue,      kRed},
+		{kGreen - 2, kRed}
+	};
+
+	const char* nameScheme[][2] = {
+		{"#Upsilon data", "J/#psi data"},
+		{"Real data",     "Simulated data"},
+		{"Real data",     "Simulated data"}
+	};
+
+	int useScheme = 1;
+	//Upsilon vs Jpsi
+	//Jpsi    Run vs MC
+	//Upsilon Run vs MC
+
 	if (pEff0 == NULL)
 	{
 		cerr << "Could not read the path in file0\n";
@@ -29,12 +46,12 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	c1->SetMargin(0.10, 0.03, 0.11, 0.07);
 
 	//Plot
-	pEff0->SetMarkerColor(kRed);
-	pEff0->SetLineColor(kRed);
+	pEff0->SetMarkerColor(colorScheme[useScheme][0]);
+	pEff0->SetLineColor(colorScheme[useScheme][0]);
 	pEff0->Draw();
 
-	pEff1->SetMarkerColor(kBlue);
-	pEff1->SetLineColor(kBlue);
+	pEff1->SetMarkerColor(colorScheme[useScheme][1]);
+	pEff1->SetLineColor(colorScheme[useScheme][1]);
 	pEff1->Draw("same");
 	
 	//Set range in y axis
@@ -70,8 +87,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Legenda
 	TLegend* tl = new TLegend(0.68,0.78,0.94,0.88);
 	tl->SetTextSize(0.04);
-	tl->AddEntry(pEff0, "Real data",      "lp");
-	tl->AddEntry(pEff1, "Simulated data", "lp");
+	tl->AddEntry(pEff0, nameScheme[useScheme][0], "lp");
+	tl->AddEntry(pEff1, nameScheme[useScheme][1],   "lp");
 	tl->Draw();
 
 	//CMS Open Data
@@ -92,7 +109,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../Comparison Upsilon Run vs MC/";
+	const char* directoryToSave = "../Comparison Jsi Run vs MC/";
 
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
@@ -121,8 +138,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../Upsilon Run 2011/generated_hist.root");
-	TFile *file1 = TFile::Open("../Upsilon MC 2020/generated_hist.root");
+	TFile *file0 = TFile::Open("../Jpsi Run 2011/generated_hist.root");
+	TFile *file1 = TFile::Open("../Jpsi MC 2020/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{

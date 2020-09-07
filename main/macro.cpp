@@ -47,13 +47,13 @@ void macro()
 	const char* directoryToSave = "../Jpsi Run 2011/";
 
 	//Should limit data?
-	long long limitData = 10000; //0 -> do not limit
+	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
 	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
     //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
