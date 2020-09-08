@@ -6,18 +6,71 @@
 !--------------------------------
 */
 
+//CONFIGS
+
+int useScheme = 2;
+//Upsilon vs Jpsi
+//Jpsi    Run vs MC
+//Upsilon Run vs MC
+
+//Root file comparison
+const char* filePaths[][2] = {
+		{"../results/Upsilon Run 2011/generated_hist.root", "../results/Jpsi Run 2011/generated_hist.root"},
+		{"../results/Jpsi Run 2011/generated_hist.root",    "../results/Jpsi MC 2020/generated_hist.root"},
+		{"../results/Upsilon Run 2011/generated_hist.root", "../results/Upsilon MC 2020/generated_hist.root"}
+	};
+
+//Label of each comparison
+const char* labelScheme[][2] = {
+	{"#Upsilon data",      "J/#psi data"},
+	{"J/#psi real data",   "Simulated data"},
+	{"#Upsilon real data", "Simulated data"}
+};
+
+//Where to save each comparison
+const char* directoriesToSave[] = {
+	"../results/Comparison Jpsi vs Upsilon/",
+	"../results/Comparison Jpsi Run vs MC/",
+	"../results/Comparison Upsilon Run vs MC/",
+};
+
+//Colors for each comparison
+int colorScheme[][2] = {
+	{kGreen - 2, kBlue},
+	{kBlue,      kRed},
+	{kGreen - 2, kRed}
+};
+
+
+
+//Global paths of Tefficiency inside .root file
+const char* TEfficiencyPaths[] = {
+	"efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency",
+	"efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency",
+	"efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency",
+	"efficiency/plots/Muon_Pt_Standalone_Probe_Efficiency",
+	"efficiency/plots/Muon_Eta_Standalone_Probe_Efficiency",
+	"efficiency/plots/Muon_Phi_Standalone_Probe_Efficiency",
+	"efficiency/plots/Muon_Pt_Global_Probe_Efficiency",
+	"efficiency/plots/Muon_Eta_Global_Probe_Efficiency",
+	"efficiency/plots/Muon_Phi_Global_Probe_Efficiency"
+};
+
+
+
 void compare_plot(TFile *file0, TFile *file1, const char* path)
 {
 	TEfficiency* pEff0 = (TEfficiency*)file0->Get(path);
 	TEfficiency* pEff1 = (TEfficiency*)file1->Get(path);
 
+	/*
 	int colorScheme[][2] = {
 		{kGreen - 2, kBlue},
 		{kBlue,      kRed},
 		{kGreen - 2, kRed}
 	};
 
-	const char* nameScheme[][2] = {
+	const char* labelScheme[][2] = {
 		{"#Upsilon data",      "J/#psi data"},
 		{"J/#psi real data",   "Simulated data"},
 		{"#Upsilon real data", "Simulated data"}
@@ -33,6 +86,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Upsilon vs Jpsi
 	//Jpsi    Run vs MC
 	//Upsilon Run vs MC
+	*/
 
 	if (pEff0 == NULL)
 	{
@@ -93,8 +147,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Legenda
 	TLegend* tl = new TLegend(0.68,0.78,0.94,0.88);
 	tl->SetTextSize(0.04);
-	tl->AddEntry(pEff0, nameScheme[useScheme][0], "lp");
-	tl->AddEntry(pEff1, nameScheme[useScheme][1],   "lp");
+	tl->AddEntry(pEff0, labelScheme[useScheme][0], "lp");
+	tl->AddEntry(pEff1, labelScheme[useScheme][1],   "lp");
 	tl->Draw();
 
 	//CMS Open Data
@@ -120,7 +174,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
 	{
-		if (gSystem->mkdir(directoryToSave))
+		if (gSystem->mkdir(directoryToSave, true))
 		{
 			cerr << "\"" << directoryToSave << "\" directory not found and could not be created ERROR" << endl;
 			abort();
@@ -144,8 +198,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../Upsilon Run 2011/generated_hist.root");
-	TFile *file1 = TFile::Open("../Jpsi Run 2011/generated_hist.root");
+	TFile *file0 = TFile::Open(filePaths[useScheme][0]);
+	TFile *file1 = TFile::Open(filePaths[useScheme][1]);
 
 	if (file0 == NULL || file1 == NULL)
 	{
@@ -153,7 +207,7 @@ void compare_efficiency()
 		abort();
 	}
 
-	compare_plot(file0, file1, "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency");
-	compare_plot(file0, file1, "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency");
-	compare_plot(file0, file1, "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency");;
+	int arraySize = sizeof(TEfficiencyPaths)/sizeof(*TEfficiencyPaths);
+	for (int i = 0; i < arraySize; i++)
+		compare_plot(file0, file1, TEfficiencyPaths[i]);
 }
