@@ -67,10 +67,6 @@ struct MassValues
 		double xMin = hMass->GetXaxis()->GetXmin();
 		double xMax = hMass->GetXaxis()->GetXmax();
 
-		//Temporary for test
-		xMin = 2.9;
-		xMax = 3.3;
-
 		const char* const fittingParName[] = {
 				"Gaus(Sg) Height  ",
 				"Gaus(Sg) Position",

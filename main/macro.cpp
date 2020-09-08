@@ -42,7 +42,7 @@ void macro()
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 2;
+	int method = 1;
 
 	//Set the canvasW wtermark
 	const char* canvasWatermark = "#bf{CMS Open Data}";
@@ -177,12 +177,16 @@ void macro()
 	auto lastTime = std::chrono::steady_clock::now();
 	auto start    = std::chrono::steady_clock::now();
 
-	/*
+/*
 	//TEMPORARY FOR TEST
-	TFile *file1 = TFile::Open("../resultsForTesting/jpsi_run2011.root");
+	TFile *file1 = TFile::Open("../results/Jpsi Run 2011/generated_hist.root");
 	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
 	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
-	*/
+	TNP.Standalone.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Standalone_Muon_InvariantMass");
+	TNP.Standalone.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Standalone_Muon_InvariantMass");
+	TNP.Global.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Global_Muon_InvariantMass");
+	TNP.Global.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Global_Muon_InvariantMass");
+*/
 
 	cout << endl;
 	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
@@ -217,7 +221,6 @@ void macro()
 	//Get values for invariant mass and sigma from plot
 	if (!isMC)
 		TNP.updateMassValuesAll();
-
 
 	//-------------------------------------
 	// Generate and save files

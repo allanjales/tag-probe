@@ -124,9 +124,9 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Set range if is pT
 	if (regex_match(path, regex(".*Pt.*")))
 	{
-		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(0.,80.);
+		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(0.,40.);
 		graph->SetMinimum(0.5);
-		graph->SetMaximum(1.15);
+		graph->SetMaximum(1.2);
 	}
 	
 	//Set range if is pT
@@ -134,14 +134,14 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	{
 		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(-3.,3.);
 		graph->SetMinimum(0.8);
-		graph->SetMaximum(1.05);
+		graph->SetMaximum(1.08);
 	}
 	
 	//Set range if is pT
 	if (regex_match(path, regex(".*Phi.*")))
 	{
 		graph->SetMinimum(0.8);
-		graph->SetMaximum(1.05);
+		graph->SetMaximum(1.08);
 	}
 
 	//Legenda
