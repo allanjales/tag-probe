@@ -18,12 +18,18 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	};
 
 	const char* nameScheme[][2] = {
-		{"#Upsilon data", "J/#psi data"},
-		{"Real data",     "Simulated data"},
-		{"Real data",     "Simulated data"}
+		{"#Upsilon data",      "J/#psi data"},
+		{"J/#psi real data",   "Simulated data"},
+		{"#Upsilon real data", "Simulated data"}
 	};
 
-	int useScheme = 1;
+	const char* directoriesToSave[] = {
+		"../Comparison Jsi vs Upsilon/",
+		"../Comparison Jsi Run vs MC/",
+		"../Comparison Upsilon Run vs MC/",
+	};
+
+	int useScheme = 0;
 	//Upsilon vs Jpsi
 	//Jpsi    Run vs MC
 	//Upsilon Run vs MC
@@ -65,23 +71,23 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	if (regex_match(path, regex(".*Pt.*")))
 	{
 		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(0.,80.);
-		//graph->SetMinimum(0.0);
-		graph->SetMaximum(1.4);
+		graph->SetMinimum(0.5);
+		graph->SetMaximum(1.15);
 	}
 	
 	//Set range if is pT
 	if (regex_match(path, regex(".*Eta.*")))
 	{
 		pEff0->GetPaintedGraph()->GetHistogram()->GetXaxis()->SetRangeUser(-3.,3.);
-		//graph->SetMinimum(0.8);
-		graph->SetMaximum(1.3);
+		graph->SetMinimum(0.8);
+		graph->SetMaximum(1.05);
 	}
 	
 	//Set range if is pT
 	if (regex_match(path, regex(".*Phi.*")))
 	{
-		graph->SetMinimum(0.40);
-		graph->SetMaximum(1.25);
+		graph->SetMinimum(0.8);
+		graph->SetMaximum(1.05);
 	}
 
 	//Legenda
@@ -109,7 +115,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../Comparison Jsi Run vs MC/";
+	const char* directoryToSave = directoriesToSave[useScheme];
 
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
@@ -138,8 +144,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 //Compare efficiency
 void compare_efficiency()
 {
-	TFile *file0 = TFile::Open("../Jpsi Run 2011/generated_hist.root");
-	TFile *file1 = TFile::Open("../Jpsi MC 2020/generated_hist.root");
+	TFile *file0 = TFile::Open("../Upsilon Run 2011/generated_hist.root");
+	TFile *file1 = TFile::Open("../Jpsi Run 2011/generated_hist.root");
 
 	if (file0 == NULL || file1 == NULL)
 	{
