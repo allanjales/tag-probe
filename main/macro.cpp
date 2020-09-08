@@ -24,12 +24,16 @@ void macro()
 {
 	//List of files
 	const char *files[] = {"../data_histoall.root",
-							"../Run2011AMuOnia_mergeNtuple.root",
+							"../Run2011AMuOnia_mergeNtuple.root",""
 							"../JPsiToMuMu_mergeMCNtuple.root",
 							"../Run2011A_MuOnia_Upsilon.root",
 							"../Upsilon1SToMuMu_MC_full.root"};
 
-
+	const char* directoriesToSave[] = {"../results/result/",
+										"../results/Jpsi Run 2011/",
+										"../results/Jpsi MC 2020/",
+										"../results/Upsilon Run 2011/",
+										"../results/Upsilon MC 2020/"};
 
 	//Options to change
 
@@ -44,7 +48,7 @@ void macro()
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 
 	//Path where is going to save results 
-	const char* directoryToSave = "../Jpsi Run 2011/";
+	const char* directoryToSave = directoriesToSave[useFile];
 
 	//Should limit data?
 	long long limitData = 0; //0 -> do not limit
@@ -55,8 +59,12 @@ void macro()
 	bool shouldDrawQuantitiesCanvas 			= true;
 	bool shouldDrawEfficiencyCanvas 			= true;
 
-    //freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
-    //freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
+	const char* ressonance = "Jpsi";
+	if (useFile > 2)
+		ressonance = "Upsilon";
+
+	//freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
+	//freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
 
 	bool isMC = false;
     if (useFile == 2 || useFile == 4)
@@ -73,9 +81,10 @@ void macro()
 	//Check if dir exists and create
 	if (gSystem->AccessPathName(directoryToSave))
 	{
-		if (gSystem->mkdir(directoryToSave))
+		if (gSystem->mkdir(directoryToSave, true))
 		{
-			cerr << "\"" << directoryToSave << "\" directory not found and could not be created ERROR" << endl;
+			cerr << "\"" << directoryToSave << "\" path could not be found and could not be created ERROR" << endl;
+			cerr << "Try to create manually this folder path" << endl;
 			abort();
 		}
 		else
@@ -143,21 +152,14 @@ void macro()
 		};
 
 	//Create a object and set configs
-	TagAndProbe TNP;
+	TagAndProbe TNP{ressonance};
 	TNP.method 			= method;
 	TNP.canvasWatermark	= canvasWatermark;
 	TNP.directoryToSave = directoryToSave;
 
 	TNP.doTracker    = true;
-	TNP.doStandalone = false;
-	TNP.doGlobal     = false;
-
-	if (useFile > 2)
-	{
-		//Prepare for Upsilon
-		TNP.ressonance = "Upsilon";
-		TNP.defineMassHistogramNumbers(8.7, 11., 60);
-	}
+	TNP.doStandalone = true;
+	TNP.doGlobal     = true;
 
 	cout << "Ressonance: " << TNP.ressonance << endl;
 	cout << "Using method " << TNP.method << endl;
@@ -182,40 +184,39 @@ void macro()
 	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
 	*/
 
-	if (!isMC) //Does not need
+	cout << endl;
+	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
+
+	//Loop between the components
+	for (long long i = 0; i < numberEntries; i++)
 	{
-		cout << endl;
-		cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
+		//Select particle pair
+		TreePC->GetEntry(i);
+		TreeAT->GetEntry(i);
 
-		//Loop between the components
-		for (long long i = 0; i < numberEntries; i++)
+		//Show progress on screen
+		if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
 		{
-			//Select particle pair
-			TreePC->GetEntry(i);
-			TreeAT->GetEntry(i);
-
-			//Show progress on screen
-			if (chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - lastTime).count() >= 1000 || i == numberEntries - 1)
-			{
-				printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
-				lastTime = chrono::steady_clock::now();
-			}
-
-			//Fill histograms
-			if (applyCuts(quantities, types))
-			{
-				TNP.fillMassHistograms(quantities, types);
-			}
+			printf(progressFormat.data(), (float)(i+1)/(float)numberEntries*100, i+1, numberEntries);
+			lastTime = chrono::steady_clock::now();
 		}
 
-		cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+		//Fill histograms
+		if (applyCuts(quantities, types))
+		{
+			TNP.fillMassHistograms(quantities, types);
+		}
+	}
 
-		//Do function fit ober the histogram
+	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+
+	//Do function fit ober the histogram
+	if (!isMC)
 		TNP.doFit();
 
-		//Get values for invariant mass and sigma from plot
+	//Get values for invariant mass and sigma from plot
+	if (!isMC)
 		TNP.updateMassValuesAll();
-	}
 
 
 	//-------------------------------------
@@ -241,7 +242,7 @@ void macro()
 		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
-	if (shouldDrawInvariantMassCanvasRegion)
+	if (shouldDrawInvariantMassCanvasRegion && !isMC)
 	{
 		bool drawRegions 	= true;
 		bool shouldWrite 	= true;

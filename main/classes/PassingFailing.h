@@ -36,7 +36,7 @@ private:
 		//Set parameters
 		string hName 		= string(particleType) + string(passingOrFailing) + string(tagOrProbe) + string(particleName) + "_" + string(quantityName) + string(histoName);
 		string hTitle 		= string(passingOrFailing) + " in " + string(particleType) + " " + string(tagOrProbe);
-		string xAxisTitle 	= "#mu " + string(xAxisName);
+		string xAxisTitle 	= string(tagOrProbe) + " #mu " + string(xAxisName);
 		string yAxisTitleForm = "Events";
 
 		//Add unit if has
@@ -45,10 +45,10 @@ private:
 
 		//Change title is passing
 		if (strcmp(passingOrFailing, "Passing") == 0)
-			hTitle = string(particleType) + " " + string(tagOrProbe);
+			hTitle = string(particleType) + " " + string(particleName) + " " + string(tagOrProbe);
 
 		if (strcmp(passingOrFailing, "All") == 0)
-			hTitle = "All " + string(tagOrProbe);
+			hTitle = "All " + string(particleName) + " " + string(tagOrProbe);
 
 
 		//Variable bin for pT

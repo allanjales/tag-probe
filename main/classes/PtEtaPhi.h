@@ -58,7 +58,7 @@ public:
 		TH1D* &hTotal = All .hSig;
 
 		string pName 	= string(particleName) + "_" + string(quantityName) + "_" + string(particleType) + "_" + string(tagOrProbe) + "_Efficiency";
-		string pTitle 	= "Efficiency of " + string(particleType) + " " + string(tagOrProbe);
+		string pTitle 	= "Efficiency of " + string(particleType) + " " + string(particleName) + " " + string(tagOrProbe);
 
 		//Set Y axis title for efficiency plot
 		hTotal->GetYaxis()->SetTitle("Efficiency");
