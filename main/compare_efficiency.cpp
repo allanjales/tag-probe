@@ -24,8 +24,8 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	};
 
 	const char* directoriesToSave[] = {
-		"../Comparison Jsi vs Upsilon/",
-		"../Comparison Jsi Run vs MC/",
+		"../Comparison Jpsi vs Upsilon/",
+		"../Comparison Jpsi Run vs MC/",
 		"../Comparison Upsilon Run vs MC/",
 	};
 
