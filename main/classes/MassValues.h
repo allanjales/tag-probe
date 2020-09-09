@@ -79,9 +79,7 @@ struct MassValues
 				"CB  (Sg) Yield   ",
 
 				"Exp1(Bg) Height  ",
-				"Exp1(Bg) Width   ",
-				"Exp2(Bg) Height  ",
-				"Exp2(Bg) Width   "
+				"Exp1(Bg) Width   "
 			};
 
 		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
@@ -99,30 +97,29 @@ struct MassValues
 		{
 			f->SetParName(i, fittingParName[i]);
 		}
-
+		
 		//Values Signal GS
-		f->SetParameter(0,	4098.2);
-		f->SetParameter(1,	3.09);
-		f->SetParameter(2,	0.020);
+		f->SetParameter(0,	4269.);
+		f->SetParameter(1,	3.094);
+		f->SetParameter(2,	0.0206);
 
 		//Values Signal CB
-		f->SetParameter(3,	1.58);
-		f->SetParameter(4,	1.54);
-		f->SetParameter(5,	3.093);
-		f->SetParameter(6,	0.032);
+		f->SetParameter(3,	1.71);
+		f->SetParameter(4,	3.96);
+		f->SetParameter(5,	3.09);
+		f->SetParameter(6,	0.038);
+		f->SetParameter(7,	37365.9);
 
 		//Values Background
-		f->SetParameter(8,	-0.217);
-		f->SetParameter(9,	1.915);
-		f->SetParameter(10, 263.185);
-		f->SetParameter(11,	0.061);
+		f->SetParameter(8,	742631);
+		f->SetParameter(9,	-1.91);
 
 		//Set par limits
-		f->SetParLimits(1, 3.06, 3.12);
-		f->SetParLimits(2, 0., 0.05);
+		f->SetParLimits(1, 3.08, 3.11);
+		f->SetParLimits(2, 0.01, 0.2);
 
-		f->SetParLimits(5, 3.06, 3.12);
-		f->SetParLimits(6, 0.01, 0.05);
+		f->SetParLimits(5, 3.08, 3.11);
+		f->SetParLimits(6, 0.01, 0.2);
 
 		//Fit function
 		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
@@ -137,7 +134,7 @@ struct MassValues
 		fs->SetLineWidth(3);						//Fit width
 
 		//Background Fitting
-		fb = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 4);
+		fb = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 2);
 		fb->SetNpx(1000);							//Resolution of background fit function
 		fb->SetParameters(&resultParameters[8]);	//Get only background part
 		fb->SetLineColor(kBlue); 					//Fit Color

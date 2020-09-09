@@ -49,26 +49,35 @@ void macro()
 
 	//Path where is going to save results 
 	const char* directoryToSave = directoriesToSave[useFile];
+	directoryToSave = "../result/";
 
 	//Should limit data?
 	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= true;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
+	bool shouldDrawQuantitiesCanvas 			= false;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
+	//Muon id anlyse
+	bool doTracker    = true;
+	bool doStandalone = true;
+	bool doGlobal     = true;
+
+	//Auto detect ressonance due file index
 	const char* ressonance = "Jpsi";
 	if (useFile > 2)
 		ressonance = "Upsilon";
 
+	//For saving in log file
 	//freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
 	//freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
 
+	//Auto detect if is MC due file index
 	bool isMC = false;
-    if (useFile == 2 || useFile == 4)
-    	isMC = true;
+	if (useFile == 2 || useFile == 4)
+		isMC = true;
 
 
 	//Check if the name of dir is ok
@@ -156,10 +165,9 @@ void macro()
 	TNP.method 			= method;
 	TNP.canvasWatermark	= canvasWatermark;
 	TNP.directoryToSave = directoryToSave;
-
-	TNP.doTracker    = true;
-	TNP.doStandalone = true;
-	TNP.doGlobal     = true;
+	TNP.doTracker       = doTracker;
+	TNP.doStandalone    = doStandalone;
+	TNP.doGlobal        = doGlobal;
 
 	cout << "Ressonance: " << TNP.ressonance << endl;
 	cout << "Using method " << TNP.method << endl;

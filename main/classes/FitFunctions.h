@@ -81,7 +81,7 @@ public:
 
 		//Fit function for background for Invariant Mass Probe
 		static Double_t Background_InvariantMass(Double_t *x, Double_t *par) {
-			return FitFunctions::Primary::Exp(x,par) + FitFunctions::Primary::Exp(x, &par[2]);
+			return FitFunctions::Primary::Exp(x,par);
 		}
 
 		//Fit function for signal & background for Invariant Mass

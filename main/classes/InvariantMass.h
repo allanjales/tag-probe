@@ -137,7 +137,7 @@ private:
 				tl->AddEntry(fitCB,	 "Crystal Ball", "l");
 
 				//Background Fitting
-				TF1* fitExp = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 4);
+				TF1* fitExp = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 2);
 				fitExp->SetNpx(1000);						//Resolution of background fit function
 				fitExp->SetParameters(&fitParameters[8]);	//Get only background part
 				fitExp->SetLineColor(kBlue); 				//Fit Color
@@ -146,7 +146,7 @@ private:
 				fitExp->Draw("same");
 				for (int i = 0; i < arraySize; i++)
 					fitExp->SetParName(i, fittingParName[i+8]);
-				tl->AddEntry(fitExp, "Exp + Exp",	 "l");
+				tl->AddEntry(fitExp, "Exponential",	 "l");
 			}
 
 			//If is showing pass and fail fit
