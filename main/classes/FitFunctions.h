@@ -48,14 +48,14 @@ public:
 			return exp;
 		}
 
-		//crystall ball function
+		//Crystall ball function
 		static Double_t CrystalBall(Double_t *x,Double_t *par)
 		{
 			//par[0] = alpha
 			//par[1] = n
 			//par[2] = mean
 			//par[3] = sigma
-			//par[4] = Yield
+			//par[4] = yield
 			Double_t t = (x[0]-par[2])/par[3];
 			if (par[0] < 0) t = -t;
 			Double_t absAlpha = fabs((Double_t)par[0]);
@@ -74,17 +74,17 @@ public:
 	class Jpsi
 	{
 	public:
-		//Fit function for signal for Invariant Mass Probe
+		//Fit function for signal of Invariant Mass
 		static Double_t Signal_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::Gaus(x,par) + FitFunctions::Primary::CrystalBall(x, &par[3]);
 		}
 
-		//Fit function for background for Invariant Mass Probe
+		//Fit function for background of Invariant Mass
 		static Double_t Background_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::Exp(x,par);
 		}
 
-		//Fit function for signal & background for Invariant Mass
+		//Fit function for signal & background of Invariant Mass
 		static Double_t InvariantMass(Double_t *x, Double_t *par) {
 			return Signal_InvariantMass(x,par) + Background_InvariantMass(x, &par[8]);
 		}
@@ -92,17 +92,17 @@ public:
 	class Upsilon
 	{
 	public:
-		//Fit function for signal for Invariant Mass Probe
+		//Fit function for signal of Invariant Mass
 		static Double_t Signal_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::CrystalBall(x,par) + FitFunctions::Primary::Gaus(x, &par[5]) + FitFunctions::Primary::Gaus(x, &par[8]);
 		}
 
-		//Fit function for background for Invariant Mass Probe
+		//Fit function for background of Invariant Mass
 		static Double_t Background_InvariantMass(Double_t *x, Double_t *par) {
 			return FitFunctions::Primary::Pol3(x, par);
 		}
 
-		//Fit function for signal & background for Invariant Mass
+		//Fit function for signal & background of Invariant Mass
 		static Double_t InvariantMass(Double_t *x, Double_t *par) {
 			return Signal_InvariantMass(x,par) + Background_InvariantMass(x, &par[11]);
 		}
