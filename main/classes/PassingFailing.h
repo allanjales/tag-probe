@@ -319,15 +319,14 @@ public:
 		legend += "= ";
 
 		//Diference calculus
-		double diff = hSigBack->GetEntries() - (hSig->GetEntries() + PassFailObj()->subtractionFactor()*hBack->GetEntries());
+		double diff = hSigBack->Integral() - (hSig->Integral() + PassFailObj()->subtractionFactor()*hBack->Integral());
 
 		const char* addSpace = "";
 		if (diff >= 0.)
 			addSpace = " ";
 
-		//Show information
-		cout << legend << fixed << addSpace << diff;
-		cout << " (-factor: " << PassFailObj()->subtractionFactor() << ")\n";
+		//Show consistency
+		cout << legend << fixed << addSpace << diff << "\n";
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)

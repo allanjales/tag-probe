@@ -55,10 +55,10 @@ void macro()
 	long long limitData = 0; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= false;
-	bool shouldDrawEfficiencyCanvas 			= false;
+	bool shouldDrawInvariantMassCanvas 			= true;
+	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawQuantitiesCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= true;
 
 	//Muon id anlyse
 	bool doTracker    = true;
