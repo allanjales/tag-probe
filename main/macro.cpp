@@ -79,6 +79,10 @@ void macro()
 	if (useFile == 2 || useFile == 4)
 		isMC = true;
 
+	//Auto detect limit of data
+	if (limitData > 0)
+		directoryToSave = "../result/";
+
 
 	//Check if the name of dir is ok
 	if (string(directoryToSave).back() != string("/"))
