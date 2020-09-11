@@ -5,7 +5,7 @@ class TagAndProbe
 {
 public:
 	int method = 1;	// 1 | 2
-	const char* ressonance      = "Jpsi"; // "Jpsi" | "Upsilon"
+	const char* resonance      = "Jpsi"; // "Jpsi" | "Upsilon"
 	const char* particleName    = "Muon";
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 	const char* directoryToSave = "../result/";
@@ -15,9 +15,9 @@ public:
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
-	Type Tracker    {method, ressonance, particleName, canvasWatermark, directoryToSave, "Tracker"};
-	Type Standalone {method, ressonance, particleName, canvasWatermark, directoryToSave, "Standalone"};
-	Type Global     {method, ressonance, particleName, canvasWatermark, directoryToSave, "Global"};
+	Type Tracker    {method, resonance, particleName, canvasWatermark, directoryToSave, "Tracker"};
+	Type Standalone {method, resonance, particleName, canvasWatermark, directoryToSave, "Standalone"};
+	Type Global     {method, resonance, particleName, canvasWatermark, directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
@@ -186,7 +186,7 @@ public:
 	TagAndProbe()
 	{}
 
-	TagAndProbe(const char* ressonance)
-			: ressonance(ressonance)
+	TagAndProbe(const char* resonance)
+			: resonance(resonance)
 	{}
 };

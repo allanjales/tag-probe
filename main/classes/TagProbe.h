@@ -4,7 +4,7 @@
 class TagProbe{
 private:
 	int& method;
-	const char*& ressonance;
+	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -14,11 +14,11 @@ private:
 public:
 	const char* tagOrProbe = NULL;
 
-	PtEtaPhi Pt  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Pt  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 50,  0.00, 80.00};
-	PtEtaPhi Eta {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Eta {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",      50, -2.50,  2.50};
-	PtEtaPhi Phi {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Phi {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",     15, -3.15,  3.15};
 
 	void subtractSigHistograms()
@@ -81,7 +81,7 @@ public:
 
 
 	TagProbe(int& method,
-		const char*& ressonance,
+		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -89,7 +89,7 @@ public:
 	 	InvariantMass& ObjMass,
 	 	const char*  tagOrProbe)
 		  : method(method),
-		    ressonance(ressonance),
+		    resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

@@ -12,7 +12,7 @@ using namespace std;
 class PassingFailing{
 private:
 	int& method;
-	const char*& ressonance;
+	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -344,7 +344,7 @@ public:
 
 
 	PassingFailing(int& method,
-		const char*& ressonance,
+		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -361,7 +361,7 @@ public:
 		int&    	 nBins,
 		int&    	 decimals)
 		  : method(method),
-		    ressonance(ressonance),
+		    resonance(resonance),
 			particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

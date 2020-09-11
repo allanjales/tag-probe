@@ -19,7 +19,7 @@ using namespace std;
 class InvariantMass{
 private:
 	int& method;
-	const char*& ressonance;
+	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -56,7 +56,7 @@ private:
 		canvas->cd(quarter);
 		canvas->cd(quarter)->SetMargin(0.14, 0.02, 0.09, 0.07);
 
-		if (strcmp(ressonance, "Upsilon") == 0)
+		if (strcmp(resonance, "Upsilon") == 0)
 		{
 			hMass->SetMinimum(0.);
 			hMass->SetMaximum(1.2*hMass->GetBinContent(hMass->GetMaximumBin()));
@@ -85,7 +85,7 @@ private:
 			tl->AddEntry(fFit, "Total Fit", "l");
 
 			//If is showing pass and fail fit
-			if (strcmp(ressonance, "Jpsi") == 0)
+			if (strcmp(resonance, "Jpsi") == 0)
 			{
 				const char* const fittingParName[] = {
 						"Gaus(Sg) Height  ",
@@ -150,7 +150,7 @@ private:
 			}
 
 			//If is showing pass and fail fit
-			if (strcmp(ressonance, "Upsilon") == 0)
+			if (strcmp(resonance, "Upsilon") == 0)
 			{
 				const char* const fittingParName[] = {
 						"CB  (1S) Alpha   ",
@@ -302,7 +302,7 @@ public:
 
 	void doFit()
 	{
-		if (strcmp(ressonance, "Jpsi") == 0)
+		if (strcmp(resonance, "Jpsi") == 0)
 		{
 			cout << endl;
 			cout << "Fitting Passing in " << particleType << " " << particleName << "...\n";
@@ -313,7 +313,7 @@ public:
 			All.doFitJpsi();
 		}
 
-		if (strcmp(ressonance, "Upsilon") == 0)
+		if (strcmp(resonance, "Upsilon") == 0)
 		{
 			cout << endl;
 			cout << "Fitting Passing in " << particleType << " " << particleName << "...\n";
@@ -360,7 +360,7 @@ public:
 
 		double sigma = fwhm/2.355;
 
-		if (strcmp(ressonance, "Jpsi") == 0)
+		if (strcmp(resonance, "Jpsi") == 0)
 		{
 			//Signal region = mass +- 3*sigma
 			ObjMassValues->signalRegion_x1 = value - 3*sigma;
@@ -373,7 +373,7 @@ public:
 			ObjMassValues->sidebandRegion2_x2 = value + 7*sigma;
 		}
 
-		if (strcmp(ressonance, "Upsilon") == 0)
+		if (strcmp(resonance, "Upsilon") == 0)
 		{
 			//Signal region = mass +- 3*sigma
 			ObjMassValues->signalRegion_x1 = value - 3*sigma;
@@ -451,26 +451,26 @@ public:
 
 
 	InvariantMass(int& method,
-		const char*& ressonance,
+		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*& particleType)
 		  : method(method),
-		    ressonance(ressonance),
+		    resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)
 	{
-		if (strcmp(ressonance, "Jpsi") == 0)
+		if (strcmp(resonance, "Jpsi") == 0)
 		{
 			xMin  = 2.9;
 			xMax  = 3.3;
 			nBins = 160;
 		}
 
-		if (strcmp(ressonance, "Upsilon") == 0)
+		if (strcmp(resonance, "Upsilon") == 0)
 		{
 			xMin  = 8.7;
 			xMax  = 11.;

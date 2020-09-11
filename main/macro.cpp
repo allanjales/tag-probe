@@ -65,10 +65,10 @@ void macro()
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
-	//Auto detect ressonance due file index
-	const char* ressonance = "Jpsi";
+	//Auto detect resonance due file index
+	const char* resonance = "Jpsi";
 	if (useFile > 2)
-		ressonance = "Upsilon";
+		resonance = "Upsilon";
 
 	//For saving in log file
 	//freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
@@ -161,7 +161,7 @@ void macro()
 		};
 
 	//Create a object and set configs
-	TagAndProbe TNP{ressonance};
+	TagAndProbe TNP{resonance};
 	TNP.method 			= method;
 	TNP.canvasWatermark	= canvasWatermark;
 	TNP.directoryToSave = directoryToSave;
@@ -169,7 +169,7 @@ void macro()
 	TNP.doStandalone    = doStandalone;
 	TNP.doGlobal        = doGlobal;
 
-	cout << "Ressonance: " << TNP.ressonance << endl;
+	cout << "resonance: " << TNP.resonance << endl;
 	cout << "Using method " << TNP.method << endl;
 
 	//Get data size and set data limit if has

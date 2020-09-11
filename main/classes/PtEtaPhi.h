@@ -4,7 +4,7 @@
 class PtEtaPhi{
 private:
 	int& method;
-	const char*& ressonance;
+	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -26,9 +26,9 @@ public:
 
 	TEfficiency* pEff 	= NULL;
 
-	PassingFailing Pass {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PassingFailing Pass {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Passing", quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
-	PassingFailing All  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PassingFailing All  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"All",     quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
 
 	void subtractSigHistograms()
@@ -189,7 +189,7 @@ public:
 
 
 	PtEtaPhi(int& method,
-		const char*& ressonance,
+		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
@@ -205,7 +205,7 @@ public:
 		double	 	 xMax,
 		int	    	 decimals = 3)
 		  : method(method),
-		    ressonance(ressonance),
+		    resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

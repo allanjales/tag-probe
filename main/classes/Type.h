@@ -5,7 +5,7 @@
 class Type{
 private:
 	int& method;
-	const char*& ressonance;
+	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
@@ -13,9 +13,9 @@ private:
 public:
 	const char* particleType = NULL;
 
-	InvariantMass Mass  {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType};
-	TagProbe      Tag   {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Tag"};
-	TagProbe      Probe {method, ressonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Probe"};
+	InvariantMass Mass  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType};
+	TagProbe      Tag   {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Tag"};
+	TagProbe      Probe {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, Mass, "Probe"};
 
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
@@ -104,13 +104,13 @@ public:
 
 
 	Type(int& method,
-		const char*& ressonance,
+		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*  particleType)
 		  : method(method),
-		    ressonance(ressonance),
+		    resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
