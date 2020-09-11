@@ -38,7 +38,7 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 3;
+	int useFile = 1;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
@@ -49,7 +49,7 @@ void macro()
 
 	//Path where is going to save results 
 	const char* directoryToSave = directoriesToSave[useFile];
-	directoryToSave = "../result/";
+	//directoryToSave = "../result/";
 
 	//Should limit data?
 	long long limitData = 0; //0 -> do not limit
