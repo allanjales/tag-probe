@@ -185,6 +185,21 @@ public:
 			hSigBack->SetBinContent(i, hSigBack->GetBinContent(i)/hSigBack->GetBinWidth(i));
 			hBack->SetBinContent(i, hBack->GetBinContent(i)/hBack->GetBinWidth(i));
 		}
+
+		//Set bin errors
+		for (int i = 0; i <= hSig->GetXaxis()->GetNbins(); i++)
+		{
+			int bin_sb = hSigBack->GetBin(i);
+			int bin_b  = hBack->GetBin(i);
+			int bin_s  = hSig->GetBin(i);
+
+			double n_sb = hSigBack->GetBinContent(bin_sb);
+			double n_b  = hBack->GetBinContent(bin_b);
+
+			double error = TMath::Sqrt(n_sb + n_b);
+
+			hSig->SetBinError(bin_s, error);
+		}
 	}
 
 	//Fill histogram
@@ -248,7 +263,7 @@ public:
 		hSig->SetLineColor(kMagenta);
 		hSig->SetLineStyle(kSolid);
 		hSig->SetLineWidth(2);
-		hSig->Draw("same");
+		hSig->Draw("same HIST");
 
 		//Not show frame with mean, std dev
 		//gStyle->SetOptTitle(0);
