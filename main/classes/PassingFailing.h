@@ -76,9 +76,9 @@ private:
 			*/
 
 			double xbins[10000];
-			xbins[0] = .1;
+			xbins[0] = .5;
 			int nbins = 0;
-			double binWidth = 0.9;
+			double binWidth = 0.2;
 
 			//For positive
 			for (int i = 1; xbins[i-1] < xMax+binWidth; i++)

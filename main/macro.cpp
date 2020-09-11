@@ -38,11 +38,11 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 1;
+	int useFile = 3;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 1;
+	int method = 2;
 
 	//Set the canvasW wtermark
 	const char* canvasWatermark = "#bf{CMS Open Data}";
