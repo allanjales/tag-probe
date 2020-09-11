@@ -63,31 +63,6 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	TEfficiency* pEff0 = (TEfficiency*)file0->Get(path);
 	TEfficiency* pEff1 = (TEfficiency*)file1->Get(path);
 
-	/*
-	int colorScheme[][2] = {
-		{kGreen - 2, kBlue},
-		{kBlue,      kRed},
-		{kGreen - 2, kRed}
-	};
-
-	const char* labelScheme[][2] = {
-		{"#Upsilon data",      "J/#psi data"},
-		{"J/#psi real data",   "Simulated data"},
-		{"#Upsilon real data", "Simulated data"}
-	};
-
-	const char* directoriesToSave[] = {
-		"../Comparison Jpsi vs Upsilon/",
-		"../Comparison Jpsi Run vs MC/",
-		"../Comparison Upsilon Run vs MC/",
-	};
-
-	int useScheme = 0;
-	//Upsilon vs Jpsi
-	//Jpsi    Run vs MC
-	//Upsilon Run vs MC
-	*/
-
 	if (pEff0 == NULL)
 	{
 		cerr << "Could not read the path in file0\n";

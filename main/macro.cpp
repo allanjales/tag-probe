@@ -38,7 +38,7 @@ void macro()
 	//Options to change
 
 	//Which file of files (variable above) should use
-	int useFile = 1;
+	int useFile = 4;
 
 	//Choose method
 	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
