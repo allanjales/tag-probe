@@ -186,6 +186,7 @@ public:
 			hBack->SetBinContent(i, hBack->GetBinContent(i)/hBack->GetBinWidth(i));
 		}
 
+		/*
 		//Set bin errors
 		for (int i = 0; i <= hSig->GetXaxis()->GetNbins(); i++)
 		{
@@ -200,6 +201,7 @@ public:
 
 			hSig->SetBinError(bin_s, error);
 		}
+		*/
 	}
 
 	//Fill histogram
