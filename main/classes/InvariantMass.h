@@ -45,7 +45,7 @@ private:
 		//Create histogram
 		hMass = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
 		hMass->GetYaxis()->SetTitle(Form(yAxisTitleForm.data(), hMass->GetBinWidth(0)));
-		hMass->GetXaxis()->SetTitle("#mu^{+}#mu^{-} invariant mass (GeV/c^{2})");
+		hMass->GetXaxis()->SetTitle("#mu^{+}#mu^{-} invariant mass [GeV/c^{2}]");
 	}
 
 	void drawCanvasQuarter(TCanvas* &canvas, bool drawRegions, int quarter, MassValues* ObjMassValues, int color = kBlue)
