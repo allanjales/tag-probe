@@ -65,6 +65,9 @@ void macro()
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
+
+
+
 	//Auto detect resonance due file index
 	const char* resonance = "Jpsi";
 	if (useFile > 2)
@@ -81,7 +84,7 @@ void macro()
 
 	//Auto detect limit of data
 	if (limitData > 0)
-		directoryToSave = "../result/";
+		directoryToSave = "../partial result/";
 
 
 	//Check if the name of dir is ok
