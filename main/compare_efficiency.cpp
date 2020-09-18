@@ -125,7 +125,7 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	TLegend* tl = new TLegend(0.68,0.78,0.94,0.88);
 	tl->SetTextSize(0.04);
 	tl->AddEntry(pEff0, labelScheme[useScheme][0], "lp");
-	tl->AddEntry(pEff1, labelScheme[useScheme][1],   "lp");
+	tl->AddEntry(pEff1, labelScheme[useScheme][1], "lp");
 	tl->Draw();
 
 	//CMS Open Data
@@ -187,4 +187,7 @@ void compare_efficiency()
 	int arraySize = sizeof(TEfficiencyPaths)/sizeof(*TEfficiencyPaths);
 	for (int i = 0; i < arraySize; i++)
 		compare_plot(file0, file1, TEfficiencyPaths[i]);
+
+	cout << "\nUse Scheme: " << useScheme << "\n";
+	cout << "Done. All result files can be found at \"" << directoriesToSave[useScheme] << "\"\n";
 }

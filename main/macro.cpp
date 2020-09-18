@@ -314,5 +314,5 @@ void macro()
 	//Close files
 	generatedFile->Close();
 
-	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n" << endl;
+	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n\n";
 }
