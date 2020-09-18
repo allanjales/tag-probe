@@ -12,7 +12,7 @@ const char* directoriesToSave[] = {"../results/result/",
 									"../results/Upsilon Run 2011/",
 									"../results/Upsilon MC 2020/"};
 
-//Options to change
+//MAIN OPTIONS
 
 //Which file of files (variable above) should use
 int useFile = 4;
@@ -42,6 +42,7 @@ bool doTracker    = true;
 bool doStandalone = true;
 bool doGlobal     = true;
 
+//ENDED MAIN OPTIONS
 
 
 
