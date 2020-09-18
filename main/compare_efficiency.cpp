@@ -83,10 +83,12 @@ void compare_plot(TFile *file0, TFile *file1, const char* path)
 	//Plot
 	pEff0->SetMarkerColor(colorScheme[useScheme][0]);
 	pEff0->SetLineColor(colorScheme[useScheme][0]);
+	pEff0->SetLineWidth(2);
 	pEff0->Draw();
 
 	pEff1->SetMarkerColor(colorScheme[useScheme][1]);
 	pEff1->SetLineColor(colorScheme[useScheme][1]);
+	pEff0->SetLineWidth(2);
 	pEff1->Draw("same");
 	
 	//Set range in y axis
