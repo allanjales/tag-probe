@@ -182,8 +182,8 @@ void macro()
 	//-------------------------------------
 
 	//Supress canvas PROBLEMS BELOW:
-	//- Does not store TBox of
-	//- Does not save anything in created .root
+	//- Does not store TBox of sideband subtraction
+	//- Does not save anything in created file .root
 	//gROOT->SetBatch(1);
 
 	//Create file root to store generated files
