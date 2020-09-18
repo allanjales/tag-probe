@@ -22,69 +22,9 @@ using namespace std;
 //Select particles, draws and save histograms
 void macro()
 {
-	//List of files
-	const char *files[] = {"../data_histoall.root",
-							"../Run2011AMuOnia_mergeNtuple.root",""
-							"../JPsiToMuMu_mergeMCNtuple.root",
-							"../Run2011A_MuOnia_Upsilon.root",
-							"../Upsilon1SToMuMu_MC_full.root"};
+	//Input files, options are set here!
+	#include "config/settings.cpp"
 
-	const char* directoriesToSave[] = {"../results/result/",
-										"../results/Jpsi Run 2011/",
-										"../results/Jpsi MC 2020/",
-										"../results/Upsilon Run 2011/",
-										"../results/Upsilon MC 2020/"};
-
-	//Options to change
-
-	//Which file of files (variable above) should use
-	int useFile = 1;
-
-	//Choose method
-	//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-	int method = 2;
-
-	//Set the canvasW wtermark
-	const char* canvasWatermark = "#bf{CMS Open Data}";
-
-	//Path where is going to save results 
-	const char* directoryToSave = directoriesToSave[useFile];
-	//directoryToSave = "../result/";
-
-	//Should limit data?
-	long long limitData = 10000; //0 -> do not limit
-
-	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= false;
-	bool shouldDrawInvariantMassCanvasRegion 	= false;
-	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= false;
-
-	//Muon id anlyse	
-	bool doTracker    = true;
-	bool doStandalone = false;
-	bool doGlobal     = false;
-
-
-
-
-	//Auto detect resonance due file index
-	const char* resonance = "Jpsi";
-	if (useFile > 2)
-		resonance = "Upsilon";
-
-	//For saving in log file
-	//freopen((string(directoryToSave) + "log.txt").data(), "w", stdout);
-	//freopen((string(directoryToSave) + "log.txt").data(), "w", stderr);
-
-	//Auto detect if is MC due file index
-	bool isMC = false;
-	if (useFile == 2 || useFile == 4)
-		isMC = true;
-
-	//Auto detect limit of data
-	if (limitData > 0)
-		directoryToSave = "../partial result/";
 
 
 	//Check if the name of dir is ok
@@ -117,7 +57,7 @@ void macro()
 
 	//Compatibility adjusts on file read (for data_histoall ntupples)
 	string folderName = "tagandprobe/";
-	if (useFile == 0)
+	if (needsRetroCompatibility)
 		folderName = "demo/";
 
 	//Open and read files
@@ -145,7 +85,7 @@ void macro()
 	TreePC->SetBranchAddress("TagMuon_Pt",					&TagMuon_Pt);
 	TreePC->SetBranchAddress("TagMuon_Eta",					&TagMuon_Eta);
 	TreePC->SetBranchAddress("TagMuon_Phi",					&TagMuon_Phi);
-	if (useFile == 0)
+	if (needsRetroCompatibility)
 	TreePC->SetBranchAddress("InvariantMass",				&InvariantMass);
 	else
 	TreeAT->SetBranchAddress("InvariantMass",				&InvariantMass);

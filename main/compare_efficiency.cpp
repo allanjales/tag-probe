@@ -8,7 +8,7 @@
 
 //CONFIGS
 
-int useScheme = 2;
+int useScheme = 0;
 //Upsilon vs Jpsi
 //Jpsi    Run vs MC
 //Upsilon Run vs MC
