@@ -42,6 +42,12 @@ public:
 		Mass.writeMassHistogramsOnFile(writehPass, writehAll);
 	}
 
+	void normalizeHistograms()
+	{
+		Probe.normalizeHistograms();
+		Tag  .normalizeHistograms();
+	}
+
 	void subtractSigHistograms()
 	{
 		Tag  .subtractSigHistograms();

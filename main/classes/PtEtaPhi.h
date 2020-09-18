@@ -31,6 +31,12 @@ public:
 	PassingFailing All  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"All",     quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
 
+	void normalizeHistograms()
+	{
+		Pass.normalizeHistograms();
+		All .normalizeHistograms();
+	}
+
 	void subtractSigHistograms()
 	{
 		Pass.subtractSigHistogram();

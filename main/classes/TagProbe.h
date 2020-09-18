@@ -21,6 +21,13 @@ public:
 	PtEtaPhi Phi {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",     15, -3.15,  3.15};
 
+	void normalizeHistograms()
+	{
+		Pt .normalizeHistograms();
+		Eta.normalizeHistograms();
+		Phi.normalizeHistograms();
+	}
+
 	void subtractSigHistograms()
 	{
 		Pt .subtractSigHistograms();

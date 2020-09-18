@@ -39,6 +39,18 @@ public:
 			Global    .doFit();
 	}
 
+	void normalizeHistograms()
+	{
+		cout << "Normalizing quantities histograms\n";
+		if (doTracker)
+			Tracker   .normalizeHistograms();
+		if (doStandalone)
+			Standalone.normalizeHistograms();
+		if (doGlobal)
+			Global    .normalizeHistograms();
+		cout << "Quantities histograms normalized.\n";
+	}
+
 	void updateMassValuesAll()
 	{
 		if (doTracker)

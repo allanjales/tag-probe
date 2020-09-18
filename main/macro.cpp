@@ -52,18 +52,18 @@ void macro()
 	//directoryToSave = "../result/";
 
 	//Should limit data?
-	long long limitData = 0; //0 -> do not limit
+	long long limitData = 10000; //0 -> do not limit
 
 	//Canvas drawing
-	bool shouldDrawInvariantMassCanvas 			= true;
-	bool shouldDrawInvariantMassCanvasRegion 	= true;
+	bool shouldDrawInvariantMassCanvas 			= false;
+	bool shouldDrawInvariantMassCanvasRegion 	= false;
 	bool shouldDrawQuantitiesCanvas 			= true;
-	bool shouldDrawEfficiencyCanvas 			= true;
+	bool shouldDrawEfficiencyCanvas 			= false;
 
-	//Muon id anlyse
+	//Muon id anlyse	
 	bool doTracker    = true;
-	bool doStandalone = true;
-	bool doGlobal     = true;
+	bool doStandalone = false;
+	bool doGlobal     = false;
 
 
 
@@ -269,6 +269,8 @@ void macro()
 		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 	
+
+
 	//Prepare for showing progress
 	lastTime = std::chrono::steady_clock::now();
 	start    = std::chrono::steady_clock::now();
@@ -297,6 +299,10 @@ void macro()
 		}
 	}
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+
+	//Normalize Histograms for variable binning
+	cout << "\n";
+	TNP.normalizeHistograms();	
 
 	//For sideband subtraction
 	if (!isMC)

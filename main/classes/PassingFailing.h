@@ -173,18 +173,20 @@ public:
 		return NULL;
 	}
 
+	void normalizeHistograms()
+	{
+		//Now normalize yields (to adapt variable binning)
+		for (int i = 1; i <= hSig->GetXaxis()->GetNbins(); i++)
+		{
+			hSigBack->SetBinContent(i, hSigBack->GetBinContent(i)/hSigBack->GetBinWidth(i));
+			hBack->SetBinContent(i, hBack->GetBinContent(i)/hBack->GetBinWidth(i));
+		}
+	}
+
 	void subtractSigHistogram()
 	{
 		hSig->Add(hSigBack, 1.);
 		hSig->Add(hBack, -PassFailObj()->subtractionFactor());
-
-		//Now normalize yields (to adapt variable binning)
-		for (int i = 1; i <= hSig->GetXaxis()->GetNbins(); i++)
-		{
-			hSig->SetBinContent(i, hSig->GetBinContent(i)/hSig->GetBinWidth(i));
-			hSigBack->SetBinContent(i, hSigBack->GetBinContent(i)/hSigBack->GetBinWidth(i));
-			hBack->SetBinContent(i, hBack->GetBinContent(i)/hBack->GetBinWidth(i));
-		}
 
 		/*
 		//Set bin errors
