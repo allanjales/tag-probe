@@ -188,7 +188,6 @@ public:
 		hSig->Add(hSigBack, 1.);
 		hSig->Add(hBack, -PassFailObj()->subtractionFactor());
 
-		/*
 		//Set bin errors
 		for (int i = 0; i <= hSig->GetXaxis()->GetNbins(); i++)
 		{
@@ -203,7 +202,6 @@ public:
 
 			hSig->SetBinError(bin_s, error);
 		}
-		*/
 	}
 
 	//Fill histogram
