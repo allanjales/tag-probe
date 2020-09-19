@@ -14,7 +14,7 @@
 #include <chrono>
 #include <TSystem.h>
 
-#include "classes/TagAndProbe.h"
+#include "classes/SidebandSubtraction.h"
 #include "config/cuts.h"
 
 using namespace std;
@@ -108,16 +108,16 @@ void macro()
 		};
 
 	//Create a object and set configs
-	TagAndProbe TNP{resonance};
-	TNP.method 			= method;
-	TNP.canvasWatermark	= canvasWatermark;
-	TNP.directoryToSave = directoryToSave;
-	TNP.doTracker       = doTracker;
-	TNP.doStandalone    = doStandalone;
-	TNP.doGlobal        = doGlobal;
+	SidebandSubtraction SdS{resonance};
+	SdS.method 			= method;
+	SdS.canvasWatermark	= canvasWatermark;
+	SdS.directoryToSave = directoryToSave;
+	SdS.doTracker       = doTracker;
+	SdS.doStandalone    = doStandalone;
+	SdS.doGlobal        = doGlobal;
 
-	cout << "resonance: " << TNP.resonance << endl;
-	cout << "Using method " << TNP.method << endl;
+	cout << "resonance: " << SdS.resonance << endl;
+	cout << "Using method " << SdS.method << endl;
 
 	//Get data size and set data limit if has
 	long long numberEntries = TreePC->GetEntries();
@@ -135,12 +135,12 @@ void macro()
 /*
 	//TEMPORARY FOR TEST
 	TFile *file1 = TFile::Open("../results/Jpsi Run 2011/generated_hist.root");
-	TNP.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
-	TNP.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
-	TNP.Standalone.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Standalone_Muon_InvariantMass");
-	TNP.Standalone.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Standalone_Muon_InvariantMass");
-	TNP.Global.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Global_Muon_InvariantMass");
-	TNP.Global.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Global_Muon_InvariantMass");
+	SdS.Tracker.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Tracker_Muon_InvariantMass");
+	SdS.Tracker.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Tracker_Muon_InvariantMass");
+	SdS.Standalone.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Standalone_Muon_InvariantMass");
+	SdS.Standalone.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Standalone_Muon_InvariantMass");
+	SdS.Global.Mass.Pass.hMass = (TH1D*)file1->Get("histograms/Passing_Global_Muon_InvariantMass");
+	SdS.Global.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Global_Muon_InvariantMass");
 */
 
 	cout << endl;
@@ -163,7 +163,7 @@ void macro()
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{
-			TNP.fillMassHistograms(quantities, types);
+			SdS.fillMassHistograms(quantities, types);
 		}
 	}
 
@@ -171,11 +171,11 @@ void macro()
 
 	//Do function fit ober the histogram
 	if (!isMC)
-		TNP.doFit();
+		SdS.doFit();
 
 	//Get values for invariant mass and sigma from plot
 	if (!isMC)
-		TNP.updateMassValuesAll();
+		SdS.updateMassValuesAll();
 
 	//-------------------------------------
 	// Generate and save files
@@ -197,7 +197,7 @@ void macro()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		SdS.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 	if (shouldDrawInvariantMassCanvasRegion && !isMC)
@@ -206,7 +206,7 @@ void macro()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		TNP.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		SdS.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 	
 
@@ -235,18 +235,18 @@ void macro()
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{	
-			TNP.fillQuantitiesHistograms(quantities, types, isMC);
+			SdS.fillQuantitiesHistograms(quantities, types, isMC);
 		}
 	}
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
 	//Normalize Histograms for variable binning
 	cout << "\n";
-	TNP.normalizeHistograms();	
+	SdS.normalizeHistograms();	
 
 	//For sideband subtraction
 	if (!isMC)
-		TNP.subtractSigHistograms();
+		SdS.subtractSigHistograms();
 
 
 
@@ -256,12 +256,12 @@ void macro()
 		bool shouldSavePNG 	= true;
 
 		cout << endl;
-		TNP.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		SdS.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Debug consistency for histograms
 	if (!isMC)
-		TNP.consistencyDebugCout();
+		SdS.consistencyDebugCout();
 	else
 		cout << "No consistency check needed. It's MC simulations.\n";
 
@@ -275,7 +275,7 @@ void macro()
 		bool writehSig 		= true;
 		bool writehBack 	= true;
 	
-		TNP.writeQuantitiesHistogramsOnFile(writehSigBack, writehSig, writehBack);
+		SdS.writeQuantitiesHistogramsOnFile(writehSigBack, writehSig, writehBack);
 	}
 
 	//Write mass histograms on file
@@ -283,7 +283,7 @@ void macro()
 		bool writehPass = true;
 		bool writehAll 	= true;
 
-		TNP.writeMassHistogramsOnFile(writehPass, writehAll);
+		SdS.writeMassHistogramsOnFile(writehPass, writehAll);
 	}
 
 	//Save plots
@@ -294,7 +294,7 @@ void macro()
 	{
 		bool shouldWrite 	= true;
 
-		TNP.createEfficiencyPlot(shouldWrite);
+		SdS.createEfficiencyPlot(shouldWrite);
 	}
 
 
@@ -308,11 +308,11 @@ void macro()
 		bool shouldSavePNG 	= true;
 
 		cout << endl;
-		TNP.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		SdS.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	//Close files
 	generatedFile->Close();
 
-	cout << "\nDone. All result files can be found at \"" << TNP.directoryToSave << "\"\n\n";
+	cout << "\nDone. All result files can be found at \"" << SdS.directoryToSave << "\"\n\n";
 }

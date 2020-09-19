@@ -1,7 +1,7 @@
 #include "Type.h"
 
 //Holder for 3 Type class
-class TagAndProbe
+class SidebandSubtraction
 {
 public:
 	int method = 1;	// 1 | 2
@@ -195,10 +195,10 @@ public:
 	
 
 
-	TagAndProbe()
+	SidebandSubtraction()
 	{}
 
-	TagAndProbe(const char* resonance)
+	SidebandSubtraction(const char* resonance)
 			: resonance(resonance)
 	{}
 };
