@@ -169,7 +169,7 @@ void macro()
 
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
 
-	//Do function fit ober the histogram
+	//Do function fit over the histogram
 	if (!isMC)
 		SdS.doFit();
 

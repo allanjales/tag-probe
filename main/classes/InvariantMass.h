@@ -7,8 +7,6 @@
 #include "TLatex.h"
 #include "TFrame.h"
 
-#include "RooFitResult.h"
-
 #include <iostream>
 
 using namespace std;
