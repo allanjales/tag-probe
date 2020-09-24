@@ -390,7 +390,7 @@ public:
 		updateMassValuesFor(&All);
 	}
 
-	TCanvas* createCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
+	TCanvas* createMassCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
 	{
 		string canvasName 	= "InvariantMass_" + string(particleType);
 		string canvasTitle	= "Invariant Mass " + string(particleType);
