@@ -34,7 +34,7 @@ public:
 
 	void createMassCanvas(bool drawRegions = false, bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		Mass.createCanvas(drawRegions, shouldWrite, shouldSavePNG);
+		Mass.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
 	void writeMassHistogramsOnFile(bool writehPass, bool writehAll)
