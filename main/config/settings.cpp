@@ -1,3 +1,7 @@
+/*
+What is this file: This file is called in macro.cpp
+What does it do:   It set some main options in this code
+*/
 
 //List of files
 const char *files[] = {"../data_histoall.root",

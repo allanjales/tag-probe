@@ -109,7 +109,6 @@ void macro()
 
 	//Create a object and set configs
 	SidebandSubtraction SdS{resonance};
-	SdS.method 			= method;
 	SdS.canvasWatermark	= canvasWatermark;
 	SdS.directoryToSave = directoryToSave;
 	SdS.doTracker       = doTracker;
@@ -183,7 +182,6 @@ void macro()
 
 	//Supress canvas PROBLEMS BELOW:
 	//- Does not store TBox of sideband subtraction
-	//- Does not save anything in created file .root
 	//gROOT->SetBatch(1);
 
 	//Create file root to store generated files

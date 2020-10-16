@@ -4,7 +4,7 @@
 class SidebandSubtraction
 {
 public:
-	int method = 1;	// 1 | 2
+	int method = 2;	// 1 -> subtraction factor by sideband mean | 2 -> subtraction factor by background fit
 	const char* resonance      = "Jpsi"; // "Jpsi" | "Upsilon"
 	const char* particleName    = "Muon";
 	const char* canvasWatermark = "#bf{CMS Open Data}";
