@@ -4,7 +4,6 @@
 class SidebandSubtraction
 {
 public:
-	int method = 2;	// 1 -> subtraction factor by sideband mean | 2 -> subtraction factor by background fit
 	const char* resonance      = "Jpsi"; // "Jpsi" | "Upsilon"
 	const char* particleName    = "Muon";
 	const char* canvasWatermark = "#bf{CMS Open Data}";
@@ -15,9 +14,9 @@ public:
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
-	Type Tracker    {method, resonance, particleName, canvasWatermark, directoryToSave, "Tracker"};
-	Type Standalone {method, resonance, particleName, canvasWatermark, directoryToSave, "Standalone"};
-	Type Global     {method, resonance, particleName, canvasWatermark, directoryToSave, "Global"};
+	Type Tracker    {resonance, particleName, canvasWatermark, directoryToSave, "Tracker"};
+	Type Standalone {resonance, particleName, canvasWatermark, directoryToSave, "Standalone"};
+	Type Global     {resonance, particleName, canvasWatermark, directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{

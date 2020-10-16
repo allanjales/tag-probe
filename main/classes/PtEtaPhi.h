@@ -3,7 +3,6 @@
 //Holder for 3 set of histograms for each quantity
 class PtEtaPhi{
 private:
-	int& method;
 	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
@@ -26,9 +25,9 @@ public:
 
 	TEfficiency* pEff 	= NULL;
 
-	PassingFailing Pass {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PassingFailing Pass {resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Passing", quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
-	PassingFailing All  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PassingFailing All  {resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"All",     quantityName, xAxisName, quantityUnit, extendedQuantityName, xMin, xMax, nBins, decimals};
 
 	void normalizeHistograms()
@@ -194,7 +193,7 @@ public:
 
 
 
-	PtEtaPhi(int& method,
+	PtEtaPhi(
 		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
@@ -210,8 +209,7 @@ public:
 		double	 	 xMin,
 		double	 	 xMax,
 		int	    	 decimals = 3)
-		  : method(method),
-		    resonance(resonance),
+		  : resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

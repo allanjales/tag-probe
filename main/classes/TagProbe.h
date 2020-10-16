@@ -3,7 +3,6 @@
 //Holder for 3 set of histograms for each quantity
 class TagProbe{
 private:
-	int& method;
 	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
@@ -14,11 +13,11 @@ private:
 public:
 	const char* tagOrProbe = NULL;
 
-	PtEtaPhi Pt  {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Pt  {resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Pt",  "p_{t}", "GeV/c", "Transverse Momentum", 50,  0.00, 80.00};
-	PtEtaPhi Eta {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Eta {resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Eta", "#eta",  "", 	 "Pseudorapidity",      50, -2.50,  2.50};
-	PtEtaPhi Phi {method, resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
+	PtEtaPhi Phi {resonance, particleName, canvasWatermark, directoryToSave, particleType, ObjMass, tagOrProbe,
 		"Phi", "#phi",  "rad",   "Azimuthal Angle",     15, -3.15,  3.15};
 
 	void normalizeHistograms()
@@ -87,7 +86,7 @@ public:
 
 
 
-	TagProbe(int& method,
+	TagProbe(
 		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
@@ -95,8 +94,7 @@ public:
 	 	const char*& particleType,
 	 	InvariantMass& ObjMass,
 	 	const char*  tagOrProbe)
-		  : method(method),
-		    resonance(resonance),
+		  : resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

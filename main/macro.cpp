@@ -116,7 +116,7 @@ void macro()
 	SdS.doGlobal        = doGlobal;
 
 	cout << "resonance: " << SdS.resonance << endl;
-	cout << "Using method " << SdS.method << endl;
+	cout << "Using subtraction factor as integral of background fit\n";
 
 	//Get data size and set data limit if has
 	long long numberEntries = TreePC->GetEntries();

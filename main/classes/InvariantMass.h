@@ -16,7 +16,6 @@ using namespace std;
 
 class InvariantMass{
 private:
-	int& method;
 	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
@@ -328,6 +327,10 @@ public:
 		double value = 0.;
 		double fwhm  = 0.;
 
+		int method = 2; //Default
+		// 1 -> subtraction factor by sideband mean
+		// 2 -> subtraction factor by background fit
+
 		//Default: method == 1
 		{
 			//Get value and uncertain of signal by histogram
@@ -448,14 +451,13 @@ public:
 	
 
 
-	InvariantMass(int& method,
+	InvariantMass(
 		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*& particleType)
-		  : method(method),
-		    resonance(resonance),
+		  : resonance(resonance),
 		    particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

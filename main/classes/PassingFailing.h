@@ -11,7 +11,6 @@ using namespace std;
 //Holder signal, background and signal+background histograms
 class PassingFailing{
 private:
-	int& method;
 	const char*& resonance;
 	const char*& particleName;
 	const char*& canvasWatermark;
@@ -254,7 +253,7 @@ public:
 
 
 
-	PassingFailing(int& method,
+	PassingFailing(
 		const char*& resonance,
 		const char*& particleName,
 		const char*& canvasWatermark,
@@ -271,8 +270,7 @@ public:
 		double& 	 xMax,
 		int&    	 nBins,
 		int&    	 decimals)
-		  : method(method),
-		    resonance(resonance),
+		  : resonance(resonance),
 			particleName(particleName),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),

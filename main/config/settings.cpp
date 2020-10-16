@@ -19,11 +19,7 @@ const char* directoriesToSave[] = {"../results/result/",
 //MAIN OPTIONS
 
 //Which file of files (variable above) should use
-int useFile = 4;
-
-//Choose method
-//if 1 -> sideband by histogram || if 2 -> sideband by fitting
-int method = 2;
+int useFile = 4;;
 
 //Set the canvasW wtermark
 const char* canvasWatermark = "#bf{CMS Open Data}";
