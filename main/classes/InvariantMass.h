@@ -324,8 +324,8 @@ public:
 		double fwhm  = 0.;
 
 		int method = 2; //Default
-		// 1 -> subtraction factor by sideband mean
-		// 2 -> subtraction factor by background fit
+		// 1 -> estimate signal region by FWHM using histograms
+		// 2 -> estimate signal region by FWHM using fitting
 
 		//Default: method == 1
 		{
