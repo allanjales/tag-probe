@@ -66,7 +66,7 @@ public:
 			return &ObjMass.Pass;
 			//return &ObjMass.All;
 
-		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR" << endl;
+		cerr << "Could not find PassFailObj in PassingFailing class: " << particleType << " " << tagOrProbe << " " << quantityName <<  " " << passingOrFailing << " ERROR\n";
 		return NULL;
 	}
 

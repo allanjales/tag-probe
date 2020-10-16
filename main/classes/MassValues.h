@@ -52,7 +52,7 @@ struct MassValues
 		}
 		else
 		{
-			cerr << "WARNING: not using advanced method for subtraction factor calculation. Using method for linear background." << endl;
+			cerr << "\nWARNING: not using advanced method for subtraction factor calculation. Using method for linear background.\n";
 		}
 
 		return signalRegion/sidebandRegion;
@@ -143,9 +143,9 @@ struct MassValues
 		
 		/*
 		//TEST
-		cout << "Entries  (TH1): " << hMass->GetEntries() << endl;
-		cout << "Integral (TH1): " << hMass->Integral(0, hMass->GetNbinsX()+1) << endl;
-		cout << "Integral (TF1): " << f->Integral(xMin, xMax)/hMass->GetBinWidth(0) << endl;
+		cout << "Entries  (TH1): " << hMass->GetEntries() << "\n";
+		cout << "Integral (TH1): " << hMass->Integral(0, hMass->GetNbinsX()+1) << "\n";
+		cout << "Integral (TF1): " << f->Integral(xMin, xMax)/hMass->GetBinWidth(0) << "\n";
 		*/
 		cout << "chi2/ndf = " << (fitResult)->Chi2()/(fitResult)->Ndf() << "\n";
 	}

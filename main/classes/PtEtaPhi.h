@@ -88,18 +88,18 @@ public:
 			cerr << "--- Consistency error detected! Showing problematic bins of histograms ---\n";
 			cerr << "Error at: " << pTitle << "\n";
 			int nbinsx = hPass->GetXaxis()->GetNbins();
-			cout << "Bins : " << nbinsx << endl;
+			cout << "Bins : " << nbinsx << "\n";
 			for (int i = 0; i < nbinsx; i++)
 			{
 				if (hTotal->GetBinContent(i) - hPass->GetBinContent(i) < 0)
 				{
-					//cout << "Bin " << i << " with problems | T:" <<  hTotal->GetBinContent(i) << " - P:" << hPass->GetBinContent(i) << endl;
-					cout << "Bin " << i << " with problems | P:" <<  hPass->GetBinContent(i) << " : T:" << hTotal->GetBinContent(i) << endl;
+					//cout << "Bin " << i << " with problems | T:" <<  hTotal->GetBinContent(i) << " - P:" << hPass->GetBinContent(i) << "\n";
+					cout << "Bin " << i << " with problems | P:" <<  hPass->GetBinContent(i) << " : T:" << hTotal->GetBinContent(i) << "\n";
 					cout << "-> Pass  : " << Pass.hSigBack->GetBinContent(i) << " - " << Pass.hBack->GetBinContent(i) << "a = " << Pass.hSig->GetBinContent(i) << " (a = "<< Pass.PassFailObj()->subtractionFactor() << ")\n";
 					cout << "-> Total : " << All .hSigBack->GetBinContent(i) << " - " << All .hBack->GetBinContent(i) << "a = " << All .hSig->GetBinContent(i) << " (a = "<< All .PassFailObj()->subtractionFactor() << ")\n";
 				}
 			}
-			cerr << "Consistency ERROR! Program stopped" << endl;
+			cerr << "Consistency ERROR! Program stopped" << "\n";
 			abort();
 		}
 		*/

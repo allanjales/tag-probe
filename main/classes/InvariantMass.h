@@ -301,23 +301,19 @@ public:
 	{
 		if (strcmp(resonance, "Jpsi") == 0)
 		{
-			cout << endl;
-			cout << "Fitting Passing in " << particleType << " " << particleName << "...\n";
+			cout << "\nFitting Passing in " << particleType << " " << particleName << "...\n";
 			Pass.doFitJpsi();
 
-			cout << endl;
-			cout << "Fitting All in " << particleType << " " << particleName << "...\n";
+			cout << "\nFitting All in " << particleType << " " << particleName << "...\n";
 			All.doFitJpsi();
 		}
 
 		if (strcmp(resonance, "Upsilon") == 0)
 		{
-			cout << endl;
-			cout << "Fitting Passing in " << particleType << " " << particleName << "...\n";
+			cout << "\nFitting Passing in " << particleType << " " << particleName << "...\n";
 			Pass.doFitUpsilon();
 
-			cout << endl;
-			cout << "Fitting All in " << particleType << " " << particleName << "...\n";
+			cout << "\nFitting All in " << particleType << " " << particleName << "...\n";
 			All.doFitUpsilon();
 		}
 	}

@@ -30,7 +30,7 @@ void macro()
 	//Check if the name of dir is ok
 	if (string(directoryToSave).back() != string("/"))
 	{
-		cerr << "To avoid errors, please end the result directory with a \"/\"" << endl;
+		cerr << "To avoid errors, please end the result directory with a \"/\"\n";
 		abort();
 	}
 
@@ -39,18 +39,18 @@ void macro()
 	{
 		if (gSystem->mkdir(directoryToSave, true))
 		{
-			cerr << "\"" << directoryToSave << "\" path could not be found and could not be created ERROR" << endl;
-			cerr << "Try to create manually this folder path" << endl;
+			cerr << "\"" << directoryToSave << "\" path could not be found and could not be created ERROR\n";
+			cerr << "Try to create manually this folder path\n";
 			abort();
 		}
 		else
 		{
-			cout << "\"" << directoryToSave << "\" directory created OK" << endl;
+			cout << "\"" << directoryToSave << "\" directory created OK\n";
 		}
 	}
 	else
 	{
-		cout << "\"" << directoryToSave << "\" directory OK" << endl;
+		cout << "\"" << directoryToSave << "\" directory OK\n";
 	}
 
 
@@ -64,7 +64,7 @@ void macro()
 	TFile *file0  = TFile::Open(files[useFile]);
 	TTree *TreePC = (TTree*)file0->Get((folderName + "PlotControl").data());
 	TTree *TreeAT = (TTree*)file0->Get((folderName + "AnalysisTree").data());
-	cout << "Using \"" << files[useFile] << "\" ntupple" << endl;
+	cout << "Using \"" << files[useFile] << "\" ntupple\n";
 	
 	//Create variables
 	double ProbeMuon_Pt;
@@ -115,7 +115,7 @@ void macro()
 	SdS.doStandalone    = doStandalone;
 	SdS.doGlobal        = doGlobal;
 
-	cout << "resonance: " << SdS.resonance << endl;
+	cout << "resonance: " << SdS.resonance << "\n";
 	cout << "Using subtraction factor as integral of background fit\n";
 
 	//Get data size and set data limit if has
@@ -142,8 +142,7 @@ void macro()
 	SdS.Global.Mass.All.hMass = (TH1D*)file1->Get("histograms/All_Global_Muon_InvariantMass");
 */
 
-	cout << endl;
-	cout << "Filling Invariant Mass Histograms..... (1/2)" << endl;
+	cout << "\nFilling Invariant Mass Histograms..... (1/2)\n";
 
 	//Loop between the components
 	for (long long i = 0; i < numberEntries; i++)
@@ -166,7 +165,7 @@ void macro()
 		}
 	}
 
-	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms\n";
 
 	//Do function fit over the histogram
 	if (!isMC)
@@ -213,8 +212,7 @@ void macro()
 	lastTime = std::chrono::steady_clock::now();
 	start    = std::chrono::steady_clock::now();
 
-	cout << endl;
-	cout << "Filling Quantities Histograms..... (2/2)" << endl;
+	cout << "\nFilling Quantities Histograms..... (2/2)\n";
 
 	//Loop between the components again
 	for (long long i = 0; i < numberEntries; i++)
@@ -236,7 +234,7 @@ void macro()
 			SdS.fillQuantitiesHistograms(quantities, types, isMC);
 		}
 	}
-	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms" << endl;
+	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms\n";
 
 	//Normalize Histograms for variable binning
 	cout << "\n";
@@ -253,7 +251,7 @@ void macro()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		cout << endl;
+		cout << "\n";
 		SdS.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
@@ -305,7 +303,7 @@ void macro()
 		bool shouldWrite 	= true;
 		bool shouldSavePNG 	= true;
 
-		cout << endl;
+		cout << "\n";
 		SdS.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
