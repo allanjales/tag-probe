@@ -9,15 +9,16 @@
 //CONFIGS
 
 int useScheme = 0;
-//Upsilon Sideband Run vs Upsilon Sideband MC
-//Upsilon Fitting  Run vs Upsilon Fitting  MC
-//Upsilon Sideband Run vs Upsilon Fitting  Run
-//Jpsi    Sideband Run vs Jpsi    Sideband MC
-//Jpsi    Fitting  Run vs Jpsi    Fitting  MC
-//Jpsi    Sideband Run vs Jpsi    Fitting  Run
+//Jpsi    Sideband Run vs Jpsi    Fitting  Run vs Monte Carlo
+//Upsilon Sideband Run vs Upsilon Fitting  Run vs Monte Carlo
+
+//Muon id anlyse
+bool doTracker    = true;
+bool doStandalone = true;
+bool doGlobal     = true;
 
 //Root files and paths for Tefficiency objects inside these files
-const char* filePathsEff0[][2] = {
+const char* sid_run_upsilon[][2] = {
 	{"../results/Upsilon_Run_2011/generated_hist.root", "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency"},
 	{"../results/Upsilon_Run_2011/generated_hist.root", "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency"},
 	{"../results/Upsilon_Run_2011/generated_hist.root", "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency"},
@@ -29,8 +30,43 @@ const char* filePathsEff0[][2] = {
 	{"../results/Upsilon_Run_2011/generated_hist.root", "efficiency/plots/Muon_Phi_Global_Probe_Efficiency"}
 };
 
-//Root files and paths for Tefficiency objects inside these files
-const char* filePathsEff1[][2] = {
+const char* sid_run_jpsi[][2] = {
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Pt_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Eta_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Phi_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Pt_Global_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Eta_Global_Probe_Efficiency"},
+	{"../results/Jpsi_Run_2011/generated_hist.root", "efficiency/plots/Muon_Phi_Global_Probe_Efficiency"}
+};
+
+const char* fit_run_upsilon[][2] = {
+	{"../../result_thomas/Upsilon/Tracker/pT/Efficiency_Run2011.root",     "Efficiency"},
+	{"../../result_thomas/Upsilon/Tracker/Eta/Efficiency_Run2011.root",    "Efficiency"},
+	{"../../result_thomas/Upsilon/Tracker/Phi/Efficiency_Run2011.root",    "Efficiency"},
+	{"../../result_thomas/Upsilon/Standalone/pT/Efficiency_Run2011.root",  "Efficiency"},
+	{"../../result_thomas/Upsilon/Standalone/Eta/Efficiency_Run2011.root", "Efficiency"},
+	{"../../result_thomas/Upsilon/Standalone/Phi/Efficiency_Run2011.root", "Efficiency"},
+	{"../../result_thomas/Upsilon/Global/pT/Efficiency_Run2011.root",      "Efficiency"},
+	{"../../result_thomas/Upsilon/Global/Eta/Efficiency_Run2011.root",     "Efficiency"},
+	{"../../result_thomas/Upsilon/Global/Phi/Efficiency_Run2011.root",     "Efficiency"}
+};
+
+const char* fit_run_jpsi[][2] = {
+	{"../../result_thomas/JPsi/Tracker/pT/Efficiency_Run2011.root",     "Efficiency"},
+	{"../../result_thomas/JPsi/Tracker/Eta/Efficiency_Run2011.root",    "Efficiency"},
+	{"../../result_thomas/JPsi/Tracker/Phi/Efficiency_Run2011.root",    "Efficiency"},
+	{"../../result_thomas/JPsi/Standalone/pT/Efficiency_Run2011.root",  "Efficiency"},
+	{"../../result_thomas/JPsi/Standalone/Eta/Efficiency_Run2011.root", "Efficiency"},
+	{"../../result_thomas/JPsi/Standalone/Phi/Efficiency_Run2011.root", "Efficiency"},
+	{"../../result_thomas/JPsi/Global/pT/Efficiency_Run2011.root",      "Efficiency"},
+	{"../../result_thomas/JPsi/Global/Eta/Efficiency_Run2011.root",     "Efficiency"},
+	{"../../result_thomas/JPsi/Global/Phi/Efficiency_Run2011.root",     "Efficiency"}
+};
+
+const char* mc_upsilon[][2] = {
 	{"../results/Upsilon_MC_2020/generated_hist.root", "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency"},
 	{"../results/Upsilon_MC_2020/generated_hist.root", "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency"},
 	{"../results/Upsilon_MC_2020/generated_hist.root", "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency"},
@@ -42,48 +78,75 @@ const char* filePathsEff1[][2] = {
 	{"../results/Upsilon_MC_2020/generated_hist.root", "efficiency/plots/Muon_Phi_Global_Probe_Efficiency"}
 };
 
+const char* mc_jpsi[][2] = {
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Pt_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Eta_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Phi_Tracker_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Pt_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Eta_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Phi_Standalone_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Pt_Global_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Eta_Global_Probe_Efficiency"},
+	{"../results/Jpsi_MC_2020/generated_hist.root", "efficiency/plots/Muon_Phi_Global_Probe_Efficiency"}
+};
+
 //How comparisons will be saved
 const char* resultNames[] = {
-	"Muon_Pt_Tracker_Probe_Efficiency.png",
-	"Muon_Eta_Tracker_Probe_Efficiency.png",
-	"Muon_Phi_Tracker_Probe_Efficiency.png",
-	"Muon_Pt_Standalone_Probe_Efficiency.png",
-	"Muon_Eta_Standalone_Probe_Efficiency.png",
-	"Muon_Phi_Standalone_Probe_Efficiency.png",
-	"Muon_Pt_Global_Probe_Efficiency.png",
-	"Muon_Eta_Global_Probe_Efficiency.png",
-	"Muon_Phi_Global_Probe_Efficiency.png"
+	"Muon_Pt_Tracker_Probe_Efficiency.pdf",
+	"Muon_Eta_Tracker_Probe_Efficiency.pdf",
+	"Muon_Phi_Tracker_Probe_Efficiency.pdf",
+	"Muon_Pt_Standalone_Probe_Efficiency.pdf",
+	"Muon_Eta_Standalone_Probe_Efficiency.pdf",
+	"Muon_Phi_Standalone_Probe_Efficiency.pdf",
+	"Muon_Pt_Global_Probe_Efficiency.pdf",
+	"Muon_Eta_Global_Probe_Efficiency.pdf",
+	"Muon_Phi_Global_Probe_Efficiency.pdf"
 };
 
 //Label of each comparison
-const char* labelScheme[][2] = {
-	{"#Upsilon real data", "Simulated data"},
-	{"#Upsilon real data", "Simulated data"},
-	{"#Upsilon Sideband",  "#Upsilon Fitting"},
-	{"J/#psi real data",   "Simulated data"},
-	{"J/#psi real data",   "Simulated data"},
-	{"J/#psi Sideband",    "J/#psi Fitting"}
+const char* labelScheme[][3] = {
+	{"J/#psi Sideband",       "J/#psi Fitting",       "Simulated data"},
+	{"#Upsilon(1S) Sideband", "#Upsilon(1S) Fitting", "Simulated data"}
 };
 
 //Where to save each comparison
 const char* directoriesToSave[] = {
-	"../results/Comparison_Upsilon_Sideband_Run_vs_MC/",
-	"../results/Comparison_Upsilon_Fitting_Run_vs_MC/",
-	"../results/Comparison_Upsilon_Sideband_vs_Fitting/",
-	"../results/Comparison_Jpsi_Sideband_Run_vs_MC/",
-	"../results/Comparison_Jpsi_Fitting_Run_vs_MC/",
-	"../results/Comparison_Jpsi_Sideband_vs_Fitting/"
+	"../results/Comparison/Comparison_Jpsi/",
+	"../results/Comparison/Comparison_Upsilon/"
 };
 
 //Colors for each comparison
-int colorScheme[][2] = {
-	{kGreen - 2, kRed},
-	{kGreen - 2, kRed},
-	{kRed - 4,   kBlue + 1},
-	{kBlue,      kRed},
-	{kBlue,      kRed},
-	{kRed - 4,   kBlue + 1}
+int colorScheme[][3] = {
+	{kBlue + 1, kGreen - 2, kRed - 4},
+	{kBlue + 1, kGreen - 2, kRed - 4}
 };
+
+//Choose a option between two
+const char* chooseOption(int item, const char* option0, const char* option1, const char* option2)
+{
+	switch (item)
+	{
+		case 0:  return option0;
+		case 1:  return option1;
+		case 2:  return option2;
+		default: return NULL;
+	}
+}
+
+//Get a file path
+const char* getFilePath(int index, int row, int col)
+{
+	switch (useScheme)
+	{
+		case 0:  return chooseOption(index, sid_run_jpsi   [row][col], fit_run_jpsi   [row][col], mc_jpsi   [row][col]);
+		case 1:  return chooseOption(index, sid_run_upsilon[row][col], fit_run_upsilon[row][col], mc_upsilon[row][col]);
+		default:
+			std::cerr << "ERROR: useScheme not found\n";
+			std::cerr << "ABORTING...\n";
+			abort();
+			return NULL;
+	}
+}
 
 //Get TEfficiency from file_path
 TEfficiency* get_eff_plot(const char* file_path, const char* hist_path)
@@ -110,7 +173,7 @@ TEfficiency* get_eff_plot(const char* file_path, const char* hist_path)
 }
 
 //Compare two Tefficiencies and save
-void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName, const char* quantity = "")
+void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, TEfficiency* pEff2, string resultName, const char* quantity = "")
 {
 	//Create canvas
 	TCanvas* c1 = new TCanvas();
@@ -120,13 +183,18 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 	//Plot
 	pEff0->SetMarkerColor(colorScheme[useScheme][0]);
 	pEff0->SetLineColor(colorScheme[useScheme][0]);
-	pEff0->SetLineWidth(2);
+	pEff0->SetLineWidth(1);
 	pEff0->Draw();
 
 	pEff1->SetMarkerColor(colorScheme[useScheme][1]);
 	pEff1->SetLineColor(colorScheme[useScheme][1]);
-	pEff1->SetLineWidth(2);
+	pEff1->SetLineWidth(1);
 	pEff1->Draw("same");
+
+	pEff2->SetMarkerColor(colorScheme[useScheme][2]);
+	pEff2->SetLineColor(colorScheme[useScheme][2]);
+	pEff2->SetLineWidth(1);
+	pEff2->Draw("same");
 	
 	//Set range in y axis
 	gPad->Update();
@@ -142,7 +210,7 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 		graph->SetMinimum(0.5);
 		graph->SetMaximum(1.2);
 
-		pEff0->SetTitle("Efficiency of Tracker Muon Probe;p_{T} [GeV/c];Efficiency");
+		//pEff0->SetTitle("Efficiency of Tracker Muon Probe;p_{T} [GeV/c];Efficiency");
 	}
 	
 	//Set range if is eta
@@ -152,7 +220,7 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 		graph->SetMinimum(0.8);
 		graph->SetMaximum(1.08);
 
-		pEff0->SetTitle("Efficiency of Tracker Muon Probe;#eta;Efficiency");
+		//pEff0->SetTitle("Efficiency of Tracker Muon Probe;#eta;Efficiency");
 	}
 	
 	//Set range if is phi
@@ -161,14 +229,15 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 		graph->SetMinimum(0.8);
 		graph->SetMaximum(1.08);
 
-		pEff0->SetTitle("Efficiency of Tracker Muon Probe;#phi [rad];Efficiency");
+		//pEff0->SetTitle("Efficiency of Tracker Muon Probe;#phi [rad];Efficiency");
 	}
 
 	//Legenda
-	TLegend* tl = new TLegend(0.68,0.78,0.94,0.88);
+	TLegend* tl = new TLegend(0.68,0.73,0.94,0.88);
 	tl->SetTextSize(0.04);
 	tl->AddEntry(pEff0, labelScheme[useScheme][0], "lp");
 	tl->AddEntry(pEff1, labelScheme[useScheme][1], "lp");
+	tl->AddEntry(pEff2, labelScheme[useScheme][2], "lp");
 	tl->Draw();
 
 	//CMS Open Data
@@ -190,17 +259,17 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 	{
 		if (gSystem->mkdir(directoryToSave, true))
 		{
-			cerr << "\"" << directoryToSave << "\" directory not found and could not be created ERROR" << endl;
+			cerr << "\"" << directoryToSave << "\" directory not found and could not be created ERROR\n";
 			abort();
 		}
 		else
 		{
-			cout << "\"" << directoryToSave << "\" directory created OK" << endl;
+			cout << "\"" << directoryToSave << "\" directory created OK\n";
 		}
 	}
 	else
 	{
-		cout << "\"" << directoryToSave << "\" directory OK" << endl;
+		cout << "\"" << directoryToSave << "\" directory OK\n";
 	}
 
 	//Path of file
@@ -212,16 +281,25 @@ void compare_eff_plot(TEfficiency* pEff0, TEfficiency* pEff1, string resultName,
 //Compare efficiency
 void compare_efficiency()
 {
-	//Get lists of file
-	int arraySize = sizeof(filePathsEff0)/sizeof(*filePathsEff0);
-	for (int i = 0; i < arraySize; i++)
+	for (int i = 0; i < 9; i++)
 	{
+		if (!doTracker    && i < 3)
+			continue;
+		if (!doStandalone && i >= 3 && i < 6)
+			continue;
+		if (!doGlobal     && i >= 6)
+			continue;
+
 		//Get Tefficiency object
-		TEfficiency* pEff0 = get_eff_plot(filePathsEff0[i][0], filePathsEff0[i][1]);
-		TEfficiency* pEff1 = get_eff_plot(filePathsEff1[i][0], filePathsEff1[i][1]);
+		TEfficiency* pEff0 = get_eff_plot(getFilePath(0,i,0), getFilePath(0,i,1));
+		TEfficiency* pEff1 = get_eff_plot(getFilePath(1,i,0), getFilePath(1,i,1));
+		TEfficiency* pEff2 = get_eff_plot(getFilePath(2,i,0), getFilePath(2,i,1));
 
 		//Name of file
 		string resultName = resultNames[i];
+
+		std::cout << "\nEvaluating: " << resultName << "\n";
+		std::cout << "----------------------------------\n";
 
 		//Get which quantity is working on
 		const char* quantity = "";
@@ -237,7 +315,8 @@ void compare_efficiency()
 
 
 		//Compare efficiency polts
-		compare_eff_plot(pEff0, pEff1, resultName, quantity);
+		compare_eff_plot(pEff0, pEff1, pEff2, resultName, quantity);
+		std::cout << "----------------------------------\n";
 	}
 
 	cout << "\nUse Scheme: " << useScheme << "\n";

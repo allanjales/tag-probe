@@ -26,66 +26,28 @@ void createHistogram(TH1D* &histo, const char* histoName)
 	//Variable bin for pT
 	if (strcmp(quantityName, "Pt") == 0)
 	{
-		double xbins[10000];
-		xbins[0] = .0;
-		int nbins = 0;
-		double binWidth = 1.;
-		for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
-		{
-			xbins[i] = xbins[i-1] < 1. ? 1. : xbins[i-1] *(1+binWidth);
-			nbins++;
-		}
-
+		double xbins[] = {0., 2.0, 3.4, 4.0, 4.4, 4.7, 5.0, 5.6, 5.8, 6.0, 6.2, 6.4, 6.6, 6.8, 7.3, 9.5, 13.0, 17.0, 40.};
+		
+		int nbins = sizeof(xbins)/sizeof(*xbins) - 1;
 		histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
 	}
 
 	//Variable bin for eta
 	else if (strcmp(quantityName, "Eta") == 0)
 	{
-		double xbins[10000];
-		xbins[0] = .5;
-		int nbins = 0;
-		double binWidth = 0.2;
-
-		//For positive
-		for (int i = 1; xbins[i-1] < xMax+binWidth; i++)
-		{
-			xbins[i] = xbins[i-1] < 1. ? 1. : xbins[i-1] *(1+binWidth);
-			nbins++;
-		}
-
-		//Duplicate array and create another
-		double rxbins[nbins*2+1];
-		int entry = 0;
-		for (int i = nbins; i >= 0; i--)
-		{
-			rxbins[entry] = -xbins[i];
-			entry++;
-		}
-		rxbins[entry] = 0.;
-		entry++;
-		for (int i = 0; i <= nbins; i++)
-		{
-			rxbins[entry] = xbins[i];
-			entry++;
-		}
+		double xbins[] = {-2.4, -1.8, -1.4, -1.2, -1.0, -0.8, -0.5, -0.2, 0, 0.2, 0.5, 0.8, 1.0, 1.2, 1.4, 1.8, 2.4};
 		
-		histo = new TH1D(hName.data(), hTitle.data(), entry-1, rxbins);
+		int nbins = sizeof(xbins)/sizeof(*xbins) - 1;
+		histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
 	}
 
 	//Bins for phi 
 	else
 	{
-		if (strcmp(quantityUnit, "") == 0)
-		{
-			yAxisTitleForm += " / (%1." + to_string(decimals) + "f)";
-		}
-		else
-		{
-			yAxisTitleForm += " / (%1." + to_string(decimals) + "f " + string(quantityUnit) + ")";
-		}
-
-		histo = new TH1D(hName.data(), hTitle.data(), nBins, xMin, xMax);
+		double xbins[] = {-3.0, -1.8, -1.6, -1.2, -1.0, -0.7, -0.4, -0.2, 0, 0.2, 0.4, 0.7, 1.0, 1.2, 1.6, 1.8, 3.0};
+		
+		int nbins = sizeof(xbins)/sizeof(*xbins) - 1;
+		histo = new TH1D(hName.data(), hTitle.data(), nbins, xbins);
 	}
 
 	//Edit histogram axis

@@ -11,15 +11,15 @@ const char *files[] = {"../data_histoall.root",
 						"../Upsilon1SToMuMu_MC_full.root"};
 
 const char* directoriesToSave[] = {"../results/result/",
-									"../results/Jpsi Run 2011/",
-									"../results/Jpsi MC 2020/",
-									"../results/Upsilon Run 2011/",
-									"../results/Upsilon MC 2020/"};
+									"../results/Jpsi_Run_2011/",
+									"../results/Jpsi_MC_2020/",
+									"../results/Upsilon_Run_2011/",
+									"../results/Upsilon_MC_2020/"};
 
 //MAIN OPTIONS
 
 //Which file of files (variable above) should use
-int useFile = 4;
+int useFile = 1;
 
 //Set the canvasW wtermark
 const char* canvasWatermark = "#bf{CMS Open Data}";
@@ -58,7 +58,7 @@ if (useFile == 2 || useFile == 4)
 
 //Auto detect limit of data
 if (limitData > 0)
-	directoryToSave = "../partial result/";
+	directoryToSave = "../partial_result/";
 
 
 
