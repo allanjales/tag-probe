@@ -13,22 +13,13 @@ After download one of those files, you can run the code. Don't forget to use `in
 
 ## Preferences and setup
 
-You can change the method to estimate signal region by modifying `int method` by choosing 1 (estimate by FWHM using histograms) or 2 (estimate by FWHM using fitting):
-
-```cpp
-int method = 1;
-```
-
 Change this line to specify the ntupple you are analysing by choosing 0 (old ntupple), 1 (run 2011 ntupple) or 2 (monte carlo ntupple):
 
 ```cpp
 int useFile = 1;
 ```
 
-More options are below the line
-```cpp
-//Options to change
-```
+More options can be found at `config` folder
 
 ## Development setting and run
 

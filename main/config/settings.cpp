@@ -19,7 +19,7 @@ const char* directoriesToSave[] = {"../results/result/",
 //MAIN OPTIONS
 
 //Which file of files (variable above) should use
-int useFile = 1;
+int useFile = 4;
 
 //Set the canvasW wtermark
 const char* canvasWatermark = "#bf{CMS Open Data}";
@@ -50,6 +50,8 @@ bool doGlobal     = true;
 const char* resonance = "Jpsi";
 if (useFile > 2)
 	resonance = "Upsilon";
+if (useFile == 4)
+	resonance = "Upsilon1S";
 
 //Auto detect if is MC due file index
 bool isMC = false;

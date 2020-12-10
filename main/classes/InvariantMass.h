@@ -316,6 +316,15 @@ public:
 			cout << "\nFitting All in " << particleType << " " << particleName << "...\n";
 			All.doFitUpsilon();
 		}
+
+		if (strcmp(resonance, "Upsilon1S") == 0)
+		{
+			cout << "\nFitting Passing in " << particleType << " " << particleName << "...\n";
+			Pass.doFitUpsilon1S();
+
+			cout << "\nFitting All in " << particleType << " " << particleName << "...\n";
+			All.doFitUpsilon1S();
+		}
 	}
 
 	void updateMassValuesFor(MassValues* ObjMassValues, bool isAll = false)
@@ -470,6 +479,13 @@ public:
 		}
 
 		if (strcmp(resonance, "Upsilon") == 0)
+		{
+			xMin  = 8.7;
+			xMax  = 11.;
+			nBins = 60;
+		}
+
+		if (strcmp(resonance, "Upsilon1S") == 0)
 		{
 			xMin  = 8.7;
 			xMax  = 11.;

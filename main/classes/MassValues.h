@@ -152,7 +152,6 @@ struct MassValues
 
 	void doFitUpsilon()
 	{
-		cout << fixed;
 		TF1* &f  	= fitFunction;
 		TF1* &fs 	= fitSignal;
 		TF1* &fb 	= fitBackground;
@@ -244,6 +243,98 @@ struct MassValues
 		fb->SetLineStyle(kDashDotted);				//Fit style
 		fb->SetLineWidth(3);						//Fit width
 
+		cout << "chi2/ndf = " << (fitResult)->Chi2()/(fitResult)->Ndf() << "\n";
+	}
+
+	void doFitUpsilon1S()
+	{
+		TF1* &f  	= fitFunction;
+		TF1* &fs 	= fitSignal;
+		TF1* &fb 	= fitBackground;
+
+		double xMin = hMass->GetXaxis()->GetXmin();
+		double xMax = hMass->GetXaxis()->GetXmax();
+
+		const char* const fittingParName[] = {
+				"Gaus(Sg) Height  ",
+				"Gaus(Sg) Position",
+				"Gaus(Sg) Sigma   ",
+
+				"CB  (Sg) Alpha   ",
+				"CB  (Sg) N       ",
+				"CB  (Sg) Mean    ",
+				"CB  (Sg) Sigma   ",
+				"CB  (Sg) Yield   ",
+
+				"Exp1(Bg) Height  ",
+				"Exp1(Bg) Width   "
+			};
+
+		int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
+
+		//Fit Function
+		f = new TF1("FitFunction", FitFunctions::Jpsi::InvariantMass, xMin, xMax, arraySize);
+		f->SetNpx(1000);
+		f->SetLineStyle(kSolid);
+		f->SetLineColor(kBlue);
+		f->SetLineWidth(3);
+
+		//Rename parameters
+		double resultParameters[arraySize];
+		for (int i = 0; i < arraySize; i++)
+		{
+			f->SetParName(i, fittingParName[i]);
+		}
+		
+		//Values Signal GS
+		f->SetParameter(0,	4269.);
+		f->SetParameter(1,	9.46030);
+		f->SetParameter(2,	0.0206);
+
+		//Values Signal CB
+		f->SetParameter(3,	1.71);
+		f->SetParameter(4,	9.46030);
+		f->SetParameter(5,	3.09);
+		f->SetParameter(6,	0.038);
+		f->SetParameter(7,	37365.9);
+
+		//Values Background
+		f->SetParameter(8,	742631);
+		f->SetParameter(9,	-1.91);
+
+		//Set par limits
+		f->SetParLimits(1, 9.3, 9.6);
+		f->SetParLimits(2, 0.01, 0.2);
+
+		f->SetParLimits(5, 9.3, 9.6);
+		f->SetParLimits(6, 0.01, 0.2);
+
+		//Fit function
+		fitResult = hMass->Fit(f, "RNS", "", xMin, xMax);
+		f->GetParameters(resultParameters);
+		
+		//Signal Fitting
+		fs = new TF1("FitFunction_Signal", FitFunctions::Jpsi::Signal_InvariantMass, xMin, xMax, 8);
+		fs->SetNpx(1000);							//Resolution of signal fit function
+		fs->SetParameters(resultParameters);		//Get only signal part
+		fs->SetLineColor(kMagenta); 				//Fit Color
+		fs->SetLineStyle(kSolid);					//Fit Style
+		fs->SetLineWidth(3);						//Fit width
+
+		//Background Fitting
+		fb = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 2);
+		fb->SetNpx(1000);							//Resolution of background fit function
+		fb->SetParameters(&resultParameters[8]);	//Get only background part
+		fb->SetLineColor(kBlue); 					//Fit Color
+		fb->SetLineStyle(kDashDotted);				//Fit style
+		fb->SetLineWidth(3);						//Fit width
+		
+		/*
+		//TEST
+		cout << "Entries  (TH1): " << hMass->GetEntries() << "\n";
+		cout << "Integral (TH1): " << hMass->Integral(0, hMass->GetNbinsX()+1) << "\n";
+		cout << "Integral (TF1): " << f->Integral(xMin, xMax)/hMass->GetBinWidth(0) << "\n";
+		*/
 		cout << "chi2/ndf = " << (fitResult)->Chi2()/(fitResult)->Ndf() << "\n";
 	}
 
