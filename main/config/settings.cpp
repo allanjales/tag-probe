@@ -5,16 +5,16 @@ What does it do:   It set some main options in this code
 
 //List of files
 const char *files[] = {"../data_histoall.root",
-						"../Run2011AMuOnia_mergeNtuple.root",""
+						"../Run2011AMuOnia_mergeNtuple.root",
 						"../JPsiToMuMu_mergeMCNtuple.root",
 						"../Run2011A_MuOnia_Upsilon.root",
 						"../Upsilon1SToMuMu_MC_full.root"};
 
 const char* directoriesToSave[] = {"../results/result/",
 									"../results/Jpsi_Run_2011/",
-									"../results/Jpsi_MC_2020/",
+									"../results/Jpsi_MC_2020_sbs/",
 									"../results/Upsilon_Run_2011/",
-									"../results/Upsilon_MC_2020/"};
+									"../results/Upsilon_MC_2020_sbs/"};
 
 //MAIN OPTIONS
 
@@ -55,6 +55,7 @@ if (useFile > 2)
 bool isMC = false;
 if (useFile == 2 || useFile == 4)
 	isMC = true;
+isMC = false;
 
 //Auto detect limit of data
 if (limitData > 0)

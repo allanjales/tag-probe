@@ -150,81 +150,65 @@ private:
 			if (strcmp(resonance, "Upsilon") == 0)
 			{
 				const char* const fittingParName[] = {
-						"CB  (1S) Alpha   ",
-						"CB  (1S) N       ",
-						"CB  (1S) Mean    ",
-						"CB  (1S) Sigma   ",
-						"CB  (1S) Yield   ",
+						"Gaus(Sg) Height  ",
+						"Gaus(Sg) Position",
+						"Gaus(Sg) Sigma   ",
 
-						"Gaus(2S) Height  ",
-						"Gaus(2S) Position",
-						"Gaus(2S) Sigma   ",
+						"CB  (Sg) Alpha   ",
+						"CB  (Sg) N       ",
+						"CB  (Sg) Mean    ",
+						"CB  (Sg) Sigma   ",
+						"CB  (Sg) Yield   ",
 
-						"Gaus(3S) Height  ",
-						"Gaus(3S) Position",
-						"Gaus(3S) Sigma   ",
-
-						"Pol3(Bg) Height  ",
-						"Pol3(Bg) Width   ",
-						"Pol3(Bg) Height  ",
-						"Pol3(Bg) Width   "
+						"Exp1(Bg) Height  ",
+						"Exp1(Bg) Width   ",
+						"Exp2(Bg) Height  ",
+						"Exp2(Bg) Width   "
 					};
 
 				//Change the size of TLegend
-				tl->SetY1(tl->GetY1() - tl->GetTextSize()*4);
+				tl->SetY1(tl->GetY1() - tl->GetTextSize()*3);
 
 				//Get parameters of fit
 				int arraySize = sizeof(fittingParName)/sizeof(*fittingParName);
 				double fitParameters[arraySize];
 				fFit->GetParameters(fitParameters);
+
+				//Signal Gaus Fitting
+				TF1* fitGaus = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
+				fitGaus->SetNpx(1000);						//Resolution of signal fit function
+				fitGaus->SetParameters(fitParameters);		//Get only signal part
+				fitGaus->SetLineColor(kMagenta); 			//Fit Color
+				fitGaus->SetLineStyle(kDashed);				//Fit Style
+				fitGaus->SetLineWidth(3);					//Fit width
+				fitGaus->Draw("same");
+				for (int i = 0; i < arraySize; i++)
+					fitGaus->SetParName(i, fittingParName[i]);
+				tl->AddEntry(fitGaus, "Gaussian",    "l");
 				
 				//Signal CB Fitting
-				TF1* fitCB1 = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
-				fitCB1->SetNpx(1000);
-				fitCB1->SetParameters(fitParameters);
-				fitCB1->SetLineColor(kMagenta);
-				fitCB1->SetLineStyle(kDotted);
-				fitCB1->SetLineWidth(3);
-				fitCB1->Draw("same");
+				TF1* fitCB = new TF1("FitFunction_CrystalBall", FitFunctions::Primary::CrystalBall, xMin, xMax, 5);
+				fitCB->SetNpx(1000);						//Resolution of signal fit function
+				fitCB->SetParameters(&fitParameters[3]);	//Get only signal part
+				fitCB->SetLineColor(kOrange); 				//Fit Color
+				fitCB->SetLineStyle(kDotted);				//Fit Style
+				fitCB->SetLineWidth(3);						//Fit width
+				fitCB->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitCB1->SetParName(i, fittingParName[i]);
-				tl->AddEntry(fitCB1, "Crystal Ball", "l");
-
-				//Signal Gaus Fitting
-				TF1* fitGaus2 = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
-				fitGaus2->SetNpx(1000);
-				fitGaus2->SetParameters(&fitParameters[5]);
-				fitGaus2->SetLineColor(kOrange);
-				fitGaus2->SetLineStyle(kDashed);
-				fitGaus2->SetLineWidth(3);
-				fitGaus2->Draw("same");
-				for (int i = 0; i < arraySize; i++)
-					fitGaus2->SetParName(i, fittingParName[i+5]);
-				tl->AddEntry(fitGaus2, "Gauss (2S)", "l");
-
-				//Signal Gaus Fitting
-				TF1* fitGaus3 = new TF1("FitFunction_Gaussian", FitFunctions::Primary::Gaus, xMin, xMax, 3);
-				fitGaus3->SetNpx(1000);
-				fitGaus3->SetParameters(&fitParameters[8]);
-				fitGaus3->SetLineColor(kMagenta - 5);
-				fitGaus3->SetLineStyle(kDashed);
-				fitGaus3->SetLineWidth(3);
-				fitGaus3->Draw("same");
-				for (int i = 0; i < arraySize; i++)
-					fitGaus3->SetParName(i, fittingParName[i+8]);
-				tl->AddEntry(fitGaus3, "Gauss (3S)", "l");
+					fitCB->SetParName(i, fittingParName[i+3]);
+				tl->AddEntry(fitCB,	 "Crystal Ball", "l");
 
 				//Background Fitting
-				TF1* fitPol = new TF1("FitFunction_Background", FitFunctions::Upsilon::Background_InvariantMass, xMin, xMax, 4);
-				fitPol->SetNpx(1000);
-				fitPol->SetParameters(&fitParameters[11]);
-				fitPol->SetLineColor(kBlue);
-				fitPol->SetLineStyle(kDashDotted);
-				fitPol->SetLineWidth(3);
-				fitPol->Draw("same");
+				TF1* fitExp = new TF1("FitFunction_Background", FitFunctions::Jpsi::Background_InvariantMass, xMin, xMax, 2);
+				fitExp->SetNpx(1000);						//Resolution of background fit function
+				fitExp->SetParameters(&fitParameters[8]);	//Get only background part
+				fitExp->SetLineColor(kBlue); 				//Fit Color
+				fitExp->SetLineStyle(kDashDotted);			//Fit style
+				fitExp->SetLineWidth(3);					//Fit width
+				fitExp->Draw("same");
 				for (int i = 0; i < arraySize; i++)
-					fitPol->SetParName(i, fittingParName[i+11]);
-				tl->AddEntry(fitPol, "Pol 3", "l");
+					fitExp->SetParName(i, fittingParName[i+8]);
+				tl->AddEntry(fitExp, "Exponential",	 "l");
 			}
 		}
 
@@ -330,17 +314,14 @@ public:
 		//Default: method == 1
 		{
 			//Get value and uncertain of signal by histogram
-			TH1D* &hMass = ObjMassValues->hMass; 
+			TH1D* &hMass = ObjMassValues->hMass;
 			int bin0 = hMass->GetMaximumBin();
 			value    = hMass->GetBinCenter(bin0);
 			int bin1 = hMass->FindFirstBinAbove(hMass->GetMaximum()/2);
 			int bin2 = hMass->FindLastBinAbove(hMass->GetMaximum()/2);
-			if (strcmp(resonance, "Upsilon") == 0)
-				bin2 = hMass->FindLastBinAbove(hMass->GetMaximum()/2, 1, 1, hMass->GetXaxis()->FindBin(9.75));
 			fwhm     = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
 		}
 
-		//Num pode fazer isso para sideband subtraction... :(
 		if (method == 2)
 		{
 			//Get value and uncertain of signal by fitting
@@ -381,7 +362,7 @@ public:
 
 			ObjMassValues->sidebandRegion1_x1  = xMin;
 			ObjMassValues->sidebandRegion1_x2  = value - 4*sigma;
-			ObjMassValues->sidebandRegion2_x1  = 10.6;
+			ObjMassValues->sidebandRegion2_x1  = value + 4*sigma;
 			ObjMassValues->sidebandRegion2_x2  = xMax;
 		}
 	}
