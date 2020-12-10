@@ -37,10 +37,14 @@ bool shouldDrawInvariantMassCanvasRegion 	= true;
 bool shouldDrawQuantitiesCanvas 			= true;
 bool shouldDrawEfficiencyCanvas 			= true;
 
-//Muon id anlyse	
+//Muon id anlyse
 bool doTracker    = true;
-bool doStandalone = true;
-bool doGlobal     = true;
+bool doStandalone = false;
+bool doGlobal     = false;
+
+//Muon label anlyse
+bool doTagMuon   = false;
+bool doProbeMuon = true;
 
 //ENDED MAIN OPTIONS
 
@@ -53,11 +57,7 @@ if (useFile > 2)
 if (useFile == 4)
 	resonance = "Upsilon1S";
 
-//Auto detect if is MC due file index
-bool isMC = false;
-if (useFile == 2 || useFile == 4)
-	isMC = true;
-isMC = false;
+
 
 //Auto detect limit of data
 if (limitData > 0)

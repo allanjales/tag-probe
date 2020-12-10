@@ -98,21 +98,13 @@ public:
 	}
 
 	//Fill histogram
-	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, bool storeInSignalHistogram = false)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass)
 	{
-		if (!storeInSignalHistogram)
-		{
-			if (PassFailObj()->isInSignalRegion(InvariantMass))
-				hSigBack->Fill(quantity);
+		if (PassFailObj()->isInSignalRegion(InvariantMass))
+			hSigBack->Fill(quantity);
 
-			if (PassFailObj()->isInSidebandRegion(InvariantMass))
-				hBack->Fill(quantity);
-		}
-		else
-		{
-			hSig->Fill(quantity);
-		}
-
+		if (PassFailObj()->isInSidebandRegion(InvariantMass))
+			hBack->Fill(quantity);
 	}
 
 	TCanvas* createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = true)

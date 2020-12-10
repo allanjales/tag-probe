@@ -9,6 +9,9 @@ private:
 	const char*& canvasWatermark;
 	const char*& directoryToSave;
 
+	bool& doTagMuon;
+	bool& doProbeMuon;
+
 public:
 	const char* particleType = NULL;
 
@@ -43,44 +46,58 @@ public:
 
 	void normalizeHistograms()
 	{
-		Probe.normalizeHistograms();
-		Tag  .normalizeHistograms();
+		if (doTagMuon)
+			Tag  .normalizeHistograms();
+		if (doProbeMuon)
+			Probe.normalizeHistograms();
 	}
 
 	void subtractSigHistograms()
 	{
-		Tag  .subtractSigHistograms();
-		Probe.subtractSigHistograms();
+		if (doTagMuon)
+			Tag  .subtractSigHistograms();
+		if (doProbeMuon)
+			Probe.subtractSigHistograms();
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		Tag  .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
-		Probe.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		if (doTagMuon)
+			Tag  .createQuantitiesCanvas(shouldWrite, shouldSavePNG);
+		if (doProbeMuon)
+			Probe.createQuantitiesCanvas(shouldWrite, shouldSavePNG);
 	}
 
 	void consistencyDebugCout()
 	{
-		Tag  .consistencyDebugCout();
-		Probe.consistencyDebugCout();
+		if (doTagMuon)
+			Tag  .consistencyDebugCout();
+		if (doProbeMuon)
+			Probe.consistencyDebugCout();
 	}
 
 	void writeQuantitiesHistogramsOnFile(bool hSigBack, bool hSig, bool hBack)
 	{
-		Tag  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
-		Probe.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		if (doTagMuon)
+			Tag  .writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
+		if (doProbeMuon)
+			Probe.writeQuantitiesHistogramsOnFile(hSigBack, hSig, hBack);
 	}
 
 	void createEfficiencyPlot(bool shouldWrite = false)
 	{
-		Tag  .createEfficiencyPlot(shouldWrite);
-		Probe.createEfficiencyPlot(shouldWrite);
+		if (doTagMuon)
+			Tag  .createEfficiencyPlot(shouldWrite);
+		if (doProbeMuon)
+			Probe.createEfficiencyPlot(shouldWrite);
 	}
 
 	void createEfficiencyCanvas(bool shouldWrite = false, bool shouldSavePNG = false)
 	{
-		Tag  .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
-		Probe.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		if (doTagMuon)
+			Tag  .createEfficiencyCanvas(shouldWrite, shouldSavePNG);
+		if (doProbeMuon)
+			Probe.createEfficiencyCanvas(shouldWrite, shouldSavePNG);
 	}
 
 
@@ -90,7 +107,7 @@ public:
 		Mass.fillMassHistograms(InvariantMass, isPassing);
 	}
 
-	void fillQuantitiesHistograms(double** quantities, int& isPassing, bool storeInSignalHistogram = false)
+	void fillQuantitiesHistograms(double** quantities, int& isPassing)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -103,19 +120,25 @@ public:
 		double &InvariantMass           = *quantities[6];
 		*/
 
-		Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing, storeInSignalHistogram);
-		Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing, storeInSignalHistogram);
+		if (doTagMuon)
+			Tag  .fillQuantitiesHistograms(&quantities[3], *quantities[6], isPassing);
+		if (doProbeMuon)
+			Probe.fillQuantitiesHistograms(quantities,     *quantities[6], isPassing);
 	}
 
 
 	Type(
 		const char*& resonance,
 		const char*& particleName,
+		bool& doTagMuon,
+		bool& doProbeMuon,
 		const char*& canvasWatermark,
 		const char*& directoryToSave,
 	 	const char*  particleType)
 		  : resonance(resonance),
 		    particleName(particleName),
+		    doTagMuon(doTagMuon),
+		    doProbeMuon(doProbeMuon),
 		    canvasWatermark(canvasWatermark),
 		    directoryToSave(directoryToSave),
 		    particleType(particleType)

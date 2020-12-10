@@ -4,7 +4,7 @@
 class SidebandSubtraction
 {
 public:
-	const char* resonance      = "Jpsi"; // "Jpsi" | "Upsilon"
+	const char* resonance       = "Jpsi"; // "Jpsi" | "Upsilon" | "Upsilon1S"
 	const char* particleName    = "Muon";
 	const char* canvasWatermark = "#bf{CMS Open Data}";
 	const char* directoryToSave = "../result/";
@@ -14,9 +14,13 @@ public:
 	bool doStandalone = true;
 	bool doGlobal     = true;
 
-	Type Tracker    {resonance, particleName, canvasWatermark, directoryToSave, "Tracker"};
-	Type Standalone {resonance, particleName, canvasWatermark, directoryToSave, "Standalone"};
-	Type Global     {resonance, particleName, canvasWatermark, directoryToSave, "Global"};
+	//Variables for computing each muon label
+	bool doTagMuon   = true;
+	bool doProbeMuon = true;
+
+	Type Tracker    {resonance, particleName, doTagMuon, doProbeMuon, canvasWatermark, directoryToSave, "Tracker"};
+	Type Standalone {resonance, particleName, doTagMuon, doProbeMuon, canvasWatermark, directoryToSave, "Standalone"};
+	Type Global     {resonance, particleName, doTagMuon, doProbeMuon, canvasWatermark, directoryToSave, "Global"};
 	
 	void defineMassHistogramNumbers(double xMin, double xMax, int nBins, int decimals = 3)
 	{
@@ -168,7 +172,7 @@ public:
 			Global    .fillMassHistograms(*quantities[6], *types[2]);
 	}
 
-	void fillQuantitiesHistograms(double** quantities, int** types, bool storeInSignalHistogram = false)
+	void fillQuantitiesHistograms(double** quantities, int** types)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -185,11 +189,11 @@ public:
 		*/
 
 		if (doTracker)
-			Tracker   .fillQuantitiesHistograms(quantities, *types[0], storeInSignalHistogram);
+			Tracker   .fillQuantitiesHistograms(quantities, *types[0]);
 		if (doStandalone)
-			Standalone.fillQuantitiesHistograms(quantities, *types[1], storeInSignalHistogram);
+			Standalone.fillQuantitiesHistograms(quantities, *types[1]);
 		if (doGlobal)
-			Global    .fillQuantitiesHistograms(quantities, *types[2], storeInSignalHistogram);
+			Global    .fillQuantitiesHistograms(quantities, *types[2]);
 	}
 	
 

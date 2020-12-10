@@ -114,6 +114,8 @@ void macro()
 	SdS.doTracker       = doTracker;
 	SdS.doStandalone    = doStandalone;
 	SdS.doGlobal        = doGlobal;
+	SdS.doTagMuon       = doTagMuon;
+	SdS.doProbeMuon     = doProbeMuon;
 
 	cout << "resonance: " << SdS.resonance << "\n";
 	cout << "Using subtraction factor as integral of background fit\n";
@@ -168,12 +170,10 @@ void macro()
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms\n";
 
 	//Do function fit over the histogram
-	if (!isMC)
-		SdS.doFit();
+	SdS.doFit();
 
 	//Get values for invariant mass and sigma from plot
-	if (!isMC)
-		SdS.updateMassValuesAll();
+	SdS.updateMassValuesAll();
 
 	//-------------------------------------
 	// Generate and save files
@@ -197,7 +197,7 @@ void macro()
 		SdS.createMassCanvas(drawRegions, shouldWrite, shouldSavePNG);
 	}
 
-	if (shouldDrawInvariantMassCanvasRegion && !isMC)
+	if (shouldDrawInvariantMassCanvasRegion)
 	{
 		bool drawRegions 	= true;
 		bool shouldWrite 	= true;
@@ -231,7 +231,7 @@ void macro()
 		//Fill histograms
 		if (applyCuts(quantities, types))
 		{	
-			SdS.fillQuantitiesHistograms(quantities, types, isMC);
+			SdS.fillQuantitiesHistograms(quantities, types);
 		}
 	}
 	cout << "\nTook " << chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count() << " ms\n";
@@ -241,8 +241,7 @@ void macro()
 	SdS.normalizeHistograms();	
 
 	//For sideband subtraction
-	if (!isMC)
-		SdS.subtractSigHistograms();
+	SdS.subtractSigHistograms();
 
 
 
@@ -256,10 +255,7 @@ void macro()
 	}
 
 	//Debug consistency for histograms
-	if (!isMC)
-		SdS.consistencyDebugCout();
-	else
-		cout << "No consistency check needed. It's MC simulations.\n";
+	SdS.consistencyDebugCout();
 
 	//Save histograms
 	generatedFile->mkdir("histograms/");

@@ -70,7 +70,7 @@ public:
 	}
 
 
-	void fillQuantitiesHistograms(double** quantities, double& InvariantMass, int& isPassing, bool storeInSignalHistogram = false)
+	void fillQuantitiesHistograms(double** quantities, double& InvariantMass, int& isPassing)
 	{
 		/*
 		//Assign variables for easy visualization
@@ -79,9 +79,9 @@ public:
 		double &phi = *quantities[2];
 		*/
 
-		Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing, storeInSignalHistogram);
-		Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing, storeInSignalHistogram);
-		Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing, storeInSignalHistogram);
+		Pt .fillQuantitiesHistograms(*quantities[0], InvariantMass, isPassing);
+		Eta.fillQuantitiesHistograms(*quantities[1], InvariantMass, isPassing);
+		Phi.fillQuantitiesHistograms(*quantities[2], InvariantMass, isPassing);
 	}
 
 

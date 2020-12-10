@@ -42,11 +42,11 @@ public:
 		All .subtractSigHistogram();
 	}
 
-	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing, bool storeInSignalHistogram = false)
+	void fillQuantitiesHistograms(double& quantity, double& InvariantMass, int& isPassing)
 	{
 		if (isPassing)
-			Pass.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
-		All.fillQuantitiesHistograms(quantity, InvariantMass, storeInSignalHistogram);
+			Pass.fillQuantitiesHistograms(quantity, InvariantMass);
+		All.fillQuantitiesHistograms(quantity, InvariantMass);
 	}
 
 	void createQuantitiesCanvas(bool shouldWrite = false, bool shouldSavePNG = false)

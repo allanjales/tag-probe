@@ -344,32 +344,17 @@ public:
 			value    = hMass->GetBinCenter(bin0);
 			int bin1 = hMass->FindFirstBinAbove(hMass->GetMaximum()/2);
 			int bin2 = hMass->FindLastBinAbove(hMass->GetMaximum()/2);
+
+			//If is Upsilon, consider finding the ain peak only
 			if (strcmp(resonance, "Upsilon") == 0)
 				bin2 = hMass->FindLastBinAbove(hMass->GetMaximum()/2, 1, 1, hMass->GetXaxis()->FindBin(9.75));
-			fwhm     = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
-		}
 
-		//Num pode fazer isso para sideband subtraction... :(
-		if (method == 2)
-		{
-			//Get value and uncertain of signal by fitting
-			TF1* &signalFit = ObjMassValues->fitSignal;
-			if (signalFit != NULL)
-			{
-				value     = signalFit->GetMaximumX();
-				double x1 = signalFit->GetX(signalFit->GetMaximum()/2);
-				double x2 = signalFit->GetX(signalFit->GetMaximum()/2, x1+0.0001, value + x1*3);
-				fwhm      = x2 - x1;
-			}
-			else
-			{
-				cerr << "Could not find signal fit function. Detemining singal region by histogram\n";
-			}
+			fwhm     = hMass->GetBinCenter(bin2) - hMass->GetBinCenter(bin1);
 		}
 
 		double sigma = fwhm/2.355;
 
-		if (strcmp(resonance, "Jpsi") == 0)
+		if (strcmp(resonance, "Jpsi") == 0 || strcmp(resonance, "Upsilon1S") == 0)
 		{
 			//Signal region = mass +- 3*sigma
 			ObjMassValues->signalRegion_x1 = value - 3*sigma;
